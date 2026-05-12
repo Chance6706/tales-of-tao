@@ -1,0 +1,19 @@
+{
+    "name": "TalesOfTao.AI",
+    "rootNamespace": "TalesOfTao.AI",
+    "references": [
+        "TalesOfTao.Core",
+        "TalesOfTao.Sects",
+        "TalesOfTao.Combat",
+        "TalesOfTao.Diplomacy"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
