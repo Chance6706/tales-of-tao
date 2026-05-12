@@ -8,14 +8,15 @@
         "TalesOfTao.Combat",
         "TalesOfTao.Economy",
         "TalesOfTao.Research",
-        "TalesOfTao.Diplomacy"
+        "TalesOfTao.Diplomacy",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

@@ -3,7 +3,9 @@
     "rootNamespace": "TalesOfTao.Tests",
     "references": [
         "TalesOfTao.Core",
-        "TalesOfTao.Hex"
+        "TalesOfTao.Hex",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
