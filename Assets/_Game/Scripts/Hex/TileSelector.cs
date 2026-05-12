@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace TalesOfTao.Hex
 {
@@ -20,27 +21,36 @@ namespace TalesOfTao.Hex
 
         private Camera _cam;
         private HexTile _currentSelection;
+        private bool _mousePressed;
 
         private void Awake() => _cam = GetComponent<Camera>();
 
         private void Update()
         {
-            if (!Input.GetMouseButtonDown(0)) return;
+            // Read mouse state via new Input System
+            var mouse = Mouse.current;
+            if (mouse == null) return;
 
-            var ray = _cam.ScreenPointToRay(Input.mousePosition);
-            // Use RaycastAll so overlapping colliders (feature prefabs, decorative meshes)
-            // don't block the base hex tile hit.
-            var hits = Physics.RaycastAll(ray, Mathf.Infinity, _hexLayer)
-                .OrderBy(h => h.distance);
-
-            foreach (var hit in hits)
+            // Check for left button press this frame
+            if (mouse.leftButton.wasPressedThisFrame)
             {
-                var tile = hit.collider.GetComponent<HexTile>();
-                if (tile != null && tile != _currentSelection)
+                var mousePosition = mouse.position.ReadValue();
+                var ray = _cam.ScreenPointToRay(mousePosition);
+
+                // Use RaycastAll so overlapping colliders (feature prefabs, decorative meshes)
+                // don't block the base hex tile hit.
+                var hits = Physics.RaycastAll(ray, Mathf.Infinity, _hexLayer)
+                    .OrderBy(h => h.distance);
+
+                foreach (var hit in hits)
                 {
-                    _currentSelection = tile;
-                    TileSelected?.Invoke(tile.Data);
-                    return;
+                    var tile = hit.collider.GetComponent<HexTile>();
+                    if (tile != null && tile != _currentSelection)
+                    {
+                        _currentSelection = tile;
+                        TileSelected?.Invoke(tile.Data);
+                        return;
+                    }
                 }
             }
         }
