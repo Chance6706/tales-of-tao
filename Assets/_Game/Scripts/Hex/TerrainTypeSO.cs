@@ -30,19 +30,5 @@ namespace TalesOfTao.Hex
         public float       QiModifier   => _qiModifier;
         public Color       TintColor    => _tintColor;
         public bool        IsImpassable => _isImpassable;
-        [field: SerializeField] public TerrainType Type         { get; private set; } = TerrainType.Plains;
-        [field: SerializeField] public string      DisplayName  { get; private set; } = "Plains";
-        [field: SerializeField] public float       MovementCost { get; private set; } = 1f;
-
-        [Tooltip("Additive percentage bonus to defending unit's combat power.")]
-        [field: SerializeField] public float DefenseBonus  { get; private set; } = 0f;
-
-        [Tooltip("Multiplier applied to raw Qi income on this tile type.")]
-        [field: SerializeField] public float QiModifier   { get; private set; } = 1f;
-
-        [field: SerializeField] public Color TintColor    { get; private set; } = new Color(0.55f, 0.76f, 0.29f);
-
-        [Tooltip("Units cannot enter this tile (e.g. Lake).")]
-        [field: SerializeField] public bool  IsImpassable { get; private set; } = false;
     }
 }
