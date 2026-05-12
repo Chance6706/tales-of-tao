@@ -1,0 +1,22 @@
+{
+    "name": "TalesOfTao.Editor",
+    "rootNamespace": "TalesOfTao.Editor",
+    "references": [
+        "TalesOfTao.Core",
+        "TalesOfTao.Hex",
+        "TalesOfTao.Units",
+        "TalesOfTao.Economy",
+        "TalesOfTao.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
