@@ -20,7 +20,7 @@ namespace TalesOfTao.Editor
         [MenuItem("TalesOfTao/3 - Validate Mesh Import Settings")]
         public static void ValidateMeshImports()
         {
-            int fixed_ = 0, skipped = 0;
+            int fixedCount = 0, skipped = 0;
 
             string[] guids = AssetDatabase.FindAssets("t:DefaultAsset", new[] { MeshRoot });
             foreach (string guid in guids)
@@ -55,12 +55,12 @@ namespace TalesOfTao.Editor
                 if (changed)
                 {
                     importer.SaveAndReimport();
-                    fixed_++;
+                    fixedCount++;
                     Debug.Log($"[ImportSettings] Fixed: {path}");
                 }
             }
 
-            Debug.Log($"[TalesOfTao] Import validation complete — {fixed_} fixed, {skipped} skipped.");
+            Debug.Log($"[TalesOfTao] Import validation complete — {fixedCount} fixed, {skipped} skipped.");
             AssetDatabase.Refresh();
         }
     }

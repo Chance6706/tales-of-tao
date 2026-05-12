@@ -15,6 +15,7 @@ namespace TalesOfTao.Economy
 
         private MeshFilter   _meshFilter;
         private MeshRenderer _meshRenderer;
+        private bool         _colliderSetup;
 
         public BuildingDataSO Data => _buildingData;
 
@@ -38,6 +39,8 @@ namespace TalesOfTao.Economy
 
         private void Apply()
         {
+            if (_buildingData == null) return;
+
             if (_buildingData.Mesh != null)
                 _meshFilter.sharedMesh = _buildingData.Mesh;
 
@@ -49,17 +52,21 @@ namespace TalesOfTao.Economy
 
         private void SetupCollider()
         {
-            // Remove any existing collider added by a previous Apply call.
-            var existing = GetComponent<MeshCollider>();
-            if (existing != null)
-                Destroy(existing);
-
             if (!_buildingData.RequiresCollider || _buildingData.Mesh == null)
                 return;
+
+            // Remove collider added by a previous Apply() call.
+            if (_colliderSetup)
+            {
+                var existing = GetComponent<MeshCollider>();
+                if (existing != null)
+                    Destroy(existing);
+            }
 
             var mc         = gameObject.AddComponent<MeshCollider>();
             mc.sharedMesh  = _buildingData.Mesh;
             mc.convex      = true; // required for physics interactions and triggers
+            _colliderSetup = true;
         }
     }
 }
