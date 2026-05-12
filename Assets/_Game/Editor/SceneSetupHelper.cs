@@ -31,7 +31,7 @@ namespace TalesOfTao.Editor
 
         private static void SetupGameManager()
         {
-            if (Object.FindFirstObjectByType<GameManager>() != null) return;
+            if (Object.FindAnyObjectByType<GameManager>() != null) return;
 
             var go = new GameObject("GameManager");
             var gm = go.AddComponent<GameManager>();
@@ -55,7 +55,7 @@ namespace TalesOfTao.Editor
 
         private static void SetupHexTile()
         {
-            if (Object.FindFirstObjectByType<HexTile>() != null) return;
+            if (Object.FindAnyObjectByType<HexTile>() != null) return;
 
             int layerIndex = LayerMask.NameToLayer("HexTile");
             if (layerIndex < 0)
@@ -95,7 +95,7 @@ namespace TalesOfTao.Editor
 
         private static void SetupTileInfoPanel()
         {
-            if (Object.FindFirstObjectByType<TileInfoPanel>() != null) return;
+            if (Object.FindAnyObjectByType<TileInfoPanel>() != null) return;
 
             var canvasGo = new GameObject("HUD_Canvas");
             var canvas   = canvasGo.AddComponent<Canvas>();
