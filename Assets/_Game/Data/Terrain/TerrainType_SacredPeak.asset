@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db95401753b34727b8855dcf074f5736, type: 3}
+  m_Name: TerrainType_SacredPeak
+  m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
+  _type: 7
+  _displayName: Sacred Peak
+  _movementCost: 4
+  _defenseBonus: 0.75
+  _qiModifier: 2
+  _isImpassable: 0
+  _tintColor: {r: 0.84, g: 0.91, b: 0.97, a: 1}
+  _baseMesh: {fileID: 0}
+  _featurePrefab: {fileID: 0}
