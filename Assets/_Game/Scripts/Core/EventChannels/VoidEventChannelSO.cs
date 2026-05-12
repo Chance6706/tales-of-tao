@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace TalesOfTao.Core.EventChannels
 {
+    // Void (no-payload) event channel. Use for signals that carry no data,
+    // e.g. OnTurnEnded, OnUnitMoved.
     [CreateAssetMenu(menuName = "TalesOfTao/Events/Void Event Channel", fileName = "VoidEventChannel")]
     public class VoidEventChannelSO : ScriptableObject
     {
@@ -24,5 +26,6 @@ namespace TalesOfTao.Core.EventChannels
         }
 
         protected virtual void OnDisable() => _listeners.Clear();
+        private void OnDisable() => _listeners.Clear();
     }
 }

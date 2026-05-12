@@ -13,6 +13,19 @@ namespace TalesOfTao.Hex
         Desert     = 5,
         Swamp      = 6,
         SacredPeak = 7,
+    // All enumerations that describe the static and dynamic state of a hex tile.
+    // Kept in one file so the GDD tables map 1:1 to code with no hunting.
+
+    public enum TerrainType
+    {
+        Plains,
+        Mountain,
+        Forest,
+        River,
+        Lake,
+        Desert,
+        Swamp,
+        SacredPeak,
     }
 
     public enum ElevationLevel
@@ -21,6 +34,10 @@ namespace TalesOfTao.Hex
         Medium = 1,
         High   = 2,
         Summit = 3,
+        Low,
+        Medium,
+        High,
+        Summit,
     }
 
     public enum QiDensityLevel
@@ -30,6 +47,11 @@ namespace TalesOfTao.Hex
         Moderate = 2,
         Dense    = 3,
         LeyLine  = 4,
+        None,
+        Sparse,
+        Moderate,
+        Dense,
+        LeyLine,
     }
 
     public enum DepositType
@@ -43,6 +65,15 @@ namespace TalesOfTao.Hex
         Horses         = 6,
         Lumber         = 7,
         RareEarth      = 8,
+        None,
+        IronOre,
+        Jade,
+        MedicinalHerbs,
+        SpiritHerbs,
+        TeaLeaves,
+        Horses,
+        Lumber,
+        RareEarth,
     }
 
     public enum TileFeature
@@ -53,6 +84,12 @@ namespace TalesOfTao.Hex
         SpiritVein      = 3,
         BanditCamp      = 4,
         WanderingMaster = 5,
+        None,
+        AncientRuins,
+        HotSpring,
+        SpiritVein,
+        BanditCamp,
+        WanderingMaster,
     }
 
     public enum ControlState
@@ -61,6 +98,10 @@ namespace TalesOfTao.Hex
         SectTerritory       = 1,
         SettlementInfluence = 2,
         Contested           = 3,
+        Unowned,
+        SectTerritory,
+        SettlementInfluence,
+        Contested,
     }
 
     public enum FortificationLevel
@@ -69,5 +110,9 @@ namespace TalesOfTao.Hex
         Watchtower = 1,
         Garrison   = 2,
         Fortress   = 3,
+        None,
+        Watchtower,
+        Garrison,
+        Fortress,
     }
 }

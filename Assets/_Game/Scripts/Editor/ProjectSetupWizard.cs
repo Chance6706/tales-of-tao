@@ -9,6 +9,10 @@ namespace TalesOfTao.Editor
     public static class ProjectSetupWizard
     {
         private const string TerrainDir      = "Assets/_Game/Data/Terrain";
+    // Run once after first import: TalesOfTao > 1 - Create Data Assets
+    public static class ProjectSetupWizard
+    {
+        private const string TerrainDir     = "Assets/_Game/Data/Terrain";
         private const string EventChannelDir = "Assets/_Game/Data/EventChannels";
 
         [MenuItem("TalesOfTao/1 - Create Data Assets")]
@@ -22,6 +26,18 @@ namespace TalesOfTao.Editor
             AssetDatabase.Refresh();
             Debug.Log("[TalesOfTao] Data assets created. Check Assets/_Game/Data/.");
         }
+
+
+            CreateTerrainAssets();
+            CreateEventChannelAssets();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log("[TalesOfTao] Data assets created. Check Assets/_Game/Data/.");
+        }
+
+        // ── Terrain ───────────────────────────────────────────────────────────
 
         private static void CreateTerrainAssets()
         {
@@ -67,6 +83,24 @@ namespace TalesOfTao.Editor
             }
             assign(prop);
         }
+            if (AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path) != null)
+                return;
+
+            var so = ScriptableObject.CreateInstance<TerrainTypeSO>();
+            AssetDatabase.CreateAsset(so, path);
+
+            var ser = new SerializedObject(so);
+            ser.FindProperty("_type").enumValueIndex         = (int)type;
+            ser.FindProperty("_displayName").stringValue     = displayName;
+            ser.FindProperty("_movementCost").floatValue     = moveCost;
+            ser.FindProperty("_defenseBonus").floatValue     = defenseBon;
+            ser.FindProperty("_qiModifier").floatValue       = qiMod;
+            ser.FindProperty("_tintColor").colorValue        = tint;
+            ser.FindProperty("_isImpassable").boolValue      = impassable;
+            ser.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // ── Event Channels ────────────────────────────────────────────────────
 
         private static void CreateEventChannelAssets()
         {
@@ -75,6 +109,10 @@ namespace TalesOfTao.Editor
             CreateChannel<StringEventChannelSO>   ("EC_OnResourceChanged");
             CreateChannel<VoidEventChannelSO>     ("EC_OnUnitMoved");
             CreateChannel<VoidEventChannelSO>     ("EC_OnCombatResolved");
+            CreateChannel<VoidEventChannelSO>("EC_OnTurnEnded");
+            CreateChannel<StringEventChannelSO>("EC_OnResourceChanged");
+            CreateChannel<VoidEventChannelSO>("EC_OnUnitMoved");
+            CreateChannel<VoidEventChannelSO>("EC_OnCombatResolved");
         }
 
         private static void CreateChannel<T>(string fileName) where T : ScriptableObject
@@ -95,6 +133,28 @@ namespace TalesOfTao.Editor
                 if (!AssetDatabase.IsValidFolder(next))
                     AssetDatabase.CreateFolder(current, parts[i]);
                 current = next;
+            if (AssetDatabase.LoadAssetAtPath<T>(path) != null)
+                return;
+
+            var so = ScriptableObject.CreateInstance<T>();
+            AssetDatabase.CreateAsset(so, path);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        private static void EnsureDirectory(string path)
+        {
+            if (!AssetDatabase.IsValidFolder(path))
+            {
+                string[] parts = path.Split('/');
+                string current = parts[0];
+                for (int i = 1; i < parts.Length; i++)
+                {
+                    string next = current + "/" + parts[i];
+                    if (!AssetDatabase.IsValidFolder(next))
+                        AssetDatabase.CreateFolder(current, parts[i]);
+                    current = next;
+                }
             }
         }
     }

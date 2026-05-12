@@ -8,6 +8,14 @@ namespace TalesOfTao.UI
     // Screen-space overlay panel showing properties of the last clicked hex tile.
     // Subscribes for the full scene lifetime (Awake→OnDestroy) so clicks are
     // never missed even while the panel is hidden.
+    // Screen-space overlay panel that displays the properties of the last
+    // clicked hex tile.
+    //
+    // Scene setup (Phase 1):
+    //   1. Create a Canvas (Screen Space – Overlay).
+    //   2. Add a Panel child; add this component to it.
+    //   3. Add a TextMeshProUGUI child; assign it to _contentText.
+    //   4. The panel hides itself on Awake and shows when a tile is selected.
     public class TileInfoPanel : MonoBehaviour
     {
         [SerializeField] private TMP_Text _contentText;
@@ -19,6 +27,10 @@ namespace TalesOfTao.UI
         }
 
         private void OnDestroy() => TileSelector.TileSelected -= Show;
+        private void Awake() => gameObject.SetActive(false);
+
+        private void OnEnable()  => TileSelector.TileSelected += Show;
+        private void OnDisable() => TileSelector.TileSelected -= Show;
 
         public void Show(HexTileData data)
         {

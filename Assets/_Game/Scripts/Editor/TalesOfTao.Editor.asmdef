@@ -1,16 +1,14 @@
 {
-    "name": "TalesOfTao.UI",
-    "rootNamespace": "TalesOfTao.UI",
+    "name": "TalesOfTao.Editor",
+    "rootNamespace": "TalesOfTao.Editor",
     "references": [
         "TalesOfTao.Core",
         "TalesOfTao.Hex",
-        "TalesOfTao.Sects",
-        "TalesOfTao.Combat",
-        "TalesOfTao.Economy",
-        "TalesOfTao.Research",
-        "TalesOfTao.Diplomacy"
+        "TalesOfTao.UI"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

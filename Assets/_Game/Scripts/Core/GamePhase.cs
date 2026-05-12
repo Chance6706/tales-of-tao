@@ -8,5 +8,13 @@ namespace TalesOfTao.Core
         Research   = 3,
         Action     = 4,
         Resolution = 5,
+    public enum GamePhase
+    {
+        Event,
+        Income,
+        Build,
+        Research,
+        Action,
+        Resolution
     }
 }
