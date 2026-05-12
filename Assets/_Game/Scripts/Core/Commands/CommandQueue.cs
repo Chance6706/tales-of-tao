@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+
+namespace TalesOfTao.Core.Commands
+{
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +16,10 @@ namespace TalesOfTao.Core.Commands
 
         public int HistoryCount => _history.Count;
 
+        public bool Execute(Command command)
+        {
+            if (command == null) throw new ArgumentNullException(nameof(command));
+            if (!command.CanExecute()) return false;
         // Validates, executes, and records the command.
         // Returns false and skips execution if CanExecute() fails.
         public bool Execute(Command command)
@@ -34,6 +43,13 @@ namespace TalesOfTao.Core.Commands
             return true;
         }
 
+        // Returns any commands that were skipped (CanExecute failed).
+        public IReadOnlyList<Command> Replay(IEnumerable<Command> commands)
+        {
+            var skipped = new List<Command>();
+            foreach (var cmd in commands)
+                if (!Execute(cmd)) skipped.Add(cmd);
+            return skipped;
         // Replays all commands in chronological order (oldest first).
         // Used for deterministic save-game restore from a command log.
         public void Replay(IEnumerable<Command> commands)

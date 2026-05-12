@@ -25,6 +25,7 @@ namespace TalesOfTao.Core.EventChannels
                 _listeners[i]?.Invoke();
         }
 
+        protected virtual void OnDisable() => _listeners.Clear();
         private void OnDisable() => _listeners.Clear();
     }
 }

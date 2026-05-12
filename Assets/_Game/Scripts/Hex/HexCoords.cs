@@ -20,6 +20,8 @@ namespace TalesOfTao.Hex
 
         public static readonly HexCoords Zero = new(0, 0);
 
+        // Six direction offsets (flat-top, E→NE→NW→W→SW→SE).
+        // Note: array contents must not be modified.
         // The six cube-coordinate direction offsets (flat-top, ordered by angle).
         public static readonly HexCoords[] Directions =
         {
@@ -33,6 +35,9 @@ namespace TalesOfTao.Hex
 
         public HexCoords(int q, int r) { Q = q; R = r; }
 
+        public HexCoords Neighbour(int direction) =>
+            this + Directions[((direction % 6) + 6) % 6];
+
         // Returns the neighbour in the given direction (0–5, wraps).
         public HexCoords Neighbour(int direction) =>
             this + Directions[((direction % 6) + 6) % 6];
@@ -43,6 +48,17 @@ namespace TalesOfTao.Hex
 
         public int DistanceTo(HexCoords other) => Distance(this, other);
 
+        public Vector3 ToWorldPosition(float size)
+        {
+            float x = size * 1.5f * Q;
+            float z = size * (0.866025f * Q + 1.732051f * R);
+            return new Vector3(x, 0f, z);
+        }
+
+        public static HexCoords operator +(HexCoords a, HexCoords b) => new(a.Q + b.Q, a.R + b.R);
+        public static HexCoords operator -(HexCoords a, HexCoords b) => new(a.Q - b.Q, a.R - b.R);
+        public static HexCoords operator *(HexCoords a, int k)       => new(a.Q * k, a.R * k);
+        public static HexCoords operator *(int k, HexCoords a)       => new(a.Q * k, a.R * k);
         // Converts axial coordinates to a world-space position on the XZ plane.
         // size = outer radius of the hex (centre to vertex).
         // Flat-top formula: x = size * 3/2 * q, z = size * (√3/2 * q + √3 * r).

@@ -4,6 +4,17 @@ using UnityEngine;
 namespace TalesOfTao.Hex
 {
     // Attach to the Main Camera. Raycasts on left-click to find HexTile objects
+    // and raises TileSelected so any listener can respond without a direct reference.
+    //
+    // HexLayer default is 0 (no layers) so misconfiguration is immediately obvious.
+    [RequireComponent(typeof(Camera))]
+    public class TileSelector : MonoBehaviour
+    {
+        public static event Action<HexTileData> TileSelected;
+
+        [SerializeField] private LayerMask _hexLayer = 0;
+
+        private Camera  _cam;
     // and raises TileSelected so any listener (e.g. TileInfoPanel) can respond
     // without a direct reference — keeping Hex and UI assemblies decoupled.
     //

@@ -26,6 +26,7 @@ namespace TalesOfTao.Core.EventChannels
                 _listeners[i]?.Invoke(value);
         }
 
+        protected virtual void OnDisable() => _listeners.Clear();
         // Clears all listeners — useful between Play sessions in the Editor.
         private void OnDisable() => _listeners.Clear();
     }

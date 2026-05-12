@@ -17,6 +17,17 @@ namespace TalesOfTao.Core
 
         [Header("Event Channels")]
         [SerializeField] private GamePhaseEventChannelSO _onPhaseChanged;
+        [SerializeField] private VoidEventChannelSO      _onTurnEnded;
+        [SerializeField] private StringEventChannelSO    _onResourceChanged;
+        [SerializeField] private VoidEventChannelSO      _onUnitMoved;
+        [SerializeField] private VoidEventChannelSO      _onCombatResolved;
+
+        public GamePhaseEventChannelSO OnPhaseChanged    => _onPhaseChanged;
+        public VoidEventChannelSO      OnTurnEnded       => _onTurnEnded;
+        public StringEventChannelSO    OnResourceChanged => _onResourceChanged;
+        public VoidEventChannelSO      OnUnitMoved       => _onUnitMoved;
+        public VoidEventChannelSO      OnCombatResolved  => _onCombatResolved;
+
         [SerializeField] private VoidEventChannelSO _onTurnEnded;
         [SerializeField] private StringEventChannelSO _onResourceChanged;
         [SerializeField] private VoidEventChannelSO _onUnitMoved;
@@ -37,6 +48,8 @@ namespace TalesOfTao.Core
         {
             if (Instance != null)
             {
+                Debug.LogError($"[GameManager] Duplicate instance on '{gameObject.name}' — destroying it. " +
+                               $"Existing instance is on '{Instance.gameObject.name}'.");
                 Destroy(gameObject);
                 return;
             }
@@ -49,12 +62,18 @@ namespace TalesOfTao.Core
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
             if (Instance == this)
                 Instance = null;
         }
 
         private void ValidateChannels()
         {
+            if (_onPhaseChanged    == null) Debug.LogWarning("[GameManager] OnPhaseChanged channel not assigned.");
+            if (_onTurnEnded       == null) Debug.LogWarning("[GameManager] OnTurnEnded channel not assigned.");
+            if (_onResourceChanged == null) Debug.LogWarning("[GameManager] OnResourceChanged channel not assigned.");
+            if (_onUnitMoved       == null) Debug.LogWarning("[GameManager] OnUnitMoved channel not assigned.");
+            if (_onCombatResolved  == null) Debug.LogWarning("[GameManager] OnCombatResolved channel not assigned.");
             if (_onPhaseChanged == null)
                 Debug.LogWarning("[GameManager] OnPhaseChanged channel not assigned.");
             if (_onTurnEnded == null)

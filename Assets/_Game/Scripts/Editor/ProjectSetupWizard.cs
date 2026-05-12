@@ -6,6 +6,9 @@ using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Editor
 {
+    public static class ProjectSetupWizard
+    {
+        private const string TerrainDir      = "Assets/_Game/Data/Terrain";
     // Run once after first import: TalesOfTao > 1 - Create Data Assets
     public static class ProjectSetupWizard
     {
@@ -17,6 +20,13 @@ namespace TalesOfTao.Editor
         {
             EnsureDirectory(TerrainDir);
             EnsureDirectory(EventChannelDir);
+            CreateTerrainAssets();
+            CreateEventChannelAssets();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[TalesOfTao] Data assets created. Check Assets/_Game/Data/.");
+        }
+
 
             CreateTerrainAssets();
             CreateEventChannelAssets();
@@ -46,6 +56,33 @@ namespace TalesOfTao.Editor
             float moveCost, float defenseBon, float qiMod, Color tint, bool impassable)
         {
             string path = $"{TerrainDir}/{fileName}.asset";
+            if (AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path) != null) return;
+
+            var so  = ScriptableObject.CreateInstance<TerrainTypeSO>();
+            AssetDatabase.CreateAsset(so, path);
+
+            var ser = new SerializedObject(so);
+            SetProp(ser, "_type",         p => p.enumValueIndex = (int)type,   fileName);
+            SetProp(ser, "_displayName",  p => p.stringValue    = displayName, fileName);
+            SetProp(ser, "_movementCost", p => p.floatValue     = moveCost,    fileName);
+            SetProp(ser, "_defenseBonus", p => p.floatValue     = defenseBon,  fileName);
+            SetProp(ser, "_qiModifier",   p => p.floatValue     = qiMod,       fileName);
+            SetProp(ser, "_tintColor",    p => p.colorValue     = tint,        fileName);
+            SetProp(ser, "_isImpassable", p => p.boolValue      = impassable,  fileName);
+            ser.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetProp(SerializedObject ser, string field,
+            System.Action<SerializedProperty> assign, string assetName)
+        {
+            var prop = ser.FindProperty(field);
+            if (prop == null)
+            {
+                Debug.LogError($"[TalesOfTao] SerializedProperty '{field}' not found on {assetName}.");
+                return;
+            }
+            assign(prop);
+        }
             if (AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path) != null)
                 return;
 
@@ -68,6 +105,10 @@ namespace TalesOfTao.Editor
         private static void CreateEventChannelAssets()
         {
             CreateChannel<GamePhaseEventChannelSO>("EC_OnPhaseChanged");
+            CreateChannel<VoidEventChannelSO>     ("EC_OnTurnEnded");
+            CreateChannel<StringEventChannelSO>   ("EC_OnResourceChanged");
+            CreateChannel<VoidEventChannelSO>     ("EC_OnUnitMoved");
+            CreateChannel<VoidEventChannelSO>     ("EC_OnCombatResolved");
             CreateChannel<VoidEventChannelSO>("EC_OnTurnEnded");
             CreateChannel<StringEventChannelSO>("EC_OnResourceChanged");
             CreateChannel<VoidEventChannelSO>("EC_OnUnitMoved");
@@ -77,6 +118,21 @@ namespace TalesOfTao.Editor
         private static void CreateChannel<T>(string fileName) where T : ScriptableObject
         {
             string path = $"{EventChannelDir}/{fileName}.asset";
+            if (AssetDatabase.LoadAssetAtPath<T>(path) != null) return;
+            AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<T>(), path);
+        }
+
+        private static void EnsureDirectory(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path)) return;
+            string[] parts  = path.Split('/');
+            string   current = parts[0];
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string next = current + "/" + parts[i];
+                if (!AssetDatabase.IsValidFolder(next))
+                    AssetDatabase.CreateFolder(current, parts[i]);
+                current = next;
             if (AssetDatabase.LoadAssetAtPath<T>(path) != null)
                 return;
 

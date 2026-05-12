@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace TalesOfTao.UI
 {
+    // Screen-space overlay panel showing properties of the last clicked hex tile.
+    // Subscribes for the full scene lifetime (Awake→OnDestroy) so clicks are
+    // never missed even while the panel is hidden.
     // Screen-space overlay panel that displays the properties of the last
     // clicked hex tile.
     //
@@ -17,6 +20,13 @@ namespace TalesOfTao.UI
     {
         [SerializeField] private TMP_Text _contentText;
 
+        private void Awake()
+        {
+            gameObject.SetActive(false);
+            TileSelector.TileSelected += Show;
+        }
+
+        private void OnDestroy() => TileSelector.TileSelected -= Show;
         private void Awake() => gameObject.SetActive(false);
 
         private void OnEnable()  => TileSelector.TileSelected += Show;
@@ -25,6 +35,7 @@ namespace TalesOfTao.UI
         public void Show(HexTileData data)
         {
             if (data == null) { gameObject.SetActive(false); return; }
+            if (_contentText == null) return;
 
             _contentText.text = BuildText(data);
             gameObject.SetActive(true);

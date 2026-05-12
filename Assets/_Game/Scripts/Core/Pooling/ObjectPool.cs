@@ -3,6 +3,28 @@ using System.Collections.Generic;
 
 namespace TalesOfTao.Core.Pooling
 {
+    public class ObjectPool<T> where T : class
+    {
+        private readonly Stack<T>  _pool = new();
+        private readonly Func<T>   _factory;
+        private readonly Action<T> _onGet;
+        private readonly Action<T> _onReturn;
+
+#if UNITY_EDITOR || DEBUG
+        private readonly HashSet<T> _activeItems = new();
+#endif
+
+        public int CountInactive => _pool.Count;
+        public int CountAll      { get; private set; }
+
+        public ObjectPool(
+            Func<T>   factory,
+            Action<T> onGet        = null,
+            Action<T> onReturn     = null,
+            int       prewarmCount = 0)
+        {
+            _factory  = factory ?? throw new ArgumentNullException(nameof(factory));
+            _onGet    = onGet;
     // Generic object pool. Avoids GC pressure from frequent Instantiate/Destroy
     // on large maps (tile meshes, unit tokens, VFX particles, UI popups).
     //
@@ -40,6 +62,12 @@ namespace TalesOfTao.Core.Pooling
             }
         }
 
+        public T Get()
+        {
+            T item = _pool.Count > 0 ? _pool.Pop() : Create();
+#if UNITY_EDITOR || DEBUG
+            _activeItems.Add(item);
+#endif
         // Returns a pooled instance (or a freshly created one if the pool is empty).
         public T Get()
         {
@@ -58,6 +86,14 @@ namespace TalesOfTao.Core.Pooling
             return item;
         }
 
+        public void Return(T item)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+#if UNITY_EDITOR || DEBUG
+            if (!_activeItems.Remove(item))
+                throw new InvalidOperationException(
+                    $"[ObjectPool<{typeof(T).Name}>] Item not from this pool or already returned.");
+#endif
         // Returns an item to the pool. The caller must not use the object after this call.
         public void Return(T item)
         {
@@ -66,6 +102,13 @@ namespace TalesOfTao.Core.Pooling
             _pool.Push(item);
         }
 
+        public void Clear()
+        {
+            CountAll -= _pool.Count;
+            _pool.Clear();
+        }
+
+        private T Create() { CountAll++; return _factory(); }
         public void Clear() => _pool.Clear();
     }
 }

@@ -1,7 +1,31 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TalesOfTao.Hex
 {
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
+    public class HexTile : MonoBehaviour
+    {
+        [SerializeField] private float         _size            = 1f;
+        [SerializeField] private float         _height          = 0.3f;
+        [SerializeField] private TerrainTypeSO _terrainOverride;
+
+        private MeshFilter   _meshFilter;
+        private MeshCollider _meshCollider;
+        private MeshRenderer _meshRenderer;
+
+        private static Shader _cachedShader;
+        private static readonly Dictionary<Color, Material> _sharedMaterials = new();
+
+        public HexTileData Data { get; private set; }
+
+        private void Awake()
+        {
+            _meshFilter   = GetComponent<MeshFilter>();
+            _meshCollider = GetComponent<MeshCollider>();
+            _meshRenderer = GetComponent<MeshRenderer>();
+        }
+
     // Visual and physical representation of one hex tile in the scene.
     // Generates a flat-top hexagonal prism mesh at runtime from HexTileData.
     //
@@ -55,6 +79,15 @@ namespace TalesOfTao.Hex
         private void BuildMesh()
         {
             var mesh = GenerateHexMesh(_size, _height);
+            _meshFilter.sharedMesh   = mesh;
+            _meshCollider.sharedMesh = mesh;
+        }
+
+        // Produces a flat-top hexagonal prism with exactly 12 vertices:
+        //   verts[0..5]  — top ring (y = +height/2)
+        //   verts[6..11] — bottom ring (y = -height/2)
+        // 20 triangles (60 indices): 4 top + 4 bottom + 12 side (6 quads × 2)
+        public static Mesh GenerateHexMesh(float size, float height)
             GetComponent<MeshFilter>().sharedMesh    = mesh;
             GetComponent<MeshCollider>().sharedMesh  = mesh;
         }
@@ -83,6 +116,23 @@ namespace TalesOfTao.Hex
                 float angle = Mathf.Deg2Rad * 60f * i;
                 float x = size * Mathf.Cos(angle);
                 float z = size * Mathf.Sin(angle);
+                verts[i]     = new Vector3(x,  h, z);
+                verts[i + 6] = new Vector3(x, -h, z);
+            }
+
+            var tris = new int[60];
+            int ti = 0;
+
+            for (int i = 1; i < 5; i++)
+            {
+                tris[ti++] = 0; tris[ti++] = i; tris[ti++] = i + 1;
+            }
+
+            for (int i = 1; i < 5; i++)
+            {
+                tris[ti++] = 6; tris[ti++] = 6 + i + 1; tris[ti++] = 6 + i;
+            }
+
                 verts[i]     = new Vector3(x,  h, z); // top ring
                 verts[i + 6] = new Vector3(x, -h, z); // bottom ring
             }
@@ -115,6 +165,8 @@ namespace TalesOfTao.Hex
                 int n  = (i + 1) % 6;
                 int b  = i + 6;
                 int bn = n + 6;
+                tris[ti++] = i;  tris[ti++] = n;  tris[ti++] = bn;
+                tris[ti++] = i;  tris[ti++] = bn; tris[ti++] = b;
 
                 tris[ti++] = i;  tris[ti++] = n;  tris[ti++] = bn; // upper triangle
                 tris[ti++] = i;  tris[ti++] = bn; tris[ti++] = b;  // lower triangle
@@ -127,6 +179,26 @@ namespace TalesOfTao.Hex
             return mesh;
         }
 
+        private void ApplyMaterial()
+        {
+            var color = Data?.Terrain?.TintColor ?? Color.gray;
+
+            if (_sharedMaterials.TryGetValue(color, out var mat))
+            {
+                _meshRenderer.sharedMaterial = mat;
+                return;
+            }
+
+            if (_cachedShader == null)
+                _cachedShader = Shader.Find("Universal Render Pipeline/Lit")
+                             ?? Shader.Find("Standard");
+
+            if (_cachedShader == null)
+                return;
+
+            mat = new Material(_cachedShader) { color = color };
+            _sharedMaterials[color] = mat;
+            _meshRenderer.sharedMaterial = mat;
         // ── Material ──────────────────────────────────────────────────────────
 
         private void ApplyMaterial()
