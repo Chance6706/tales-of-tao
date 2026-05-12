@@ -3,6 +3,7 @@
     "rootNamespace": "TalesOfTao.UI",
     "references": [
         "TalesOfTao.Core",
+        "TalesOfTao.Hex",
         "TalesOfTao.Sects",
         "TalesOfTao.Combat",
         "TalesOfTao.Economy",
