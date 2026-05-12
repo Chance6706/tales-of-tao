@@ -1,0 +1,17 @@
+{
+    "name": "TalesOfTao.Research",
+    "rootNamespace": "TalesOfTao.Research",
+    "references": [
+        "TalesOfTao.Core",
+        "TalesOfTao.Sects"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

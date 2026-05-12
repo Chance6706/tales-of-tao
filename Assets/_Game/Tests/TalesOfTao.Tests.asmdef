@@ -1,0 +1,32 @@
+{
+    "name": "TalesOfTao.Tests",
+    "rootNamespace": "TalesOfTao.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "TalesOfTao.Core",
+        "TalesOfTao.Hex",
+        "TalesOfTao.Sects",
+        "TalesOfTao.Combat",
+        "TalesOfTao.Economy",
+        "TalesOfTao.Research",
+        "TalesOfTao.Diplomacy",
+        "TalesOfTao.AI",
+        "TalesOfTao.SaveLoad"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
