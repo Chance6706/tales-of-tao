@@ -16,17 +16,28 @@ namespace TalesOfTao.Editor
         private const string TerrainDir      = "Assets/_Game/Data/Terrain";
         private const string EventChannelDir = "Assets/_Game/Data/EventChannels";
 
+        // Layer indices matching TagManager.asset configuration
+        private const int HexTileLayer = 8;
+
         [MenuItem("TalesOfTao/2 - Setup Main Scene")]
         public static void SetupScene()
         {
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             SetupGameManager();
+            SetupMainCamera();
             SetupHexTile();
             SetupTileSelector();
             SetupTileInfoPanel();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("[TalesOfTao] Main scene setup complete. Press Play to verify the hex tile.");
+        }
+
+        [MenuItem("TalesOfTao/2b - Import TMP Essential Resources")]
+        public static void ImportTMPResources()
+        {
+            // Opens the TMP Essential Resources import window
+            EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources");
         }
 
         private static void SetupGameManager()
@@ -53,6 +64,25 @@ namespace TalesOfTao.Editor
             else Debug.LogWarning($"[TalesOfTao] Channel asset not found: {assetFile}. Run '1 - Create Data Assets' first.");
         }
 
+        private static void SetupMainCamera()
+        {
+            if (Camera.main != null) return;
+
+            var camGo = new GameObject("Main Camera");
+            camGo.tag = "MainCamera";
+            var cam = camGo.AddComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.15f, 0.15f, 0.2f, 1f);
+            cam.orthographic = true;
+            cam.orthographicSize = 5f;
+            cam.nearClipPlane = 0.3f;
+            cam.farClipPlane = 1000f;
+            camGo.transform.position = new Vector3(0f, 10f, -10f);
+            camGo.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
+            camGo.AddComponent<AudioListener>();
+            Debug.Log("[TalesOfTao] Created Main Camera (orthographic, isometric view).");
+        }
+
         private static void SetupHexTile()
         {
             if (Object.FindAnyObjectByType<HexTile>() != null) return;
@@ -60,8 +90,9 @@ namespace TalesOfTao.Editor
             int layerIndex = LayerMask.NameToLayer("HexTile");
             if (layerIndex < 0)
             {
-                Debug.LogError("[TalesOfTao] Layer 'HexTile' not found. Add it in Project Settings > Tags and Layers.");
-                return;
+                Debug.LogWarning("[TalesOfTao] Layer 'HexTile' not found in TagManager. Using default layer. " +
+                                 "Add 'HexTile' layer in Project Settings > Tags and Layers, then re-run setup.");
+                layerIndex = 0; // Default layer
             }
 
             var go   = new GameObject("HexTile_Plains");
@@ -86,7 +117,7 @@ namespace TalesOfTao.Editor
 
             var selector   = cam.gameObject.AddComponent<TileSelector>();
             int layerIndex = LayerMask.NameToLayer("HexTile");
-            if (layerIndex < 0) { Debug.LogError("[TalesOfTao] Layer 'HexTile' not found — TileSelector mask not set."); return; }
+            if (layerIndex < 0) layerIndex = 0;
 
             var ser = new SerializedObject(selector);
             ser.FindProperty("_hexLayer").intValue = 1 << layerIndex;
