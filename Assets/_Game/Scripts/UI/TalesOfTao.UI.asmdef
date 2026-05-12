@@ -4,6 +4,7 @@
     "references": [
         "TalesOfTao.Core",
         "TalesOfTao.Hex",
+        "Unity.TextMeshPro",
         "TalesOfTao.Sects",
         "TalesOfTao.Combat",
         "TalesOfTao.Economy",

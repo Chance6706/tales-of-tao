@@ -70,7 +70,7 @@ namespace TalesOfTao.Hex
         //
         // Shared vertices give flat-shaded appearance after RecalculateNormals(),
         // which is correct for a strategy-game terrain tile.
-        internal static Mesh GenerateHexMesh(float size, float height)
+        public static Mesh GenerateHexMesh(float size, float height)
         {
             var mesh = new Mesh { name = "HexTileMesh" };
 
