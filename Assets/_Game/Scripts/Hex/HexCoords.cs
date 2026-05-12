@@ -14,14 +14,14 @@ namespace TalesOfTao.Hex
         public int S => -Q - R;
 
         // Six neighbour offsets in axial coordinates: E, NE, NW, W, SW, SE
-        private static readonly HexCoords[] Directions = new[]
+        private static readonly HexCoords[] Directions =
         {
-            new( 1,  0), // E
-            new( 1, -1), // NE
-            new( 0, -1), // NW
-            new(-1,  0), // W
-            new(-1,  1), // SW
-            new( 0,  1), // SE
+            new HexCoords( 1,  0), // E
+            new HexCoords( 1, -1), // NE
+            new HexCoords( 0, -1), // NW
+            new HexCoords(-1,  0), // W
+            new HexCoords(-1,  1), // SW
+            new HexCoords( 0,  1), // SE
         };
 
         public HexCoords(int q, int r) { Q = q; R = r; }
