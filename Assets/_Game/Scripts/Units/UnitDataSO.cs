@@ -56,7 +56,7 @@ namespace TalesOfTao.Units
         public float GetCapsuleHeight(SectTier tier)
         {
             int idx = Mathf.Clamp((int)tier - 1, 0, 4);
-            return _capsuleHeights != null && idx < _capsuleHeights.Length ? _capsuleHeights[idx] : 1.8f;
+            return _capsuleHeights != null && idx < _capsuleHeights.Length ? _capsuleHeights[idx] : 1.6f;
         }
     }
 }

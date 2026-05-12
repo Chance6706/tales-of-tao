@@ -4,6 +4,14 @@ using UnityEngine;
 
 namespace TalesOfTao.Core.EventChannels
 {
+    /// <summary>
+    /// Base class for all typed event channels.
+    /// </summary>
+    /// <remarks>
+    /// <b>Thread safety:</b> not thread-safe. All subscribe/raise calls must come from
+    /// the main thread. If you add async save/load systems, use a lock or main-thread
+    /// dispatcher for event access.
+    /// </remarks>
     public abstract class EventChannelSO<T> : ScriptableObject
     {
         private readonly List<Action<T>> _listeners = new();

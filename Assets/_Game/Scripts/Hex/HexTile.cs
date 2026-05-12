@@ -7,7 +7,7 @@ namespace TalesOfTao.Hex
     //
     // Mesh priority (Phase 2):
     //   1. Data.Terrain.BaseMesh — imported .obj from Wu_Dang_Hex_System (Bottom-Center pivot)
-    //   2. GenerateHexMesh()     — procedural fallback when no .obj is assigned
+    //   2. _defaultMesh           — cached procedural fallback (shared across all tiles)
     //
     // Feature composition:
     //   If Data.Terrain.FeaturePrefab is set, it is instantiated as a child at
@@ -24,9 +24,14 @@ namespace TalesOfTao.Hex
         private MeshRenderer _meshRenderer;
         private GameObject   _featureInstance;
 
+        // ── Static caches ──────────────────────────────────────────────────────
         // Shader looked up once; materials shared per color for GPU instancing.
         private static Shader _cachedShader;
         private static readonly Dictionary<Color, Material> _sharedMaterials = new();
+
+        // Cached procedural mesh shared by all tiles that don't have an imported .obj.
+        // Keyed by (size, height) to support multiple grid configurations.
+        private static readonly Dictionary<(float, float), Mesh> _defaultMeshes = new();
 
         public HexTileData Data { get; private set; }
 
@@ -60,6 +65,13 @@ namespace TalesOfTao.Hex
             ApplyMaterial();
         }
 
+        private void OnDestroy()
+        {
+            // Clean up feature instance if this tile is destroyed at runtime.
+            if (_featureInstance != null)
+                Destroy(_featureInstance);
+        }
+
         private void ApplyWorldPosition()
         {
             if (Data.Coords != HexCoords.Zero)
@@ -68,8 +80,24 @@ namespace TalesOfTao.Hex
 
         private void BuildMesh()
         {
-            // Prefer the imported .obj base mesh; fall back to procedural.
-            var mesh = Data?.Terrain?.BaseMesh ?? GenerateHexMesh(_size, _height);
+            Mesh mesh = null;
+
+            // Priority 1: imported .obj mesh from terrain data
+            if (Data?.Terrain?.BaseMesh != null)
+            {
+                mesh = Data.Terrain.BaseMesh;
+            }
+            // Priority 2: cached procedural fallback
+            else
+            {
+                var key = (_size, _height);
+                if (!_defaultMeshes.TryGetValue(key, out mesh))
+                {
+                    mesh = GenerateHexMesh(_size, _height);
+                    _defaultMeshes[key] = mesh;
+                }
+            }
+
             _meshFilter.sharedMesh   = mesh;
             _meshCollider.sharedMesh = mesh;
         }
@@ -151,6 +179,50 @@ namespace TalesOfTao.Hex
             mat.enableInstancing = true; // required for GPU instancing at grid scale
             _sharedMaterials[color] = mat;
             _meshRenderer.sharedMaterial = mat;
+        }
+
+        // ── Static cache cleanup ──────────────────────────────────────────────
+        // Call when unloading a scene or switching pipelines to prevent leaks.
+
+        /// <summary>
+        /// Clears all cached materials and the shader reference.
+        /// Call this when unloading a scene or switching render pipelines.
+        /// </summary>
+        public static void ClearCache()
+        {
+            foreach (var mat in _sharedMaterials.Values)
+            {
+                if (mat != null)
+                {
+#if UNITY_EDITOR
+                    DestroyImmediate(mat);
+#else
+                    Destroy(mat);
+#endif
+                }
+            }
+            _sharedMaterials.Clear();
+            _cachedShader = null;
+        }
+
+        /// <summary>
+        /// Clears cached procedural meshes. Call on scene unload if tiles are
+        /// frequently created/destroyed at runtime.
+        /// </summary>
+        public static void ClearMeshCache()
+        {
+            foreach (var mesh in _defaultMeshes.Values)
+            {
+                if (mesh != null)
+                {
+#if UNITY_EDITOR
+                    DestroyImmediate(mesh);
+#else
+                    Destroy(mesh);
+#endif
+                }
+            }
+            _defaultMeshes.Clear();
         }
     }
 }

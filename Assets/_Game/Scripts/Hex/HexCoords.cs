@@ -3,19 +3,18 @@ using UnityEngine;
 
 namespace TalesOfTao.Hex
 {
-    [Serializable]
-    public struct HexCoords : IEquatable<HexCoords>
+    // Axial hex coordinates (Q, R) with derived S = -Q -R.
+    // Immutable struct — all operators return new instances.
+    public readonly struct HexCoords : IEquatable<HexCoords>
     {
-        public int Q;
-        public int R;
-
-        public int S => -Q - R;
-
         public static readonly HexCoords Zero = new(0, 0);
 
-        // Six direction offsets (flat-top, E→NE→NW→W→SW→SE).
-        // Note: array contents must not be modified.
-        public static readonly HexCoords[] Directions =
+        public int Q { get; }
+        public int R { get; }
+        public int S => -Q - R;
+
+        // Six neighbour offsets in axial coordinates: E, NE, NW, W, SW, SE
+        private static readonly HexCoords[] Directions = new[]
         {
             new( 1,  0), // E
             new( 1, -1), // NE
@@ -53,6 +52,6 @@ namespace TalesOfTao.Hex
         public bool Equals(HexCoords other) => Q == other.Q && R == other.R;
         public override bool Equals(object obj) => obj is HexCoords c && Equals(c);
         public override int GetHashCode() => HashCode.Combine(Q, R);
-        public override string ToString() => $"({Q},{R})";
+        public override string ToString() => $"({Q},{R},{S})";
     }
 }

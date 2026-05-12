@@ -8,12 +8,12 @@ namespace TalesOfTao.Economy
     //
     // Collider policy (per GDD):
     //   Interactive buildings (markets, shrines, etc.): MeshCollider Convex = true
-    //   Decorative structures: no collider (set _requiresCollider = false)
+    //   Decorative structures: no collider (set RequiresCollider = false)
     [CreateAssetMenu(menuName = "TalesOfTao/Buildings/Building Data", fileName = "BuildingData_New")]
     public class BuildingDataSO : ScriptableObject
     {
         [Header("Identity")]
-        [SerializeField] private string _buildingName = "Building";
+        [SerializeField] private string _displayName = "Building";
 
         [Header("Mesh")]
         [Tooltip("Assign .obj mesh from Assets/_Game/Art/Meshes/Buildings/.")]
@@ -27,9 +27,9 @@ namespace TalesOfTao.Economy
         [Tooltip("True for interactive buildings (spawns Convex MeshCollider). False for decorative.")]
         [SerializeField] private bool _requiresCollider = true;
 
-        public string   BuildingName     => _buildingName;
-        public Mesh     Mesh             => _mesh;
-        public Material Material         => _material;
+        public string   DisplayName     => _displayName;
+        public Mesh     Mesh            => _mesh;
+        public Material Material        => _material;
         public bool     RequiresCollider => _requiresCollider;
     }
 }

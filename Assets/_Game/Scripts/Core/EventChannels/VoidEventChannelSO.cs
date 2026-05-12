@@ -4,6 +4,14 @@ using UnityEngine;
 
 namespace TalesOfTao.Core.EventChannels
 {
+    /// <summary>
+    /// Event channel for parameterless (void) events.
+    /// </summary>
+    /// <remarks>
+    /// <b>Thread safety:</b> not thread-safe. All subscribe/raise calls must come from
+    /// the main thread. If you add async save/load systems, use a lock or main-thread
+    /// dispatcher for event access.
+    /// </remarks>
     [CreateAssetMenu(menuName = "TalesOfTao/Events/Void Event Channel", fileName = "VoidEventChannel")]
     public class VoidEventChannelSO : ScriptableObject
     {
