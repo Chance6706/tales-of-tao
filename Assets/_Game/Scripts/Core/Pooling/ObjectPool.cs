@@ -122,10 +122,6 @@ namespace TalesOfTao.Core.Pooling
 
         public void Clear()
         {
-            foreach (var go in _inner)
-            {
-                // ObjectPool doesn't expose active items; this is handled internally
-            }
             _inner.Clear();
         }
 
