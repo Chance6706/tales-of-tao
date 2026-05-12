@@ -1,0 +1,16 @@
+{
+    "name": "TalesOfTao.Units",
+    "rootNamespace": "TalesOfTao.Units",
+    "references": [
+        "TalesOfTao.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
