@@ -1,6 +1,7 @@
 fileFormatVersion: 2
 guid: 1add7e6aa3eb40df85504de1328cd5fb
 MonoImporter:
+  assemblyDefinitionReference: {fileID: 0, guid: 4d650037241649843b130ddb6638c19a, type: 1 }
   externalObjects: {}
   serializedVersion: 2
   defaultReferences: []

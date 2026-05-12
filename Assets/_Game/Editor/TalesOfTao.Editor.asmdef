@@ -3,7 +3,8 @@
     "rootNamespace": "TalesOfTao.Editor",
     "references": [
         "TalesOfTao.Core",
-        "TalesOfTao.Hex"
+        "TalesOfTao.Hex",
+        "TalesOfTao.UI"
     ],
     "includePlatforms": [
         "Editor"

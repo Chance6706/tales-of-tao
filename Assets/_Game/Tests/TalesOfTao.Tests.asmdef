@@ -2,15 +2,10 @@
     "name": "TalesOfTao.Tests",
     "rootNamespace": "TalesOfTao.Tests",
     "references": [
-        "TalesOfTao.Runtime",
-        "Unity.TestRunner"
+        "TalesOfTao.Core",
+        "TalesOfTao.Hex"
     ],
-    "includePlatforms": [
-        "Editor",
-        "Windows",
-        "macOS",
-        "Linux"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
