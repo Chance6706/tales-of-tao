@@ -5,6 +5,8 @@
         "TalesOfTao.Core",
         "TalesOfTao.Hex",
         "TalesOfTao.UI",
+        "TalesOfTao.Economy",
+        "TalesOfTao.Units",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],
