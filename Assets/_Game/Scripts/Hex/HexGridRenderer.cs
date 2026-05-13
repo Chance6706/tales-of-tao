@@ -90,7 +90,7 @@ namespace TalesOfTao.Hex
 
         private HexChunkRenderer CreateChunk(Vector2Int coord)
         {
-            var go = new GameObject($"Chunk_{coord.X}_{coord.Y}");
+            var go = new GameObject($"Chunk_{coord.x}_{coord.y}");
             go.transform.SetParent(transform, false);
             var chunk = go.AddComponent<HexChunkRenderer>();
             chunk.ChunkCoord = coord;
@@ -138,7 +138,7 @@ namespace TalesOfTao.Hex
             if (vertices.Count == 0) return;
 
             mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles);
+            mesh.SetTriangles(triangles, 0);
             mesh.SetColors(colors);
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
