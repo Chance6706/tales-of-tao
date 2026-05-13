@@ -53,17 +53,8 @@ namespace TalesOfTao.Hex
         /// </summary>
         private void AutoLoadTerrainTypes()
         {
-            // Reload if array is null, empty, or all entries are stale (null references)
-            bool hasValid = false;
-            if (_terrainTypes != null)
-            {
-                foreach (var t in _terrainTypes)
-                {
-                    if (t != null) { hasValid = true; break; }
-                }
-            }
-            if (hasValid) return;
-
+            // Always reload from disk to pick up newly created/recreated assets.
+            // This is only called from Awake and GenerateMap, so performance is fine.
 #if UNITY_EDITOR
             var guids = UnityEditor.AssetDatabase.FindAssets("t:TerrainTypeSO", new[] { "Assets/_Game/Data/Terrain" });
             var list = new System.Collections.Generic.List<TerrainTypeSO>();
@@ -73,16 +64,8 @@ namespace TalesOfTao.Hex
                 var so = UnityEditor.AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path);
                 if (so != null) list.Add(so);
             }
-            if (list.Count > 0)
-            {
-                _terrainTypes = list.ToArray();
-                Debug.Log($"[HexGrid] Auto-loaded {_terrainTypes.Length} terrain types.");
-            }
-            else
-            {
-                Debug.LogWarning("[HexGrid] No TerrainTypeSO assets found in Assets/_Game/Data/Terrain/. " +
-                                 "Run 'TalesOfTao > 1 - Create Data Assets' first.");
-            }
+            _terrainTypes = list.Count > 0 ? list.ToArray() : null;
+            Debug.Log($"[HexGrid] AutoLoadTerrainTypes: loaded {list.Count} terrain types.");
 #endif
         }
 
@@ -93,6 +76,8 @@ namespace TalesOfTao.Hex
         {
             if (forcedSeed.HasValue) _seed = forcedSeed.Value;
             else if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+
+            AutoLoadTerrainTypes();
 
             var rng = new System.Random(_seed);
 
