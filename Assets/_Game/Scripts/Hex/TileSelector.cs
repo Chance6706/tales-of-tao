@@ -17,7 +17,6 @@ namespace TalesOfTao.Hex
         public static event Action<HexTileData> TileSelected;
 
         [SerializeField] private LayerMask _hexLayer = ~0;
-        [Tooltip("Must match the hex size used by HexGridRenderer.")]
         [SerializeField] private float _hexSize = 1f;
 
         private Camera _cam;
