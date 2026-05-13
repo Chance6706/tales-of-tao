@@ -5,8 +5,9 @@ namespace TalesOfTao.Hex
 {
     /// <summary>
     /// Manages chunk-based visual rendering of the hex grid.
-    /// Subdivides the grid into 16x16 hex chunks, each rendered as a single combined mesh.
-    /// Chunks outside the camera frustum are disabled for performance.
+    /// Subdivides the grid into 16x16 hex chunks. Each chunk contains one sub-mesh
+    /// per terrain type, each with its own URP Lit material colored by terrain.
+    /// No custom shaders or vertex colors required.
     /// </summary>
     public class HexGridRenderer : MonoBehaviour
     {
@@ -17,45 +18,88 @@ namespace TalesOfTao.Hex
 
         [Header("References")]
         [SerializeField] private HexGridManager _gridManager;
-        [SerializeField] private Material _defaultMaterial;
 
         private Dictionary<Vector2Int, HexChunkRenderer> _chunks = new();
         private Transform _cameraTransform;
         private float _cullDistance = 200f;
 
-        private static Material _cachedMaterial;
+        // Cache: terrain type index -> material with correct color
+        private static readonly Dictionary<int, Material> _terrainMaterials = new();
+        private static Material _fallbackMaterial;
+        private static bool _materialsInitialized;
 
         private void Start()
         {
             _cameraTransform = Camera.main?.transform;
-            if (_defaultMaterial == null)
-                _defaultMaterial = GetOrCreateMaterial();
+            InitializeMaterials();
         }
 
-        private static Material GetOrCreateMaterial()
+        private static void InitializeMaterials()
         {
-            if (_cachedMaterial != null) return _cachedMaterial;
+            if (_materialsInitialized) return;
+            _materialsInitialized = true;
 
-            // Try our custom vertex-color shader first, then fall back to URP/Unlit
-            // which also supports vertex colors and is guaranteed to exist.
-            Shader shader = Shader.Find("Custom/HexVertexColor");
+            // Use URP Lit — always available in URP projects
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null)
             {
-                Debug.Log("[HexGridRenderer] Custom/HexVertexColor not found, using URP/Unlit.");
-                shader = Shader.Find("Universal Render Pipeline/Unlit");
+                // Last resort: Standard shader (built into all Unity versions)
+                shader = Shader.Find("Standard");
             }
             if (shader == null)
             {
-                Debug.LogError("[HexGridRenderer] No usable shader found. Hex tiles will be pink.");
-                return null;
+                Debug.LogError("[HexGridRenderer] No shader found at all. Tiles will be pink.");
+                return;
             }
 
-            _cachedMaterial = new Material(shader)
+            // Fallback material (gray)
+            _fallbackMaterial = CreateMaterial(shader, Color.gray, "HexFallback");
+
+            // Pre-create materials for each terrain type using default tint colors
+            // Colors match TerrainTypeSO defaults
+            var defaultColors = new Dictionary<TerrainType, Color>
             {
-                name = "HexTileVertexColor_Auto",
-                color = Color.white
+                { TerrainType.Plains,     new Color(0.55f, 0.76f, 0.29f) },
+                { TerrainType.Mountain,   new Color(0.55f, 0.45f, 0.35f) },
+                { TerrainType.Forest,     new Color(0.20f, 0.55f, 0.20f) },
+                { TerrainType.River,      new Color(0.25f, 0.45f, 0.75f) },
+                { TerrainType.Lake,       new Color(0.20f, 0.40f, 0.70f) },
+                { TerrainType.Desert,     new Color(0.85f, 0.75f, 0.50f) },
+                { TerrainType.Swamp,      new Color(0.35f, 0.45f, 0.25f) },
+                { TerrainType.SacredPeak, new Color(0.75f, 0.65f, 0.85f) },
             };
-            return _cachedMaterial;
+
+            foreach (var kvp in defaultColors)
+            {
+                int key = (int)kvp.Key;
+                _terrainMaterials[key] = CreateMaterial(shader, kvp.Value, $"HexTerrain_{kvp.Key}");
+            }
+        }
+
+        private static Material CreateMaterial(Shader shader, Color color, string name)
+        {
+            var mat = new Material(shader)
+            {
+                name = name,
+                color = color
+            };
+            return mat;
+        }
+
+        private static Material GetTerrainMaterial(Color color, TerrainType type)
+        {
+            // Try cached material by terrain type
+            int key = (int)type;
+            if (_terrainMaterials.TryGetValue(key, out var cached) != null)
+                return cached;
+
+            // Create on-demand
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            if (shader == null) return _fallbackMaterial;
+
+            var mat = CreateMaterial(shader, color, $"HexTerrain_{type}_Runtime");
+            _terrainMaterials[key] = mat;
+            return mat;
         }
 
         private void OnEnable()
@@ -107,6 +151,7 @@ namespace TalesOfTao.Hex
 
         private void BuildAllChunks()
         {
+            InitializeMaterials();
             ClearChunks();
 
             int width = _gridManager.Width;
@@ -144,14 +189,12 @@ namespace TalesOfTao.Hex
 
         private void BuildChunkMesh(HexChunkRenderer chunk, int chunkX, int chunkY)
         {
-            var mesh = new Mesh { name = $"HexChunk_{chunkX}_{chunkY}" };
-            var vertices = new List<Vector3>();
-            var triangles = new List<int>();
-            var colors = new List<Color>();
-            var normals = new List<Vector3>();
-
             int startQ = chunkX * _chunkSize - _gridManager.Width / 2;
             int startR = chunkY * _chunkSize - _gridManager.Height / 2;
+
+            // Group tiles by terrain+color so each unique color gets its own sub-mesh
+            // Key: color hash bucket -> mesh data
+            var meshGroups = new Dictionary<int, MeshBuildData>();
 
             for (int r = 0; r < _chunkSize; r++)
             {
@@ -162,84 +205,132 @@ namespace TalesOfTao.Hex
                     var tile = _gridManager.GetTile(tileQ, tileR);
                     if (tile == null) continue;
 
-                    float elevationOffset = GetElevationOffset(tile.Elevation);
                     Color color = GetTileColor(tile);
+                    float elevationOffset = GetElevationOffset(tile.Elevation);
                     var worldPos = tile.Coords.ToWorldPosition(_hexSize);
 
-                    // Use imported mesh if available, otherwise fall back to procedural hex prism
-                    if (tile.Terrain != null && tile.Terrain.BaseMesh != null)
+                    // Use color as grouping key (tiles with same color share a sub-mesh)
+                    int colorKey = ColorToRGBAKey(color);
+
+                    if (!meshGroups.TryGetValue(colorKey, out var data))
                     {
-                        AddImportedTileMesh(tile.Terrain.BaseMesh, worldPos, elevationOffset,
-                            color, vertices, triangles, colors, normals);
+                        data = new MeshBuildData { Color = color };
+                        meshGroups[colorKey] = data;
                     }
-                    else
+
+                    // Generate hex prism mesh into this group's buffers
+                    HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
+                        data.Vertices, data.Triangles, data.Normals);
+
+                    // Offset vertices to world position (last 12 verts added)
+                    int vertBase = data.Vertices.Count - 12;
+                    for (int i = vertBase; i < data.Vertices.Count; i++)
                     {
-                        HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
-                            vertices, triangles, colors, normals, color);
-                        int vertBase = vertices.Count - 12;
-                        for (int i = vertBase; i < vertices.Count; i++)
-                        {
-                            vertices[i] += worldPos;
-                        }
+                        data.Vertices[i] += worldPos;
                     }
                 }
             }
 
-            if (vertices.Count == 0) return;
+            if (meshGroups.Count == 0) return;
 
-            mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles, 0);
-            mesh.SetColors(colors);
-            mesh.SetNormals(normals);
+            // Build the final mesh with sub-meshes
+            var mesh = new Mesh { name = $"HexChunk_{chunkX}_{chunkY}" };
+            mesh.subMeshCount = meshGroups.Count;
+
+            int subMeshIndex = 0;
+            int totalVertices = 0;
+            foreach (var kvp in meshGroups)
+            {
+                var data = kvp.Value;
+                totalVertices += data.Vertices.Count;
+            }
+            mesh.SetVertexBufferParams(totalVertices,
+                new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttribute.Float32, 3),
+                new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttribute.Float32, 3));
+
+            // Actually, let's use the simpler List-based API then convert
+            var allVertices = new List<Vector3>();
+            var allNormals = new List<Vector3>();
+            var allTriangles = new List<int>();
+            var materials = new Material[meshGroups.Count];
+
+            int matIndex = 0;
+            int vertexOffset = 0;
+            foreach (var kvp in meshGroups)
+            {
+                var data = kvp.Value;
+                int terrainType = kvp.Key; // We'll use this to look up the terrain type
+
+                allVertices.AddRange(data.Vertices);
+                allNormals.AddRange(data.Normals);
+
+                // Offset triangles by current vertex count
+                foreach (var tri in data.Triangles)
+                {
+                    allTriangles.Add(tri + vertexOffset);
+                }
+                vertexOffset += data.Vertices.Count;
+
+                // Determine terrain type from color for material lookup
+                TerrainType tt = GetClosestTerrainType(data.Color);
+                materials[matIndex++] = GetTerrainMaterial(data.Color, tt);
+            }
+
+            mesh.SetVertices(allVertices);
+            mesh.SetNormals(allNormals);
+            mesh.SetTriangles(allTriangles, 0);
             mesh.RecalculateBounds();
 
-            chunk.SetMesh(mesh, _defaultMaterial);
+            chunk.SetMesh(mesh, materials);
             // Mesh vertices are already in world space — do NOT offset the chunk transform.
         }
 
         /// <summary>
-        /// Adds an imported mesh (e.g. Hex_Base_Flat.obj) transformed to the tile's world position.
-        /// Vertex colors are tinted with the terrain color.
+        /// Converts a color to an integer key for grouping.
+        /// Quantizes to reduce material count (rounds to nearest 1/32).
         /// </summary>
-        private static void AddImportedTileMesh(Mesh sourceMesh, Vector3 worldPos, float elevationOffset,
-            Color tint, List<Vector3> vertices, List<int> triangles, List<Color> colors, List<Vector3> normals)
+        private static int ColorToRGBAKey(Color c)
         {
-            int vertBase = vertices.Count;
+            int r = Mathf.RoundToInt(c.r * 31f);
+            int g = Mathf.RoundToInt(c.g * 31f);
+            int b = Mathf.RoundToInt(c.b * 31f);
+            int a = Mathf.RoundToInt(c.a * 31f);
+            return (r << 24) | (g << 16) | (b << 8) | a;
+        }
 
-            // Transform source vertices to world space
-            foreach (var v in sourceMesh.vertices)
+        /// <summary>
+        /// Reverse-maps a color key back to the closest terrain type.
+        /// Used for material selection. Returns Plains as default.
+        /// </summary>
+        private static TerrainType GetClosestTerrainType(Color color)
+        {
+            // Match against default terrain colors
+            var defaults = new (TerrainType type, Color color)[]
             {
-                vertices.Add(new Vector3(v.x, v.y + elevationOffset, v.z) + worldPos);
-            }
+                (TerrainType.Plains,     new Color(0.55f, 0.76f, 0.29f)),
+                (TerrainType.Mountain,   new Color(0.55f, 0.45f, 0.35f)),
+                (TerrainType.Forest,     new Color(0.20f, 0.55f, 0.20f)),
+                (TerrainType.River,      new Color(0.25f, 0.45f, 0.75f)),
+                (TerrainType.Lake,       new Color(0.20f, 0.40f, 0.70f)),
+                (TerrainType.Desert,     new Color(0.85f, 0.75f, 0.50f)),
+                (TerrainType.Swamp,      new Color(0.35f, 0.45f, 0.25f)),
+                (TerrainType.SacredPeak, new Color(0.75f, 0.65f, 0.85f)),
+            };
 
-            // Copy triangles with offset
-            foreach (var tri in sourceMesh.triangles)
+            float bestDist = float.MaxValue;
+            TerrainType best = TerrainType.Plains;
+            foreach (var d in defaults)
             {
-                triangles.Add(vertBase + tri);
-            }
-
-            // Tint vertex colors (or use tint if mesh has no colors)
-            if (sourceMesh.colors != null && sourceMesh.colors.Length > 0)
-            {
-                foreach (var c in sourceMesh.colors)
+                float dist = (color.r - d.color.r) * (color.r - d.color.r)
+                           + (color.g - d.color.g) * (color.g - d.color.g)
+                           + (color.b - d.color.b) * (color.b - d.color.b);
+                if (dist < bestDist)
                 {
-                    colors.Add(new Color(c.r * tint.r, c.g * tint.g, c.b * tint.b, c.a * tint.a));
+                    bestDist = dist;
+                    best = d.type;
                 }
             }
-            else
-            {
-                int vertCount = sourceMesh.vertexCount;
-                for (int i = 0; i < vertCount; i++)
-                {
-                    colors.Add(tint);
-                }
-            }
-
-            // Copy normals (transform rotation only, no scale)
-            foreach (var n in sourceMesh.normals)
-            {
-                normals.Add(n);
-            }
+            return best;
         }
 
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch
@@ -312,6 +403,17 @@ namespace TalesOfTao.Hex
                 }
             }
             _chunks.Clear();
+        }
+
+        /// <summary>
+        /// Helper class for accumulating mesh data per color group.
+        /// </summary>
+        private class MeshBuildData
+        {
+            public Color Color;
+            public List<Vector3> Vertices = new();
+            public List<int> Triangles = new();
+            public List<Vector3> Normals = new();
         }
     }
 }

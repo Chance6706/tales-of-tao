@@ -3,15 +3,11 @@ using UnityEngine;
 
 namespace TalesOfTao.Hex
 {
-    // Visual and physical representation of one hex tile in the scene.
-    //
-    // Mesh priority (Phase 2):
-    //   1. Data.Terrain.BaseMesh — imported .obj from Wu_Dang_Hex_System (Bottom-Center pivot)
-    //   2. _defaultMesh           — cached procedural fallback (shared across all tiles)
-    //
-    // Feature composition:
-    //   If Data.Terrain.FeaturePrefab is set, it is instantiated as a child at
-    //   local (0,0,0). Bottom-Center pivots sit flush on the tile Y=0 plane.
+    /// <summary>
+    /// Visual and physical representation of one hex tile in the scene.
+    /// Uses standard URP Lit material colored per-terrain-type.
+    /// No custom shaders or vertex colors needed.
+    /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
     public class HexTile : MonoBehaviour
     {
@@ -24,13 +20,7 @@ namespace TalesOfTao.Hex
         private MeshRenderer _meshRenderer;
         private GameObject   _featureInstance;
 
-        // ── Static caches ──────────────────────────────────────────────────────
-        // Shader looked up once; materials shared per color for GPU instancing.
-        private static Shader _cachedShader;
-        private static readonly Dictionary<Color, Material> _sharedMaterials = new();
-
         // Cached procedural mesh shared by all tiles that don't have an imported .obj.
-        // Keyed by (size, height) to support multiple grid configurations.
         private static readonly Dictionary<(float, float), Mesh> _defaultMeshes = new();
 
         public HexTileData Data { get; private set; }
@@ -42,7 +32,6 @@ namespace TalesOfTao.Hex
             _meshRenderer = GetComponent<MeshRenderer>();
         }
 
-        // Called by HexGridManager before activation (Phase 2+).
         public void Initialize(HexTileData data)
         {
             Data = data;
@@ -67,7 +56,6 @@ namespace TalesOfTao.Hex
 
         private void OnDestroy()
         {
-            // Clean up feature instance if this tile is destroyed at runtime.
             if (_featureInstance != null)
                 Destroy(_featureInstance);
         }
@@ -102,8 +90,6 @@ namespace TalesOfTao.Hex
             _meshCollider.sharedMesh = mesh;
         }
 
-        // Instantiates the terrain Feature prefab (e.g. Feature_Forest) as a child.
-        // Bottom-Center pivot models land flush at local Y=0 with no offset needed.
         private void SpawnFeature()
         {
             if (_featureInstance != null) return;
@@ -114,11 +100,53 @@ namespace TalesOfTao.Hex
             _featureInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
+        // ── Material ──────────────────────────────────────────────────────────
+
+        private void ApplyMaterial()
+        {
+            var color = Data?.Terrain?.TintColor ?? Color.gray;
+            var mat = GetOrCreateMaterial(color);
+            _meshRenderer.sharedMaterial = mat;
+        }
+
+        private static Material GetOrCreateMaterial(Color color)
+        {
+            int key = ColorToKey(color);
+            if (_materialCache.TryGetValue(key, out var cached))
+                return cached;
+
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit")
+                         ?? Shader.Find("Standard");
+            if (shader == null)
+            {
+                Debug.LogError("[HexTile] No shader found. Tiles will be pink.");
+                return null;
+            }
+
+            var mat = new Material(shader)
+            {
+                name = $"HexTile_{color.r:F2}_{color.g:F2}_{color.b:F2}",
+                color = color
+            };
+            _materialCache[key] = mat;
+            return mat;
+        }
+
+        private static int ColorToKey(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 31f);
+            int g = Mathf.RoundToInt(c.g * 31f);
+            int b = Mathf.RoundToInt(c.b * 31f);
+            return (r << 24) | (g << 16) | (b << 8);
+        }
+
+        private static readonly Dictionary<int, Material> _materialCache = new();
+
         // ── Mesh Generation ───────────────────────────────────────────────────
-        //
-        // Procedural fallback — flat-top hex prism, 12 verts, 60 indices.
-        //   verts[0..5]  top ring (y = +height/2)
-        //   verts[6..11] bottom ring (y = -height/2)
+
+        /// <summary>
+        /// Procedural fallback — flat-top hex prism, 12 verts, 60 indices.
+        /// </summary>
         public static Mesh GenerateHexMesh(float size, float height)
         {
             var mesh  = new Mesh { name = "HexTileMesh" };
@@ -158,24 +186,16 @@ namespace TalesOfTao.Hex
         }
 
         /// <summary>
-        /// Generates a flat-top hex prism mesh into the provided vertex/triangle/color/normal lists.
-        /// Used by HexGridRenderer to combine many tiles into a single mesh.
-        /// Normals are per-vertex (12 entries), not per-triangle-corner.
+        /// Generates a flat-top hex prism into the provided lists.
+        /// No vertex colors — color is applied via material.
+        /// Used by HexGridRenderer to combine many tiles into sub-meshes.
         /// </summary>
         public static void GenerateHexMesh(float size, float height, float elevationOffset,
-            List<Vector3> vertices, List<int> triangles, List<Color> colors,
-            List<Vector3> normals, Color color)
+            List<Vector3> vertices, List<int> triangles, List<Vector3> normals)
         {
             int vertBase = vertices.Count;
             float h = height * 0.5f;
             float yBase = elevationOffset;
-
-            // 12 vertices: 6 top ring (even indices), 6 bottom ring (odd indices)
-            // Top face vertices get upward normals, bottom get downward, sides get averaged.
-            // For simplicity and visual quality, we use face-normal approach:
-            // each vertex gets the normal of the face it primarily belongs to.
-            // Top ring vertices: blend of up + side normal
-            // Bottom ring vertices: blend of down + side normal
 
             Vector3[] sideNormals = new Vector3[6];
             for (int i = 0; i < 6; i++)
@@ -192,10 +212,8 @@ namespace TalesOfTao.Hex
                 vertices.Add(new Vector3(x, yBase + h, z));
                 vertices.Add(new Vector3(x, yBase - h, z));
 
-                // Top vertex normal: average of up + two adjacent side normals
                 Vector3 topNrm = (Vector3.up + sideNormals[i] + sideNormals[(i + 5) % 6]).normalized;
                 normals.Add(topNrm);
-                // Bottom vertex normal: average of down + two adjacent side normals
                 Vector3 botNrm = (Vector3.down + sideNormals[i] + sideNormals[(i + 5) % 6]).normalized;
                 normals.Add(botNrm);
             }
@@ -233,56 +251,13 @@ namespace TalesOfTao.Hex
                 triangles.Add(botN);
                 triangles.Add(botI);
             }
-
-            // Add colors for each vertex
-            for (int i = 0; i < 12; i++)
-                colors.Add(color);
         }
 
-        /// <summary>
-        /// Legacy overload without normals (for individual HexTile rendering).
-        /// </summary>
-        public static void GenerateHexMesh(float size, float height, float elevationOffset,
-            List<Vector3> vertices, List<int> triangles, List<Color> colors, Color color)
-        {
-            GenerateHexMesh(size, height, elevationOffset, vertices, triangles, colors,
-                new List<Vector3>(), color);
-        }
+        // ── Cache cleanup ─────────────────────────────────────────────────────
 
-        // ── Material ──────────────────────────────────────────────────────────
-
-        private void ApplyMaterial()
-        {
-            var color = Data?.Terrain?.TintColor ?? Color.gray;
-
-            if (_sharedMaterials.TryGetValue(color, out var mat))
-            {
-                _meshRenderer.sharedMaterial = mat;
-                return;
-            }
-
-            if (_cachedShader == null)
-                _cachedShader = Shader.Find("Universal Render Pipeline/Lit")
-                             ?? Shader.Find("Standard");
-
-            if (_cachedShader == null) return;
-
-            mat = new Material(_cachedShader) { color = color };
-            mat.enableInstancing = true; // required for GPU instancing at grid scale
-            _sharedMaterials[color] = mat;
-            _meshRenderer.sharedMaterial = mat;
-        }
-
-        // ── Static cache cleanup ──────────────────────────────────────────────
-        // Call when unloading a scene or switching pipelines to prevent leaks.
-
-        /// <summary>
-        /// Clears all cached materials and the shader reference.
-        /// Call this when unloading a scene or switching render pipelines.
-        /// </summary>
         public static void ClearCache()
         {
-            foreach (var mat in _sharedMaterials.Values)
+            foreach (var mat in _materialCache.Values)
             {
                 if (mat != null)
                 {
@@ -293,14 +268,9 @@ namespace TalesOfTao.Hex
 #endif
                 }
             }
-            _sharedMaterials.Clear();
-            _cachedShader = null;
+            _materialCache.Clear();
         }
 
-        /// <summary>
-        /// Clears cached procedural meshes. Call on scene unload if tiles are
-        /// frequently created/destroyed at runtime.
-        /// </summary>
         public static void ClearMeshCache()
         {
             foreach (var mesh in _defaultMeshes.Values)
