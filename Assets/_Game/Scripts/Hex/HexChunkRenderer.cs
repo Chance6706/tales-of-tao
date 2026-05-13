@@ -4,6 +4,7 @@ namespace TalesOfTao.Hex
 {
     /// <summary>
     /// Component on each chunk GameObject holding the combined mesh and collider.
+    /// Supports multiple sub-meshes with separate materials for terrain coloring.
     /// </summary>
     public class HexChunkRenderer : MonoBehaviour
     {
@@ -13,7 +14,18 @@ namespace TalesOfTao.Hex
         private MeshRenderer _meshRenderer;
         private MeshCollider _meshCollider;
 
+        /// <summary>
+        /// Sets a single-material mesh (backward compatible).
+        /// </summary>
         public void SetMesh(Mesh mesh, Material material)
+        {
+            SetMesh(mesh, material != null ? new[] { material } : null);
+        }
+
+        /// <summary>
+        /// Sets a multi-submesh mesh with per-submesh materials.
+        /// </summary>
+        public void SetMesh(Mesh mesh, Material[] materials)
         {
             if (_meshFilter == null)
                 _meshFilter = gameObject.AddComponent<MeshFilter>();
@@ -23,7 +35,7 @@ namespace TalesOfTao.Hex
                 _meshCollider = gameObject.AddComponent<MeshCollider>();
 
             _meshFilter.sharedMesh = mesh;
-            _meshRenderer.sharedMaterial = material;
+            _meshRenderer.sharedMaterials = materials ?? new Material[0];
             _meshCollider.sharedMesh = mesh;
         }
     }

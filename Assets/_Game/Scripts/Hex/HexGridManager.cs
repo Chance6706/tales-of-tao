@@ -53,8 +53,8 @@ namespace TalesOfTao.Hex
         /// </summary>
         private void AutoLoadTerrainTypes()
         {
-            if (_terrainTypes != null && _terrainTypes.Length > 0) return;
-
+            // Always reload from disk to pick up newly created/recreated assets.
+            // This is only called from Awake and GenerateMap, so performance is fine.
 #if UNITY_EDITOR
             var guids = UnityEditor.AssetDatabase.FindAssets("t:TerrainTypeSO", new[] { "Assets/_Game/Data/Terrain" });
             var list = new System.Collections.Generic.List<TerrainTypeSO>();
@@ -64,16 +64,8 @@ namespace TalesOfTao.Hex
                 var so = UnityEditor.AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path);
                 if (so != null) list.Add(so);
             }
-            if (list.Count > 0)
-            {
-                _terrainTypes = list.ToArray();
-                Debug.Log($"[HexGrid] Auto-loaded {_terrainTypes.Length} terrain types.");
-            }
-            else
-            {
-                Debug.LogWarning("[HexGrid] No TerrainTypeSO assets found in Assets/_Game/Data/Terrain/. " +
-                                 "Run 'TalesOfTao > 1 - Create Data Assets' first.");
-            }
+            _terrainTypes = list.Count > 0 ? list.ToArray() : null;
+            Debug.Log($"[HexGrid] AutoLoadTerrainTypes: loaded {list.Count} terrain types.");
 #endif
         }
 
@@ -84,6 +76,8 @@ namespace TalesOfTao.Hex
         {
             if (forcedSeed.HasValue) _seed = forcedSeed.Value;
             else if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+
+            AutoLoadTerrainTypes();
 
             var rng = new System.Random(_seed);
 
@@ -103,6 +97,7 @@ namespace TalesOfTao.Hex
 
             Pass_Elevation(rng);
             Pass_Biome(rng);
+            Pass_Water(rng);
             Pass_SacredPeakRarity(rng);
             Pass_LeyLines(rng);
             Pass_StartingLocations(rng);
@@ -192,7 +187,7 @@ namespace TalesOfTao.Hex
 
         private void Pass_Biome(System.Random rng)
         {
-            int numSeeds = Mathf.Max(8, _width / 15);
+            int numSeeds = Mathf.Max(20, _width / 4);
             var seedPoints = new List<(HexCoords coords, TerrainType type)>();
 
             for (int i = 0; i < numSeeds; i++)
@@ -205,9 +200,9 @@ namespace TalesOfTao.Hex
 
                 TerrainType type = tile.Elevation switch
                 {
-                    ElevationLevel.Low => Pick3(rng, TerrainType.Plains, TerrainType.River, TerrainType.Swamp),
-                    ElevationLevel.Medium => Pick(rng, TerrainType.Forest, TerrainType.Plains),
-                    ElevationLevel.High => Pick(rng, TerrainType.Mountain, TerrainType.Forest),
+                    ElevationLevel.Low => Pick4(rng, TerrainType.Plains, TerrainType.River, TerrainType.Lake, TerrainType.Desert),
+                    ElevationLevel.Medium => Pick3(rng, TerrainType.Forest, TerrainType.Plains, TerrainType.Swamp),
+                    ElevationLevel.High => Pick3(rng, TerrainType.Mountain, TerrainType.Forest, TerrainType.Desert),
                     ElevationLevel.Summit => Pick(rng, TerrainType.Mountain, TerrainType.SacredPeak),
                     _ => TerrainType.Plains
                 };
@@ -234,6 +229,110 @@ namespace TalesOfTao.Hex
 
                 _tiles[i].Terrain = GetTerrainTypeSO(nearest.type);
             }
+        }
+
+        // ── Pass 2b: Water ────────────────────────────────────────────────────
+
+        private void Pass_Water(System.Random rng)
+        {
+            // Ensure rivers and lakes spawn on Low elevation tiles.
+            // Find Low elevation tiles that are currently Plains and convert some to River/Lake.
+            int targetWater = Mathf.Max(4, _tiles.Length / 80); // ~1.25% water coverage
+            int placed = 0;
+
+            // Collect candidate tiles: Low elevation, currently Plains
+            var candidates = new List<int>();
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                if (_tiles[i].Elevation == ElevationLevel.Low &&
+                    _tiles[i].Terrain?.Type == TerrainType.Plains)
+                {
+                    candidates.Add(i);
+                }
+            }
+
+            // Shuffle candidates
+            for (int i = candidates.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+            }
+
+            // Place rivers (lines of water) and lakes (clusters)
+            int idx = 0;
+            while (placed < targetWater && idx < candidates.Count)
+            {
+                int tileIdx = candidates[idx++];
+                var tile = _tiles[tileIdx];
+
+                // 60% chance river, 40% chance lake seed
+                bool isRiver = rng.NextDouble() < 0.6;
+
+                if (isRiver)
+                {
+                    // Create a short river (3-6 tiles) flowing downhill
+                    int length = rng.Next(3, 7);
+                    int current = tileIdx;
+                    for (int s = 0; s < length && placed < targetWater; s++)
+                    {
+                        if (_tiles[current].Elevation == ElevationLevel.Low)
+                        {
+                            _tiles[current].Terrain = GetTerrainTypeSO(TerrainType.River);
+                            placed++;
+                        }
+                        // Move to a random Low neighbor
+                        var neighbors = new List<int>();
+                        for (int d = 0; d < 6; d++)
+                        {
+                            var nCoords = _tiles[current].Coords.Neighbour(d);
+                            var nTile = GetTile(nCoords.Q, nCoords.R);
+                            if (nTile != null && nTile.Elevation == ElevationLevel.Low)
+                            {
+                                int nIdx = AxialToIndex(nCoords.Q, nCoords.R);
+                                if (nIdx >= 0) neighbors.Add(nIdx);
+                            }
+                        }
+                        if (neighbors.Count == 0) break;
+                        current = neighbors[rng.Next(neighbors.Count)];
+                    }
+                }
+                else
+                {
+                    // Create a small lake (2-4 tiles)
+                    int size = rng.Next(2, 5);
+                    var lakeTiles = new List<int> { tileIdx };
+                    _tiles[tileIdx].Terrain = GetTerrainTypeSO(TerrainType.Lake);
+                    placed++;
+
+                    for (int s = 1; s < size && placed < targetWater; s++)
+                    {
+                        // Expand from existing lake tiles
+                        var expandCandidates = new List<int>();
+                        foreach (var lt in lakeTiles)
+                        {
+                            for (int d = 0; d < 6; d++)
+                            {
+                                var nCoords = _tiles[lt].Coords.Neighbour(d);
+                                var nTile = GetTile(nCoords.Q, nCoords.R);
+                                if (nTile != null && nTile.Elevation == ElevationLevel.Low &&
+                                    nTile.Terrain?.Type == TerrainType.Plains)
+                                {
+                                    int nIdx = AxialToIndex(nCoords.Q, nCoords.R);
+                                    if (nIdx >= 0 && !lakeTiles.Contains(nIdx))
+                                        expandCandidates.Add(nIdx);
+                                }
+                            }
+                        }
+                        if (expandCandidates.Count == 0) break;
+                        int chosen = expandCandidates[rng.Next(expandCandidates.Count)];
+                        _tiles[chosen].Terrain = GetTerrainTypeSO(TerrainType.Lake);
+                        lakeTiles.Add(chosen);
+                        placed++;
+                    }
+                }
+            }
+
+            Debug.Log($"[HexGrid] Pass_Water: placed {placed} water tiles (target={targetWater}).");
         }
 
         // ── Pass 3: Sacred Peak Rarity ──────────────────────────────────────
@@ -459,6 +558,9 @@ namespace TalesOfTao.Hex
 
         private static TerrainType Pick3(System.Random rng, TerrainType a, TerrainType b, TerrainType c) =>
             rng.Next(3) switch { 0 => a, 1 => b, _ => c };
+
+        private static TerrainType Pick4(System.Random rng, TerrainType a, TerrainType b, TerrainType c, TerrainType d) =>
+            rng.Next(4) switch { 0 => a, 1 => b, 2 => c, _ => d };
 
         private TerrainTypeSO GetTerrainTypeSO(TerrainType type)
         {

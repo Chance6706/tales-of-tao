@@ -688,7 +688,6 @@ MonoBehaviour:
   _hexSize: 1
   _hexHeight: 0.3
   _gridManager: {fileID: 814283731}
-  _defaultMaterial: {fileID: 0}
 --- !u!4 &1251325331
 Transform:
   m_ObjectHideFlags: 0
