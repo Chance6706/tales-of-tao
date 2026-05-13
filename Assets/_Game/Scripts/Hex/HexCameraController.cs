@@ -1,21 +1,20 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace TalesOfTao.Hex
 {
     /// <summary>
     /// Strategy-game style camera controller for the hex grid.
-    /// Uses new Input System with fallback to old Input for Editor compatibility.
+    /// Uses Unity's old Input system for maximum Editor compatibility.
     ///
     /// Controls (Civ-like):
-    ///   Scroll Wheel          — Zoom in/out
-    ///   Middle Mouse Drag     — Pan
-    ///   Right Mouse Drag      — Orbit rotate around pivot
-    ///   Q / E                 — Rotate left/right
-    ///   R / F                 — Tilt up/down
-    ///   WASD / Arrow Keys     — Pan
-    ///   Page Up / Down        — Tilt
-    ///   Home                  — Reset to default position
+    ///   Scroll Wheel          - Zoom in/out
+    ///   Middle Mouse Drag     - Pan
+    ///   Right Mouse Drag      - Orbit rotate around pivot
+    ///   Q / E                 - Rotate left/right
+    ///   R / F                 - Tilt up/down
+    ///   WASD / Arrow Keys     - Pan
+    ///   Page Up / Down        - Tilt
+    ///   Home                  - Reset to default position
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class HexCameraController : MonoBehaviour
@@ -27,7 +26,7 @@ namespace TalesOfTao.Hex
 
         [Header("Pan")]
         [SerializeField] private float _panSpeed = 1.5f;
-        [SerializeField] private float _keyboardPanSpeed = 10f;
+        [SerializeField] private float _keyboardPanSpeed = 15f;
 
         [Header("Rotation")]
         [SerializeField] private float _rotationSpeed = 45f;
@@ -66,20 +65,7 @@ namespace TalesOfTao.Hex
 
         private void HandleZoom()
         {
-            float scroll = 0;
-
-            // Try new Input System first
-            var mouse = Mouse.current;
-            if (mouse != null)
-            {
-                scroll = mouse.scroll.ReadValue().y;
-            }
-            else
-            {
-                // Fallback to old Input
-                scroll = Input.GetAxis("Mouse ScrollWheel");
-            }
-
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (Mathf.Abs(scroll) < 0.001f) return;
 
             _currentZoom -= scroll * _zoomSpeed;
@@ -90,84 +76,47 @@ namespace TalesOfTao.Hex
 
         private void HandlePan()
         {
-            Vector3 pan = Vector3.zero;
-            var keyboard = Keyboard.current;
+            float panX = 0f;
+            float panZ = 0f;
 
-            // Keyboard panning — WASD + Arrow keys
-            if (keyboard != null)
-            {
-                if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) pan.x -= 1;
-                if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) pan.x += 1;
-                if (keyboard.upArrowKey.isPressed || keyboard.wKey.isPressed) pan.z += 1;
-                if (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed) pan.z -= 1;
-            }
-            else
-            {
-                // Fallback to old Input
-                if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) pan.x -= 1;
-                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) pan.x += 1;
-                if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) pan.z += 1;
-                if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) pan.z -= 1;
-            }
+            // Keyboard panning - WASD + Arrow keys
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) panX -= 1f;
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) panX += 1f;
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) panZ += 1f;
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) panZ -= 1f;
 
             // Middle mouse drag panning
-            var mouse = Mouse.current;
-            if (mouse != null)
+            if (Input.GetMouseButton(2))
             {
-                if (mouse.middleButton.isPressed)
-                {
-                    var delta = mouse.delta.ReadValue();
-                    pan.x -= delta.x * _panSpeed * 0.01f * (_currentZoom / 10f);
-                    pan.z -= delta.y * _panSpeed * 0.01f * (_currentZoom / 10f);
-                }
-            }
-            else if (Input.GetMouseButton(2))
-            {
-                pan.x -= Input.GetAxis("Mouse X") * _panSpeed * (_currentZoom / 10f);
-                pan.z -= Input.GetAxis("Mouse Y") * _panSpeed * (_currentZoom / 10f);
+                float zoomScale = _currentZoom / 10f;
+                panX -= Input.GetAxis("Mouse X") * _panSpeed * zoomScale;
+                panZ -= Input.GetAxis("Mouse Y") * _panSpeed * zoomScale;
             }
 
-            if (pan.sqrMagnitude < 0.001f) return;
+            if (Mathf.Abs(panX) < 0.001f && Mathf.Abs(panZ) < 0.001f) return;
 
             float rad = _currentRotation * Mathf.Deg2Rad;
             Vector3 worldPan = new Vector3(
-                pan.x * Mathf.Cos(rad) - pan.z * Mathf.Sin(rad),
-                0,
-                pan.x * Mathf.Sin(rad) + pan.z * Mathf.Cos(rad)
+                panX * Mathf.Cos(rad) - panZ * Mathf.Sin(rad),
+                0f,
+                panX * Mathf.Sin(rad) + panZ * Mathf.Cos(rad)
             );
 
-            float speed = keyboard != null && keyboard.anyKey.isPressed ? _keyboardPanSpeed : 1f;
+            bool keyboardInput = Mathf.Abs(panX) > 0.001f || Mathf.Abs(panZ) > 0.001f;
+            float speed = keyboardInput ? _keyboardPanSpeed : 1f;
             _pivot += worldPan * speed * Time.deltaTime;
             ApplyTransform();
         }
 
         private void HandleRotation()
         {
-            float rotation = 0;
-            var keyboard = Keyboard.current;
+            float rotation = 0f;
 
-            if (keyboard != null)
-            {
-                if (keyboard.qKey.isPressed) rotation += 1;
-                if (keyboard.eKey.isPressed) rotation -= 1;
-            }
-            else
-            {
-                if (Input.GetKey(KeyCode.Q)) rotation += 1;
-                if (Input.GetKey(KeyCode.E)) rotation -= 1;
-            }
+            if (Input.GetKey(KeyCode.Q)) rotation += 1f;
+            if (Input.GetKey(KeyCode.E)) rotation -= 1f;
 
             // Right mouse drag rotation
-            var mouse = Mouse.current;
-            if (mouse != null)
-            {
-                if (mouse.rightButton.isPressed)
-                {
-                    var delta = mouse.delta.ReadValue();
-                    rotation += delta.x * _mouseRotationSpeed;
-                }
-            }
-            else if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1))
             {
                 rotation += Input.GetAxis("Mouse X") * _mouseRotationSpeed;
             }
@@ -181,19 +130,10 @@ namespace TalesOfTao.Hex
 
         private void HandleTilt()
         {
-            float tilt = 0;
-            var keyboard = Keyboard.current;
+            float tilt = 0f;
 
-            if (keyboard != null)
-            {
-                if (keyboard.rKey.isPressed || keyboard.pageUpKey.isPressed) tilt += 1;
-                if (keyboard.fKey.isPressed || keyboard.pageDownKey.isPressed) tilt -= 1;
-            }
-            else
-            {
-                if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp)) tilt += 1;
-                if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown)) tilt -= 1;
-            }
+            if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp)) tilt += 1f;
+            if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown)) tilt -= 1f;
 
             if (Mathf.Abs(tilt) < 0.01f) return;
 
@@ -204,12 +144,7 @@ namespace TalesOfTao.Hex
 
         private void HandleReset()
         {
-            var keyboard = Keyboard.current;
-            bool homePressed = keyboard != null
-                ? keyboard.homeKey.wasPressedThisFrame
-                : Input.GetKeyDown(KeyCode.Home);
-
-            if (homePressed)
+            if (Input.GetKeyDown(KeyCode.Home))
             {
                 _pivot = Vector3.zero;
                 _currentZoom = 10f;
@@ -224,7 +159,6 @@ namespace TalesOfTao.Hex
         {
             float rotRad = _currentRotation * Mathf.Deg2Rad;
             float tiltRad = _currentTilt * Mathf.Deg2Rad;
-            // Distance scales with zoom so the camera pulls back as orthographicSize increases.
             float distance = _currentZoom * 1.5f;
 
             float x = distance * Mathf.Cos(tiltRad) * Mathf.Sin(rotRad);
@@ -237,8 +171,8 @@ namespace TalesOfTao.Hex
 
         private static float NormalizeAngle(float angle)
         {
-            while (angle < 0) angle += 360;
-            while (angle >= 360) angle -= 360;
+            while (angle < 0f) angle += 360f;
+            while (angle >= 360f) angle -= 360f;
             return angle;
         }
     }

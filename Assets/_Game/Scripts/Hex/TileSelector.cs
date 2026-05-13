@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace TalesOfTao.Hex
 {
@@ -15,7 +14,7 @@ namespace TalesOfTao.Hex
     {
         public static event Action<HexTileData> TileSelected;
 
-        [SerializeField] private LayerMask _hexLayer = 0;
+        [SerializeField] private LayerMask _hexLayer = ~0; // Default to "Everything"
         [Tooltip("Must match the hex size used by HexGridRenderer.")]
         [SerializeField] private float _hexSize = 1f;
 
@@ -31,25 +30,19 @@ namespace TalesOfTao.Hex
 
         private void Update()
         {
+            // Left click - try new Input System first, fall back to old
             bool leftClicked = false;
-
-            // Try new Input System first
-            var mouse = Mouse.current;
-            if (mouse != null)
-            {
-                leftClicked = mouse.leftButton.wasPressedThisFrame;
-            }
+            var mouseDevice = Mouse.current;
+            if (mouseDevice != null)
+                leftClicked = mouseDevice.leftButton.wasPressedThisFrame;
             else
-            {
-                // Fallback to old Input
                 leftClicked = Input.GetMouseButtonDown(0);
-            }
 
             if (!leftClicked) return;
 
             Vector3 mousePos;
-            if (mouse != null)
-                mousePos = mouse.position.ReadValue();
+            if (mouseDevice != null)
+                mousePos = mouseDevice.position.ReadValue();
             else
                 mousePos = Input.mousePosition;
 
@@ -66,6 +59,7 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
+                        return;
                     }
                 }
             }
