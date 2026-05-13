@@ -5,7 +5,7 @@ namespace TalesOfTao.Hex
 {
     /// <summary>
     /// Manages chunk-based visual rendering of the hex grid.
-    /// Subdivides the grid into 16×16 hex chunks, each rendered as a single combined mesh.
+    /// Subdivides the grid into 16x16 hex chunks, each rendered as a single combined mesh.
     /// Chunks outside the camera frustum are disabled for performance.
     /// </summary>
     public class HexGridRenderer : MonoBehaviour
@@ -36,18 +36,17 @@ namespace TalesOfTao.Hex
         {
             if (_cachedMaterial != null) return _cachedMaterial;
 
-            var shader = Shader.Find("Custom/HexVertexColor");
+            // Try our custom vertex-color shader first, then fall back to URP/Unlit
+            // which also supports vertex colors and is guaranteed to exist.
+            Shader shader = Shader.Find("Custom/HexVertexColor");
             if (shader == null)
             {
-                Debug.LogWarning("[HexGridRenderer] Custom/HexVertexColor shader not found. " +
-                                 "Falling back to URP/Lit (vertex colors will be ignored).");
-                shader = Shader.Find("Universal Render Pipeline/Lit");
+                Debug.Log("[HexGridRenderer] Custom/HexVertexColor not found, using URP/Unlit.");
+                shader = Shader.Find("Universal Render Pipeline/Unlit");
             }
-
             if (shader == null)
             {
-                Debug.LogError("[HexGridRenderer] No usable shader found. " +
-                               "Hex tiles will appear pink/missing.");
+                Debug.LogError("[HexGridRenderer] No usable shader found. Hex tiles will be pink.");
                 return null;
             }
 
@@ -65,10 +64,6 @@ namespace TalesOfTao.Hex
                 _gridManager.OnMapGenerated += OnMapGenerated;
         }
 
-        /// <summary>
-        /// Sets the grid manager reference and subscribes to events.
-        /// Called by SceneSetupHelper after creation.
-        /// </summary>
         public void SetGridManager(HexGridManager manager)
         {
             if (_gridManager != null)
@@ -94,9 +89,6 @@ namespace TalesOfTao.Hex
             UpdateChunkVisibility();
         }
 
-        /// <summary>
-        /// Call after the grid manager has generated the map.
-        /// </summary>
         public void Initialize()
         {
             if (_gridManager == null || !_gridManager.IsGenerated)
@@ -177,7 +169,6 @@ namespace TalesOfTao.Hex
                     HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
                         vertices, triangles, colors, normals, color);
 
-                    // Offset vertices to world position
                     int vertBase = vertices.Count - 12;
                     for (int i = vertBase; i < vertices.Count; i++)
                     {
@@ -197,8 +188,6 @@ namespace TalesOfTao.Hex
             chunk.SetMesh(mesh, _defaultMaterial);
 
             // Position chunk at its world-space center for correct frustum culling
-            // Position the chunk so its frustum culling uses the correct world-space center.
-            // Each chunk covers _chunkSize hexes; center is at the midpoint of its tile region.
             float centerX = (chunkX * _chunkSize + _chunkSize * 0.5f - _gridManager.Width * 0.5f) * _hexSize * 1.5f;
             float centerZ = (chunkY * _chunkSize + _chunkSize * 0.5f - _gridManager.Height * 0.5f) * _hexSize * 1.732051f;
             chunk.transform.position = new Vector3(centerX, 0f, centerZ);
@@ -215,12 +204,10 @@ namespace TalesOfTao.Hex
 
         private Color GetTileColor(HexTileData tile)
         {
-            // Use terrain tint color from SO asset, or fallback to gray
             Color baseColor = tile.Terrain != null
                 ? tile.Terrain.TintColor
                 : Color.gray;
 
-            // Apply elevation brightness
             float elevationBrightness = tile.Elevation switch
             {
                 ElevationLevel.Low    => 1.0f,
@@ -230,11 +217,9 @@ namespace TalesOfTao.Hex
                 _ => 1.0f
             };
 
-            // Highlight ley lines with a cyan glow
             if (tile.IsLeyLine)
                 baseColor = Color.Lerp(baseColor, new Color(0.4f, 0.7f, 1.0f), 0.35f);
 
-            // Highlight controlled tiles
             if (tile.Control == ControlState.SectTerritory)
                 baseColor = Color.Lerp(baseColor, new Color(0.2f, 0.8f, 0.2f), 0.2f);
             else if (tile.Control == ControlState.SettlementInfluence)

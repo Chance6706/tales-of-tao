@@ -442,6 +442,7 @@ MonoBehaviour:
   _hexLayer:
     serializedVersion: 2
     m_Bits: 1
+  _hexSize: 1
 --- !u!81 &786746628
 AudioListener:
   m_ObjectHideFlags: 0

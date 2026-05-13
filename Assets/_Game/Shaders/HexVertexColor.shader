@@ -64,12 +64,9 @@ Shader "Custom/HexVertexColor"
             {
                 half3 normalWS = normalize(input.normalWS);
 
-                // Main directional light
                 Light mainLight = GetMainLight();
                 half NdotL = saturate(dot(normalWS, mainLight.direction));
                 half3 diffuse = input.color.rgb * mainLight.color * NdotL;
-
-                // Ambient / indirect
                 half3 ambient = input.color.rgb * SampleSH(normalWS);
 
                 half3 finalColor = diffuse + ambient;
@@ -79,7 +76,6 @@ Shader "Custom/HexVertexColor"
             ENDHLSL
         }
 
-        // Shadow caster pass so hex tiles cast shadows from the main light
         Pass
         {
             Name "ShadowCaster"
