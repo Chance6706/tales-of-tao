@@ -69,7 +69,7 @@ namespace TalesOfTao.Hex
             var mouse = Mouse.current;
             if (mouse == null) return;
 
-            float scroll = mouse.scrollDelta.ReadValue().y;
+            float scroll = mouse.scroll.ReadValue().y;
             if (Mathf.Abs(scroll) < 0.01f) return;
 
             _currentZoom -= scroll * _zoomSpeed * 0.01f;

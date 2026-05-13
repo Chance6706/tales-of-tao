@@ -26,7 +26,7 @@ namespace TalesOfTao.Hex
         private void Awake()
         {
             _cam = GetComponent<Camera>();
-            _gridManager = Object.FindAnyObjectByType<HexGridManager>();
+            _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
         }
 
         private void Update()
