@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db95401753b34727b8855dcf074f5736, type: 3}
   m_Name: TerrainType_Forest
   m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
-  _type: 2
-  _displayName: Forest
-  _movementCost: 2
-  _defenseBonus: 0.25
-  _qiModifier: 1.1
+  _type: 0
+  _displayName: Plains
+  _movementCost: 1
+  _defenseBonus: 0
+  _qiModifier: 1
   _isImpassable: 0
-  _tintColor: {r: 0.12, g: 0.55, b: 0.12, a: 1}
-  _baseMesh: {fileID: -2432090755550338912, guid: a53978916fcf43c69b97cb31594c2fc6, type: 3}
-  _featurePrefab: {fileID: 1958318171288776150, guid: 3ea44162c76e79f439c74073baeba445, type: 3}
+  _tintColor: {r: 0.55, g: 0.76, b: 0.29, a: 1}
+  _baseMesh: {fileID: 0}
+  _featurePrefab: {fileID: 0}

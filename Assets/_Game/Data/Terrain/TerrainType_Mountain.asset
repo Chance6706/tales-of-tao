@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db95401753b34727b8855dcf074f5736, type: 3}
   m_Name: TerrainType_Mountain
   m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
-  _type: 1
-  _displayName: Mountain
-  _movementCost: 3
-  _defenseBonus: 0.5
-  _qiModifier: 1.5
+  _type: 0
+  _displayName: Plains
+  _movementCost: 1
+  _defenseBonus: 0
+  _qiModifier: 1
   _isImpassable: 0
-  _tintColor: {r: 0.55, g: 0.45, b: 0.35, a: 1}
-  _baseMesh: {fileID: -2432090755550338912, guid: a53978916fcf43c69b97cb31594c2fc6, type: 3}
-  _featurePrefab: {fileID: 6023190899980137690, guid: 5e564a84fabfc354395f31e83c82d1e3, type: 3}
+  _tintColor: {r: 0.55, g: 0.76, b: 0.29, a: 1}
+  _baseMesh: {fileID: 0}
+  _featurePrefab: {fileID: 0}

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db95401753b34727b8855dcf074f5736, type: 3}
   m_Name: TerrainType_River
   m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
-  _type: 3
-  _displayName: River
-  _movementCost: 1.5
+  _type: 0
+  _displayName: Plains
+  _movementCost: 1
   _defenseBonus: 0
-  _qiModifier: 1.2
+  _qiModifier: 1
   _isImpassable: 0
-  _tintColor: {r: 0.25, g: 0.6, b: 0.9, a: 1}
-  _baseMesh: {fileID: -2432090755550338912, guid: a53978916fcf43c69b97cb31594c2fc6, type: 3}
-  _featurePrefab: {fileID: 6343190961926654855, guid: 5f40a753564b21e42953d57681803dd9, type: 3}
+  _tintColor: {r: 0.55, g: 0.76, b: 0.29, a: 1}
+  _baseMesh: {fileID: 0}
+  _featurePrefab: {fileID: 0}
