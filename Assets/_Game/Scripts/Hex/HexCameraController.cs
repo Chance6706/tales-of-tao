@@ -82,14 +82,14 @@ namespace TalesOfTao.Hex
         {
             Vector3 pan = Vector3.zero;
 
-            // Keyboard panning
+            // Keyboard panning — WASD + Arrow keys
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
-                if (keyboard.leftArrowKey.isPressed) pan.x -= 1;
-                if (keyboard.rightArrowKey.isPressed) pan.x += 1;
-                if (keyboard.upArrowKey.isPressed) pan.z += 1;
-                if (keyboard.downArrowKey.isPressed) pan.z -= 1;
+                if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) pan.x -= 1;
+                if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) pan.x += 1;
+                if (keyboard.upArrowKey.isPressed || keyboard.wKey.isPressed) pan.z += 1;
+                if (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed) pan.z -= 1;
             }
 
             // Middle mouse drag panning
