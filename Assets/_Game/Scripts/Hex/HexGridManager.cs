@@ -53,7 +53,16 @@ namespace TalesOfTao.Hex
         /// </summary>
         private void AutoLoadTerrainTypes()
         {
-            if (_terrainTypes != null && _terrainTypes.Length > 0) return;
+            // Reload if array is null, empty, or all entries are stale (null references)
+            bool hasValid = false;
+            if (_terrainTypes != null)
+            {
+                foreach (var t in _terrainTypes)
+                {
+                    if (t != null) { hasValid = true; break; }
+                }
+            }
+            if (hasValid) return;
 
 #if UNITY_EDITOR
             var guids = UnityEditor.AssetDatabase.FindAssets("t:TerrainTypeSO", new[] { "Assets/_Game/Data/Terrain" });
