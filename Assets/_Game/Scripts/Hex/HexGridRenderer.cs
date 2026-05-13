@@ -166,13 +166,21 @@ namespace TalesOfTao.Hex
                     Color color = GetTileColor(tile);
                     var worldPos = tile.Coords.ToWorldPosition(_hexSize);
 
-                    HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
-                        vertices, triangles, colors, normals, color);
-
-                    int vertBase = vertices.Count - 12;
-                    for (int i = vertBase; i < vertices.Count; i++)
+                    // Use imported mesh if available, otherwise fall back to procedural hex prism
+                    if (tile.Terrain != null && tile.Terrain.BaseMesh != null)
                     {
-                        vertices[i] += worldPos;
+                        AddImportedTileMesh(tile.Terrain.BaseMesh, worldPos, elevationOffset,
+                            color, vertices, triangles, colors, normals);
+                    }
+                    else
+                    {
+                        HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
+                            vertices, triangles, colors, normals, color);
+                        int vertBase = vertices.Count - 12;
+                        for (int i = vertBase; i < vertices.Count; i++)
+                        {
+                            vertices[i] += worldPos;
+                        }
                     }
                 }
             }
@@ -187,7 +195,51 @@ namespace TalesOfTao.Hex
 
             chunk.SetMesh(mesh, _defaultMaterial);
             // Mesh vertices are already in world space — do NOT offset the chunk transform.
-            // The chunk's transform position only matters for frustum culling.
+        }
+
+        /// <summary>
+        /// Adds an imported mesh (e.g. Hex_Base_Flat.obj) transformed to the tile's world position.
+        /// Vertex colors are tinted with the terrain color.
+        /// </summary>
+        private static void AddImportedTileMesh(Mesh sourceMesh, Vector3 worldPos, float elevationOffset,
+            Color tint, List<Vector3> vertices, List<int> triangles, List<Color> colors, List<Vector3> normals)
+        {
+            int vertBase = vertices.Count;
+
+            // Transform source vertices to world space
+            foreach (var v in sourceMesh.vertices)
+            {
+                vertices.Add(new Vector3(v.x, v.y + elevationOffset, v.z) + worldPos);
+            }
+
+            // Copy triangles with offset
+            foreach (var tri in sourceMesh.triangles)
+            {
+                triangles.Add(vertBase + tri);
+            }
+
+            // Tint vertex colors (or use tint if mesh has no colors)
+            if (sourceMesh.colors != null && sourceMesh.colors.Length > 0)
+            {
+                foreach (var c in sourceMesh.colors)
+                {
+                    colors.Add(new Color(c.r * tint.r, c.g * tint.g, c.b * tint.b, c.a * tint.a));
+                }
+            }
+            else
+            {
+                int vertCount = sourceMesh.vertexCount;
+                for (int i = 0; i < vertCount; i++)
+                {
+                    colors.Add(tint);
+                }
+            }
+
+            // Copy normals (transform rotation only, no scale)
+            foreach (var n in sourceMesh.normals)
+            {
+                normals.Add(n);
+            }
         }
 
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch
