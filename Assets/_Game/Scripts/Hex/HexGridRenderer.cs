@@ -186,11 +186,8 @@ namespace TalesOfTao.Hex
             mesh.RecalculateBounds();
 
             chunk.SetMesh(mesh, _defaultMaterial);
-
-            // Position chunk at its world-space center for correct frustum culling
-            float centerX = (chunkX * _chunkSize + _chunkSize * 0.5f - _gridManager.Width * 0.5f) * _hexSize * 1.5f;
-            float centerZ = (chunkY * _chunkSize + _chunkSize * 0.5f - _gridManager.Height * 0.5f) * _hexSize * 1.732051f;
-            chunk.transform.position = new Vector3(centerX, 0f, centerZ);
+            // Mesh vertices are already in world space — do NOT offset the chunk transform.
+            // The chunk's transform position only matters for frustum culling.
         }
 
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch
