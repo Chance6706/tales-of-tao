@@ -52,6 +52,8 @@ namespace TalesOfTao.Hex
 
             if (!leftClicked) return;
 
+            Debug.Log($"[TileSelector] Click at {mousePos}, gridManager={(_gridManager != null ? "yes" : "null")}, isGenerated={_gridManager?.IsGenerated}");
+
             var ray = _cam.ScreenPointToRay(mousePos);
 
             if (_gridManager != null && _gridManager.IsGenerated)

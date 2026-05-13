@@ -131,7 +131,7 @@ namespace TalesOfTao.Hex
             float rad = _currentRotation * Mathf.Deg2Rad;
             // Transform local pan direction to world space rotation only (no pitch)
             // Negate Z so W moves north (toward -Z on the map)
-            Vector3 worldPan = new Vector3(panX, 0f, -panZ);
+            Vector3 worldPan = new Vector3(-panX, 0f, -panZ);
             worldPan = Quaternion.Euler(0f, _currentRotation, 0f) * worldPan;
 
             bool keyboardInput = Mathf.Abs(panX) > 0.001f || Mathf.Abs(panZ) > 0.001f;
