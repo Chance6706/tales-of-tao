@@ -97,12 +97,16 @@ namespace TalesOfTao.Hex
             int chunksX = Mathf.CeilToInt((float)width / _chunkSize);
             int chunksY = Mathf.CeilToInt((float)height / _chunkSize);
 
+            int hexTileLayer = LayerMask.NameToLayer("HexTile");
+            if (hexTileLayer < 0) hexTileLayer = 0;
+
             for (int cy = 0; cy < chunksY; cy++)
             {
                 for (int cx = 0; cx < chunksX; cx++)
                 {
                     var chunkCoord = new Vector2Int(cx, cy);
                     var chunk = CreateChunk(chunkCoord);
+                    chunk.gameObject.layer = hexTileLayer;
                     BuildChunkMesh(chunk, cx, cy);
                     _chunks[chunkCoord] = chunk;
                 }
