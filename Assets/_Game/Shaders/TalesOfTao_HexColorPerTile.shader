@@ -2,7 +2,7 @@ Shader "TalesOfTao/HexColorPerTile"
 {
     Properties
     {
-        _BaseColor ("Base Color", Color) = (1,1,1,1)
+        _Color ("Base Color", Color) = (1,1,1,1)
     }
 
     SubShader
@@ -35,7 +35,7 @@ Shader "TalesOfTao/HexColorPerTile"
             };
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _Color;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -50,7 +50,7 @@ Shader "TalesOfTao/HexColorPerTile"
             half4 frag(Varyings input) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
-                return _BaseColor;
+                return _Color;
             }
             ENDHLSL
         }
