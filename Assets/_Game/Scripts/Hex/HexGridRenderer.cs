@@ -233,52 +233,46 @@ namespace TalesOfTao.Hex
 
             if (meshGroups.Count == 0) return;
 
-            // Build the final mesh with sub-meshes
+            // Build the final mesh with sub-meshes, one per color group
             var mesh = new Mesh { name = $"HexChunk_{chunkX}_{chunkY}" };
             mesh.subMeshCount = meshGroups.Count;
 
-            int subMeshIndex = 0;
-            int totalVertices = 0;
-            foreach (var kvp in meshGroups)
-            {
-                var data = kvp.Value;
-                totalVertices += data.Vertices.Count;
-            }
-            mesh.SetVertexBufferParams(totalVertices,
-                new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttribute.Float32, 3),
-                new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttribute.Float32, 3));
-
-            // Actually, let's use the simpler List-based API then convert
             var allVertices = new List<Vector3>();
             var allNormals = new List<Vector3>();
-            var allTriangles = new List<int>();
             var materials = new Material[meshGroups.Count];
+            var subMeshTriangles = new List<int>[meshGroups.Count];
 
             int matIndex = 0;
             int vertexOffset = 0;
             foreach (var kvp in meshGroups)
             {
                 var data = kvp.Value;
-                int terrainType = kvp.Key; // We'll use this to look up the terrain type
 
                 allVertices.AddRange(data.Vertices);
                 allNormals.AddRange(data.Normals);
 
-                // Offset triangles by current vertex count
+                // Collect triangles for this sub-mesh with vertex offset
+                var tris = new List<int>();
                 foreach (var tri in data.Triangles)
                 {
-                    allTriangles.Add(tri + vertexOffset);
+                    tris.Add(tri + vertexOffset);
                 }
+                subMeshTriangles[matIndex] = tris;
                 vertexOffset += data.Vertices.Count;
 
-                // Determine terrain type from color for material lookup
                 TerrainType tt = GetClosestTerrainType(data.Color);
                 materials[matIndex++] = GetTerrainMaterial(data.Color, tt);
             }
 
             mesh.SetVertices(allVertices);
             mesh.SetNormals(allNormals);
-            mesh.SetTriangles(allTriangles, 0);
+
+            // Set each sub-mesh's triangles
+            for (int i = 0; i < meshGroups.Count; i++)
+            {
+                mesh.SetTriangles(subMeshTriangles[i], i);
+            }
+
             mesh.RecalculateBounds();
 
             chunk.SetMesh(mesh, materials);
