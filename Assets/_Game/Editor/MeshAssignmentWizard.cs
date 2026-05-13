@@ -1,6 +1,8 @@
 using UnityEditor;
 using UnityEngine;
 using TalesOfTao.Hex;
+using TalesOfTao.Economy;
+using TalesOfTao.Units;
 
 namespace TalesOfTao.Editor
 {
