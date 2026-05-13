@@ -34,6 +34,18 @@ namespace TalesOfTao.Hex
                 _gridManager.OnMapGenerated += OnMapGenerated;
         }
 
+        /// <summary>
+        /// Sets the grid manager reference and subscribes to events.
+        /// Called by SceneSetupHelper after creation.
+        /// </summary>
+        public void SetGridManager(HexGridManager manager)
+        {
+            _gridManager = manager;
+            _gridManager.OnMapGenerated += OnMapGenerated;
+            if (_gridManager.IsGenerated)
+                BuildAllChunks();
+        }
+
         private void OnDisable()
         {
             if (_gridManager != null)

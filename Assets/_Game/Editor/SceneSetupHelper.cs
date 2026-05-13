@@ -26,6 +26,7 @@ namespace TalesOfTao.Editor
             SetupGameManager();
             SetupMainCamera();
             SetupGridManager();
+            SetupGridRenderer();
             SetupHexTile();
             SetupTileSelector();
             SetupTileInfoPanel();
@@ -91,6 +92,24 @@ namespace TalesOfTao.Editor
             var go = new GameObject("HexGridManager");
             go.AddComponent<HexGridManager>();
             Debug.Log("[TalesOfTao] Created HexGridManager. Use '3 - Generate Map' to generate the grid.");
+        }
+
+        private static void SetupGridRenderer()
+        {
+            if (Object.FindAnyObjectByType<HexGridRenderer>() != null) return;
+
+            var go = new GameObject("HexGridRenderer");
+            go.transform.SetParent(null);
+            var renderer = go.AddComponent<HexGridRenderer>();
+
+            // Auto-wire to grid manager
+            var gridManager = Object.FindAnyObjectByType<HexGridManager>();
+            if (gridManager != null)
+            {
+                renderer.SetGridManager(gridManager);
+            }
+
+            Debug.Log("[TalesOfTao] Created HexGridRenderer.");
         }
 
         private static void SetupHexTile()
