@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db95401753b34727b8855dcf074f5736, type: 3}
   m_Name: TerrainType_SacredPeak
   m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
-  _type: 0
-  _displayName: Plains
-  _movementCost: 1
-  _defenseBonus: 0
-  _qiModifier: 1
+  _type: 7
+  _displayName: Sacred Peak
+  _movementCost: 4
+  _defenseBonus: 0.75
+  _qiModifier: 2
   _isImpassable: 0
-  _tintColor: {r: 0.55, g: 0.76, b: 0.29, a: 1}
+  _tintColor: {r: 0.75, g: 0.65, b: 0.95, a: 1}
   _baseMesh: {fileID: 0}
   _featurePrefab: {fileID: 0}
