@@ -37,6 +37,9 @@ namespace TalesOfTao.Hex
         public int Height => _height;
         public bool IsGenerated => _isGenerated;
 
+        /// <summary>Total number of tiles in the generated map.</summary>
+        public int TileCount => _tiles?.Length ?? 0;
+
         public event Action OnMapGenerated;
 
         private void Awake()
@@ -500,13 +503,5 @@ namespace TalesOfTao.Hex
             h = h ^ (h >> 16);
             return (float)(h & 0x7fffffff) / int.MaxValue;
         }
-    }
-
-    public enum MapSize
-    {
-        Small,
-        Medium,
-        Large,
-        Epic
     }
 }
