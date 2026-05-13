@@ -157,6 +157,66 @@ namespace TalesOfTao.Hex
             return mesh;
         }
 
+        /// <summary>
+        /// Generates a flat-top hex prism mesh into the provided vertex/triangle/color lists.
+        /// Used by HexChunkRenderer to combine many tiles into a single mesh.
+        /// </summary>
+        public static void GenerateHexMesh(float size, float height, float elevationOffset,
+            List<Vector3> vertices, List<int> triangles, List<Color> colors, Color color)
+        {
+            int vertBase = vertices.Count;
+            float h = height * 0.5f;
+            float yBase = elevationOffset;
+
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = Mathf.Deg2Rad * 60f * i;
+                float x = size * Mathf.Cos(angle);
+                float z = size * Mathf.Sin(angle);
+                vertices.Add(new Vector3(x, yBase + h, z));
+                vertices.Add(new Vector3(x, yBase - h, z));
+            }
+
+            // Top face (6 triangles from center would be ideal, but we use the ring)
+            // Simplified: 4 triangles for top (fan from vert 0)
+            for (int i = 1; i < 5; i++)
+            {
+                triangles.Add(vertBase + 0);
+                triangles.Add(vertBase + i * 2);
+                triangles.Add(vertBase + (i + 1) * 2);
+            }
+
+            // Bottom face (reversed winding)
+            for (int i = 1; i < 5; i++)
+            {
+                triangles.Add(vertBase + 1);
+                triangles.Add(vertBase + (i + 1) * 2 + 1);
+                triangles.Add(vertBase + i * 2 + 1);
+            }
+
+            // Side quads (2 triangles each)
+            for (int i = 0; i < 6; i++)
+            {
+                int n = (i + 1) % 6;
+                int topI = vertBase + i * 2;
+                int topN = vertBase + n * 2;
+                int botI = vertBase + i * 2 + 1;
+                int botN = vertBase + n * 2 + 1;
+
+                triangles.Add(topI);
+                triangles.Add(topN);
+                triangles.Add(botN);
+
+                triangles.Add(topI);
+                triangles.Add(botN);
+                triangles.Add(botI);
+            }
+
+            // Add colors for each vertex
+            for (int i = 0; i < 12; i++)
+                colors.Add(color);
+        }
+
         // ── Material ──────────────────────────────────────────────────────────
 
         private void ApplyMaterial()

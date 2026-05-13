@@ -25,6 +25,7 @@ namespace TalesOfTao.Editor
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             SetupGameManager();
             SetupMainCamera();
+            SetupGridManager();
             SetupHexTile();
             SetupTileSelector();
             SetupTileInfoPanel();
@@ -81,6 +82,15 @@ namespace TalesOfTao.Editor
             camGo.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
             camGo.AddComponent<AudioListener>();
             Debug.Log("[TalesOfTao] Created Main Camera (orthographic, isometric view).");
+        }
+
+        private static void SetupGridManager()
+        {
+            if (Object.FindAnyObjectByType<HexGridManager>() != null) return;
+
+            var go = new GameObject("HexGridManager");
+            go.AddComponent<HexGridManager>();
+            Debug.Log("[TalesOfTao] Created HexGridManager. Use '3 - Generate Map' to generate the grid.");
         }
 
         private static void SetupHexTile()
