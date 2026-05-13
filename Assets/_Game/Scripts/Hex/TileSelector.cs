@@ -68,6 +68,8 @@ namespace TalesOfTao.Hex
                         return;
                     }
                 }
+                // Debug: raycast hit nothing on chunk layer
+                Debug.Log("[TileSelector] Raycast hit nothing on chunk layer.");
             }
             else
             {

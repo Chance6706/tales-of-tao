@@ -144,7 +144,6 @@ namespace TalesOfTao.Editor
             if (cam == null) { Debug.LogWarning("[TalesOfTao] No Main Camera found. TileSelector not added."); return; }
             if (cam.GetComponent<TileSelector>() != null) return;
 
-            var selector   = cam.gameObject.AddComponent<TileSelector>();
             int layerIndex = LayerMask.NameToLayer("HexTile");
             if (layerIndex < 0) layerIndex = 0;
 
