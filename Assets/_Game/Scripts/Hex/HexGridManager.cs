@@ -41,7 +41,7 @@ namespace TalesOfTao.Hex
 
         private void Awake()
         {
-            if (!_randomizeSeed) _seed = UnityEngine.Random.seed;
+            if (!_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace TalesOfTao.Hex
 
                 TerrainType type = tile.Elevation switch
                 {
-                    ElevationLevel.Low => Pick(rng, TerrainType.Plains, TerrainType.River, TerrainType.Swamp),
+                    ElevationLevel.Low => Pick3(rng, TerrainType.Plains, TerrainType.River, TerrainType.Swamp),
                     ElevationLevel.Medium => Pick(rng, TerrainType.Forest, TerrainType.Plains),
                     ElevationLevel.High => Pick(rng, TerrainType.Mountain, TerrainType.Forest),
                     ElevationLevel.Summit => Pick(rng, TerrainType.Mountain, TerrainType.SacredPeak),
@@ -437,6 +437,9 @@ namespace TalesOfTao.Hex
 
         private static TerrainType Pick(System.Random rng, TerrainType a, TerrainType b) =>
             rng.NextDouble() < 0.5 ? a : b;
+
+        private static TerrainType Pick3(System.Random rng, TerrainType a, TerrainType b, TerrainType c) =>
+            rng.Next(3) switch { 0 => a, 1 => b, _ => c };
 
         private TerrainTypeSO GetTerrainTypeSO(TerrainType type)
         {
