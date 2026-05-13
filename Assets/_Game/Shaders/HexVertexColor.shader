@@ -111,6 +111,7 @@ Shader "Custom/HexVertexColor"
             half4 ShadowFrag() : SV_Target { return 0; }
             ENDHLSL
         }
+    }
 
-        FallBack "Universal Render Pipeline/Lit"
+    FallBack "Universal Render Pipeline/Lit"
 }
