@@ -115,7 +115,8 @@ namespace TalesOfTao.Hex
             if (_materialCache.TryGetValue(key, out var cached))
                 return cached;
 
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit")
+            Shader shader = Shader.Find("TalesOfTao/HexColorPerTile")
+                         ?? Shader.Find("Universal Render Pipeline/Unlit")
                          ?? Shader.Find("Standard");
             if (shader == null)
             {

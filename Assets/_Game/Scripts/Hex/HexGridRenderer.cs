@@ -39,11 +39,17 @@ namespace TalesOfTao.Hex
             if (_materialsInitialized) return;
             _materialsInitialized = true;
 
-            // Use URP Lit — always available in URP projects
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            // Use our custom unlit terrain shader — outputs material color directly
+            // with no lighting darkening. Works in any URP project.
+            Shader shader = Shader.Find("TalesOfTao/HexColorPerTile");
             if (shader == null)
             {
-                // Last resort: Standard shader (built into all Unity versions)
+                // Fallback: URP/Unlit (also no lighting)
+                shader = Shader.Find("Universal Render Pipeline/Unlit");
+            }
+            if (shader == null)
+            {
+                // Last resort: Standard shader
                 shader = Shader.Find("Standard");
             }
             if (shader == null)
@@ -59,14 +65,14 @@ namespace TalesOfTao.Hex
             // Colors match TerrainTypeSO defaults
             var defaultColors = new Dictionary<TerrainType, Color>
             {
-                { TerrainType.Plains,     new Color(0.45f, 0.72f, 0.28f) },
-                { TerrainType.Mountain,   new Color(0.52f, 0.42f, 0.32f) },
-                { TerrainType.Forest,     new Color(0.15f, 0.48f, 0.15f) },
-                { TerrainType.River,      new Color(0.22f, 0.52f, 0.82f) },
-                { TerrainType.Lake,       new Color(0.15f, 0.35f, 0.68f) },
-                { TerrainType.Desert,     new Color(0.88f, 0.80f, 0.48f) },
-                { TerrainType.Swamp,      new Color(0.30f, 0.40f, 0.18f) },
-                { TerrainType.SacredPeak, new Color(0.70f, 0.60f, 0.88f) },
+                { TerrainType.Plains,     new Color(0.50f, 0.80f, 0.30f) },
+                { TerrainType.Mountain,   new Color(0.55f, 0.45f, 0.35f) },
+                { TerrainType.Forest,     new Color(0.12f, 0.55f, 0.12f) },
+                { TerrainType.River,      new Color(0.25f, 0.60f, 0.90f) },
+                { TerrainType.Lake,       new Color(0.15f, 0.40f, 0.80f) },
+                { TerrainType.Desert,     new Color(0.95f, 0.85f, 0.50f) },
+                { TerrainType.Swamp,      new Color(0.30f, 0.45f, 0.15f) },
+                { TerrainType.SacredPeak, new Color(0.75f, 0.65f, 0.95f) },
             };
 
             foreach (var kvp in defaultColors)
