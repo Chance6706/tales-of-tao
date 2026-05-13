@@ -90,7 +90,7 @@ namespace TalesOfTao.Hex
         {
             // Try cached material by terrain type
             int key = (int)type;
-            if (_terrainMaterials.TryGetValue(key, out var cached) != null)
+            if (_terrainMaterials.TryGetValue(key, out var cached))
                 return cached;
 
             // Create on-demand
