@@ -197,6 +197,8 @@ namespace TalesOfTao.Hex
             chunk.SetMesh(mesh, _defaultMaterial);
 
             // Position chunk at its world-space center for correct frustum culling
+            // Position the chunk so its frustum culling uses the correct world-space center.
+            // Each chunk covers _chunkSize hexes; center is at the midpoint of its tile region.
             float centerX = (chunkX * _chunkSize + _chunkSize * 0.5f - _gridManager.Width * 0.5f) * _hexSize * 1.5f;
             float centerZ = (chunkY * _chunkSize + _chunkSize * 0.5f - _gridManager.Height * 0.5f) * _hexSize * 1.732051f;
             chunk.transform.position = new Vector3(centerX, 0f, centerZ);
