@@ -27,7 +27,6 @@ namespace TalesOfTao.Editor
             SetupMainCamera();
             SetupGridManager();
             SetupGridRenderer();
-            SetupHexTile();
             SetupTileSelector();
             SetupTileInfoPanel();
             EditorSceneManager.MarkSceneDirty(scene);

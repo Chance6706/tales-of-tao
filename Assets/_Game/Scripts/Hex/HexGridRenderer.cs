@@ -26,6 +26,17 @@ namespace TalesOfTao.Hex
         private void Start()
         {
             _cameraTransform = Camera.main?.transform;
+            // Create default vertex-color material if none assigned
+            if (_defaultMaterial == null)
+                _defaultMaterial = CreateVertexColorMaterial();
+        }
+
+        private static Material CreateVertexColorMaterial()
+        {
+            var shader = Shader.Find("Sprites/Default");
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+            return new Material(shader) { name = "HexTileVertexColor_Auto" };
         }
 
         private void OnEnable()
