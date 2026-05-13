@@ -56,7 +56,8 @@ namespace TalesOfTao.Hex
 
             var ray = _cam.ScreenPointToRay(mousePos);
 
-            if (_gridManager != null && _gridManager.IsGenerated)
+            // Try chunk-based selection if grid manager has tiles (IsGenerated may not be set yet)
+            if (_gridManager != null && _gridManager.TileCount > 0)
             {
                 if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
                 {
