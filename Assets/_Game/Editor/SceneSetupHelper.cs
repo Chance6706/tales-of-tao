@@ -152,10 +152,19 @@ namespace TalesOfTao.Editor
         {
             var cam = Camera.main;
             if (cam == null) { Debug.LogWarning("[TalesOfTao] No Main Camera found. TileSelector not added."); return; }
-            if (cam.GetComponent<TileSelector>() != null) return;
+            if (cam.GetComponent<TileSelector>() == null)
+            {
+                cam.gameObject.AddComponent<TileSelector>();
+                Debug.Log("[TalesOfTao] Added TileSelector to Main Camera.");
+            }
 
-            cam.gameObject.AddComponent<TileSelector>();
-            Debug.Log("[TalesOfTao] Added TileSelector to Main Camera.");
+            // Ensure TileHighlighter exists
+            if (Object.FindAnyObjectByType<TileHighlighter>() == null)
+            {
+                var go = new GameObject("TileHighlighter");
+                go.AddComponent<TileHighlighter>();
+                Debug.Log("[TalesOfTao] Created TileHighlighter.");
+            }
         }
 
         private static void SetupTileInfoPanel()

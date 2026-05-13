@@ -64,11 +64,15 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
+                        TileHighlighter.SelectTile(tile);
                         return;
                     }
+                    Debug.Log($"[TileSelector] Raycast hit chunk but no tile at ({hexCoords.Q},{hexCoords.R}).");
                 }
-                // Debug: raycast hit nothing on chunk layer
-                Debug.Log("[TileSelector] Raycast hit nothing on chunk layer.");
+                else
+                {
+                    Debug.Log("[TileSelector] Raycast hit nothing.");
+                }
             }
             else
             {

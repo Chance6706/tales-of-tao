@@ -129,11 +129,12 @@ namespace TalesOfTao.Hex
             if (Mathf.Abs(panX) < 0.001f && Mathf.Abs(panZ) < 0.001f) return;
 
             float rad = _currentRotation * Mathf.Deg2Rad;
-            Vector3 worldPan = new Vector3(
-                panX * Mathf.Cos(rad) - panZ * Mathf.Sin(rad),
-                0f,
-                panX * Mathf.Sin(rad) + panZ * Mathf.Cos(rad)
-            );
+            // Pan in the camera's view direction (north = forward on the map)
+            // W/S = move pivot along camera's forward ground projection
+            // A/D = move pivot along camera's right ground projection
+            Vector3 forward = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
+            Vector3 right = new Vector3(Mathf.Cos(rad), 0f, -Mathf.Sin(rad));
+            Vector3 worldPan = (forward * panZ + right * panX);
 
             bool keyboardInput = Mathf.Abs(panX) > 0.001f || Mathf.Abs(panZ) > 0.001f;
             float speed = keyboardInput ? _keyboardPanSpeed : 1f;
