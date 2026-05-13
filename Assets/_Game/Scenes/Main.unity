@@ -654,6 +654,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1209810896}
   m_CullTransparentMesh: 1
+--- !u!1 &1251325329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1251325331}
+  - component: {fileID: 1251325330}
+  m_Layer: 0
+  m_Name: HexGridRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1251325330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251325329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27a2577a510c18a4fb5ef52d625b6fcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.HexGridRenderer
+  _chunkSize: 16
+  _hexSize: 1
+  _hexHeight: 0.3
+  _gridManager: {fileID: 814283731}
+  _defaultMaterial: {fileID: 0}
+--- !u!4 &1251325331
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251325329}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1880590145
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,3 +841,4 @@ SceneRoots:
   - {fileID: 786746630}
   - {fileID: 1880590150}
   - {fileID: 814283732}
+  - {fileID: 1251325331}
