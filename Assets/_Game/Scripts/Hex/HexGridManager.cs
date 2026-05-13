@@ -45,6 +45,36 @@ namespace TalesOfTao.Hex
         private void Awake()
         {
             if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            AutoLoadTerrainTypes();
+        }
+
+        /// <summary>
+        /// Auto-loads terrain type assets from Assets/_Game/Data/Terrain/ if not assigned.
+        /// </summary>
+        private void AutoLoadTerrainTypes()
+        {
+            if (_terrainTypes != null && _terrainTypes.Length > 0) return;
+
+#if UNITY_EDITOR
+            var guids = UnityEditor.AssetDatabase.FindAssets("t:TerrainTypeSO", new[] { "Assets/_Game/Data/Terrain" });
+            var list = new System.Collections.Generic.List<TerrainTypeSO>();
+            foreach (var guid in guids)
+            {
+                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                var so = UnityEditor.AssetDatabase.LoadAssetAtPath<TerrainTypeSO>(path);
+                if (so != null) list.Add(so);
+            }
+            if (list.Count > 0)
+            {
+                _terrainTypes = list.ToArray();
+                Debug.Log($"[HexGrid] Auto-loaded {_terrainTypes.Length} terrain types.");
+            }
+            else
+            {
+                Debug.LogWarning("[HexGrid] No TerrainTypeSO assets found in Assets/_Game/Data/Terrain/. " +
+                                 "Run 'TalesOfTao > 1 - Create Data Assets' first.");
+            }
+#endif
         }
 
         /// <summary>
