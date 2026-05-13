@@ -70,4 +70,15 @@ namespace TalesOfTao.Hex
         Garrison   = 2,
         Fortress   = 3,
     }
+
+    /// <summary>
+    /// Map size presets matching GDD §4.3 specifications.
+    /// </summary>
+    public enum MapSize
+    {
+        Small  = 0,
+        Medium = 1,
+        Large  = 2,
+        Epic   = 3,
+    }
 }

@@ -224,7 +224,8 @@ namespace TalesOfTao.Hex
         {
             float rotRad = _currentRotation * Mathf.Deg2Rad;
             float tiltRad = _currentTilt * Mathf.Deg2Rad;
-            float distance = _currentZoom * 2f;
+            // Distance scales with zoom so the camera pulls back as orthographicSize increases.
+            float distance = _currentZoom * 1.5f;
 
             float x = distance * Mathf.Cos(tiltRad) * Mathf.Sin(rotRad);
             float y = distance * Mathf.Sin(tiltRad);
