@@ -158,15 +158,31 @@ namespace TalesOfTao.Hex
         }
 
         /// <summary>
-        /// Generates a flat-top hex prism mesh into the provided vertex/triangle/color lists.
-        /// Used by HexChunkRenderer to combine many tiles into a single mesh.
+        /// Generates a flat-top hex prism mesh into the provided vertex/triangle/color/normal lists.
+        /// Used by HexGridRenderer to combine many tiles into a single mesh.
+        /// Normals are per-vertex (12 entries), not per-triangle-corner.
         /// </summary>
         public static void GenerateHexMesh(float size, float height, float elevationOffset,
-            List<Vector3> vertices, List<int> triangles, List<Color> colors, Color color)
+            List<Vector3> vertices, List<int> triangles, List<Color> colors,
+            List<Vector3> normals, Color color)
         {
             int vertBase = vertices.Count;
             float h = height * 0.5f;
             float yBase = elevationOffset;
+
+            // 12 vertices: 6 top ring (even indices), 6 bottom ring (odd indices)
+            // Top face vertices get upward normals, bottom get downward, sides get averaged.
+            // For simplicity and visual quality, we use face-normal approach:
+            // each vertex gets the normal of the face it primarily belongs to.
+            // Top ring vertices: blend of up + side normal
+            // Bottom ring vertices: blend of down + side normal
+
+            Vector3[] sideNormals = new Vector3[6];
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = Mathf.Deg2Rad * 60f * (i + 0.5f);
+                sideNormals[i] = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+            }
 
             for (int i = 0; i < 6; i++)
             {
@@ -175,10 +191,16 @@ namespace TalesOfTao.Hex
                 float z = size * Mathf.Sin(angle);
                 vertices.Add(new Vector3(x, yBase + h, z));
                 vertices.Add(new Vector3(x, yBase - h, z));
+
+                // Top vertex normal: average of up + two adjacent side normals
+                Vector3 topNrm = (Vector3.up + sideNormals[i] + sideNormals[(i + 5) % 6]).normalized;
+                normals.Add(topNrm);
+                // Bottom vertex normal: average of down + two adjacent side normals
+                Vector3 botNrm = (Vector3.down + sideNormals[i] + sideNormals[(i + 5) % 6]).normalized;
+                normals.Add(botNrm);
             }
 
-            // Top face (6 triangles from center would be ideal, but we use the ring)
-            // Simplified: 4 triangles for top (fan from vert 0)
+            // Top face (fan from vert 0)
             for (int i = 1; i < 5; i++)
             {
                 triangles.Add(vertBase + 0);
@@ -215,6 +237,16 @@ namespace TalesOfTao.Hex
             // Add colors for each vertex
             for (int i = 0; i < 12; i++)
                 colors.Add(color);
+        }
+
+        /// <summary>
+        /// Legacy overload without normals (for individual HexTile rendering).
+        /// </summary>
+        public static void GenerateHexMesh(float size, float height, float elevationOffset,
+            List<Vector3> vertices, List<int> triangles, List<Color> colors, Color color)
+        {
+            GenerateHexMesh(size, height, elevationOffset, vertices, triangles, colors,
+                new List<Vector3>(), color);
         }
 
         // ── Material ──────────────────────────────────────────────────────────

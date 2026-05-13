@@ -21,27 +21,42 @@ namespace TalesOfTao.Hex
 
         private Dictionary<Vector2Int, HexChunkRenderer> _chunks = new();
         private Transform _cameraTransform;
-        private float _cullDistance = 50f;
+        private float _cullDistance = 200f;
+
+        private static Material _cachedMaterial;
 
         private void Start()
         {
             _cameraTransform = Camera.main?.transform;
-            // Create default vertex-color material if none assigned
             if (_defaultMaterial == null)
-                _defaultMaterial = CreateVertexColorMaterial();
+                _defaultMaterial = GetOrCreateMaterial();
         }
 
-        private static Material CreateVertexColorMaterial()
+        private static Material GetOrCreateMaterial()
         {
+            if (_cachedMaterial != null) return _cachedMaterial;
+
             var shader = Shader.Find("Custom/HexVertexColor");
             if (shader == null)
             {
-                // Fallback if shader hasn't compiled yet
+                Debug.LogWarning("[HexGridRenderer] Custom/HexVertexColor shader not found. " +
+                                 "Falling back to URP/Lit (vertex colors will be ignored).");
                 shader = Shader.Find("Universal Render Pipeline/Lit");
             }
-            var mat = new Material(shader) { name = "HexTileVertexColor_Auto" };
-            mat.color = Color.white;
-            return mat;
+
+            if (shader == null)
+            {
+                Debug.LogError("[HexGridRenderer] No usable shader found. " +
+                               "Hex tiles will appear pink/missing.");
+                return null;
+            }
+
+            _cachedMaterial = new Material(shader)
+            {
+                name = "HexTileVertexColor_Auto",
+                color = Color.white
+            };
+            return _cachedMaterial;
         }
 
         private void OnEnable()
@@ -56,10 +71,16 @@ namespace TalesOfTao.Hex
         /// </summary>
         public void SetGridManager(HexGridManager manager)
         {
+            if (_gridManager != null)
+                _gridManager.OnMapGenerated -= OnMapGenerated;
+
             _gridManager = manager;
-            _gridManager.OnMapGenerated += OnMapGenerated;
-            if (_gridManager.IsGenerated)
-                BuildAllChunks();
+            if (_gridManager != null)
+            {
+                _gridManager.OnMapGenerated += OnMapGenerated;
+                if (_gridManager.IsGenerated)
+                    BuildAllChunks();
+            }
         }
 
         private void OnDisable()
@@ -135,6 +156,7 @@ namespace TalesOfTao.Hex
             var vertices = new List<Vector3>();
             var triangles = new List<int>();
             var colors = new List<Color>();
+            var normals = new List<Vector3>();
 
             int startQ = chunkX * _chunkSize - _gridManager.Width / 2;
             int startR = chunkY * _chunkSize - _gridManager.Height / 2;
@@ -150,13 +172,10 @@ namespace TalesOfTao.Hex
 
                     float elevationOffset = GetElevationOffset(tile.Elevation);
                     Color color = GetTileColor(tile);
-
-                    // Calculate world position for this tile
                     var worldPos = tile.Coords.ToWorldPosition(_hexSize);
 
-                    // Generate hex prism mesh at this position
                     HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
-                        vertices, triangles, colors, color);
+                        vertices, triangles, colors, normals, color);
 
                     // Offset vertices to world position
                     int vertBase = vertices.Count - 12;
@@ -172,44 +191,52 @@ namespace TalesOfTao.Hex
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
             mesh.SetColors(colors);
-            mesh.RecalculateNormals();
+            mesh.SetNormals(normals);
             mesh.RecalculateBounds();
 
             chunk.SetMesh(mesh, _defaultMaterial);
-            chunk.transform.position = Vector3.zero;
+
+            // Position chunk at its world-space center for correct frustum culling
+            float centerX = (chunkX * _chunkSize + _chunkSize * 0.5f - _gridManager.Width * 0.5f) * _hexSize * 1.5f;
+            float centerZ = (chunkY * _chunkSize + _chunkSize * 0.5f - _gridManager.Height * 0.5f) * _hexSize * 1.732051f;
+            chunk.transform.position = new Vector3(centerX, 0f, centerZ);
         }
 
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch
         {
-            ElevationLevel.Low => 0f,
+            ElevationLevel.Low    => 0f,
             ElevationLevel.Medium => 0.5f,
-            ElevationLevel.High => 1.0f,
+            ElevationLevel.High   => 1.0f,
             ElevationLevel.Summit => 1.5f,
             _ => 0f
         };
 
         private Color GetTileColor(HexTileData tile)
         {
-            // Use terrain tint color, modified by elevation
-            var baseColor = tile.Terrain?.TintColor ?? Color.gray;
+            // Use terrain tint color from SO asset, or fallback to gray
+            Color baseColor = tile.Terrain != null
+                ? tile.Terrain.TintColor
+                : Color.gray;
+
+            // Apply elevation brightness
             float elevationBrightness = tile.Elevation switch
             {
-                ElevationLevel.Low => 1.0f,
+                ElevationLevel.Low    => 1.0f,
                 ElevationLevel.Medium => 1.05f,
-                ElevationLevel.High => 1.1f,
+                ElevationLevel.High   => 1.1f,
                 ElevationLevel.Summit => 1.2f,
                 _ => 1.0f
             };
 
-            // Highlight ley lines
+            // Highlight ley lines with a cyan glow
             if (tile.IsLeyLine)
-                baseColor = Color.Lerp(baseColor, new Color(0.5f, 0.8f, 1f), 0.3f);
+                baseColor = Color.Lerp(baseColor, new Color(0.4f, 0.7f, 1.0f), 0.35f);
 
             // Highlight controlled tiles
             if (tile.Control == ControlState.SectTerritory)
-                baseColor = Color.Lerp(baseColor, Color.green, 0.2f);
+                baseColor = Color.Lerp(baseColor, new Color(0.2f, 0.8f, 0.2f), 0.2f);
             else if (tile.Control == ControlState.SettlementInfluence)
-                baseColor = Color.Lerp(baseColor, Color.yellow, 0.15f);
+                baseColor = Color.Lerp(baseColor, new Color(0.9f, 0.8f, 0.2f), 0.15f);
 
             return new Color(
                 Mathf.Clamp01(baseColor.r * elevationBrightness),
@@ -231,7 +258,8 @@ namespace TalesOfTao.Hex
 
                 float dist = Vector3.Distance(camPos, chunk.transform.position);
                 bool visible = dist < _cullDistance;
-                chunk.gameObject.SetActive(visible);
+                if (chunk.gameObject.activeSelf != visible)
+                    chunk.gameObject.SetActive(visible);
             }
         }
 
