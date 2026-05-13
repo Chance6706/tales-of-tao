@@ -30,23 +30,9 @@ namespace TalesOfTao.Hex
 
         private void Update()
         {
-            // Left click - try new Input System first, fall back to old
-            bool leftClicked = false;
-            var mouseDevice = Mouse.current;
-            if (mouseDevice != null)
-                leftClicked = mouseDevice.leftButton.wasPressedThisFrame;
-            else
-                leftClicked = Input.GetMouseButtonDown(0);
+            if (!Input.GetMouseButtonDown(0)) return;
 
-            if (!leftClicked) return;
-
-            Vector3 mousePos;
-            if (mouseDevice != null)
-                mousePos = mouseDevice.position.ReadValue();
-            else
-                mousePos = Input.mousePosition;
-
-            var ray = _cam.ScreenPointToRay(mousePos);
+            var ray = _cam.ScreenPointToRay(Input.mousePosition);
 
             if (_gridManager != null && _gridManager.IsGenerated)
             {
