@@ -8,9 +8,7 @@ namespace TalesOfTao.Hex
     /// <summary>
     /// Attach to the Main Camera. Raycasts on left-click to find hex tiles
     /// and raises TileSelected so any listener can respond without a direct reference.
-    ///
-    /// Works with chunk-based rendering: when a chunk collider is hit,
-    /// calculates which hex tile was clicked based on world position.
+    /// Works with both chunk-based and individual HexTile rendering.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class TileSelector : MonoBehaviour
@@ -31,66 +29,71 @@ namespace TalesOfTao.Hex
 
         private void Update()
         {
-            var mouse = Mouse.current;
-            if (mouse == null) return;
-            if (!mouse.leftButton.wasPressedThisFrame) return;
+            bool leftClicked = false;
 
-            var mousePos = mouse.position.ReadValue();
+            // Try new Input System first
+            var mouse = Mouse.current;
+            if (mouse != null)
+            {
+                leftClicked = mouse.leftButton.wasPressedThisFrame;
+            }
+            else
+            {
+                // Fallback to old Input
+                leftClicked = Input.GetMouseButtonDown(0);
+            }
+
+            if (!leftClicked) return;
+
+            Vector3 mousePos;
+            if (mouse != null)
+                mousePos = mouse.position.ReadValue();
+            else
+                mousePos = Input.mousePosition;
+
             var ray = _cam.ScreenPointToRay(mousePos);
 
-            if (_gridManager == null || !_gridManager.IsGenerated)
+            if (_gridManager != null && _gridManager.IsGenerated)
             {
-                // Fallback: try to find individual HexTile GameObjects (legacy)
-                TrySelectLegacy(ray);
-                return;
-            }
-
-            // Raycast against chunk colliders
-            if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
-            {
-                // Convert hit point to hex coordinates
-                var hexCoords = WorldToHex(hit.point);
-                var tile = _gridManager.GetTile(hexCoords.Q, hexCoords.R);
-                if (tile != null)
+                // Chunk-based raycast
+                if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
                 {
-                    _currentSelection = tile;
-                    TileSelected?.Invoke(tile);
+                    var hexCoords = WorldToHex(hit.point);
+                    var tile = _gridManager.GetTile(hexCoords.Q, hexCoords.R);
+                    if (tile != null)
+                    {
+                        _currentSelection = tile;
+                        TileSelected?.Invoke(tile);
+                    }
+                }
+            }
+            else
+            {
+                // Legacy: individual HexTile GameObjects
+                var hits = Physics.RaycastAll(ray, Mathf.Infinity, _hexLayer)
+                    .OrderBy(h => h.distance);
+                foreach (var hit in hits)
+                {
+                    var tile = hit.collider.GetComponent<HexTile>();
+                    if (tile != null)
+                    {
+                        _currentSelection = tile.Data;
+                        TileSelected?.Invoke(tile.Data);
+                        return;
+                    }
                 }
             }
         }
 
-        private void TrySelectLegacy(Ray ray)
-        {
-            var hits = Physics.RaycastAll(ray, Mathf.Infinity, _hexLayer)
-                .OrderBy(h => h.distance);
-
-            foreach (var hit in hits)
-            {
-                var tile = hit.collider.GetComponent<HexTile>();
-                if (tile != null)
-                {
-                    _currentSelection = tile.Data;
-                    TileSelected?.Invoke(tile.Data);
-                    return;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Converts a world position to the nearest hex axial coordinates.
-        /// Uses flat-top hex math matching HexCoords.ToWorldPosition().
-        /// </summary>
         private static HexCoords WorldToHex(Vector3 worldPos)
         {
-            // Inverse of: x = size * 1.5 * q, z = size * (sqrt3/2 * q + sqrt3 * r)
-            float size = 1f; // Must match HexGridRenderer._hexSize
+            float size = 1f;
             float sqrt3 = 1.732051f;
 
             float q = (2f / 3f * worldPos.x) / size;
             float r = (-1f / 3f * worldPos.x + sqrt3 / 3f * worldPos.z) / size;
-
-            // Round to nearest hex
             float s = -q - r;
+
             int rq = Mathf.RoundToInt(q);
             int rr = Mathf.RoundToInt(r);
             int rs = Mathf.RoundToInt(s);

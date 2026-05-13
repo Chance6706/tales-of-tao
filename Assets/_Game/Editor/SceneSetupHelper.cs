@@ -81,6 +81,7 @@ namespace TalesOfTao.Editor
             camGo.transform.position = new Vector3(0f, 10f, -10f);
             camGo.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
             camGo.AddComponent<AudioListener>();
+            camGo.AddComponent<HexCameraController>();
             Debug.Log("[TalesOfTao] Created Main Camera (orthographic, isometric view).");
         }
 

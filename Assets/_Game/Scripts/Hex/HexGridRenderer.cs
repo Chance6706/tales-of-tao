@@ -33,10 +33,15 @@ namespace TalesOfTao.Hex
 
         private static Material CreateVertexColorMaterial()
         {
-            var shader = Shader.Find("Sprites/Default");
-            if (shader == null) shader = Shader.Find("Unlit/Color");
-            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
-            return new Material(shader) { name = "HexTileVertexColor_Auto" };
+            var shader = Shader.Find("Custom/HexVertexColor");
+            if (shader == null)
+            {
+                // Fallback if shader hasn't compiled yet
+                shader = Shader.Find("Universal Render Pipeline/Lit");
+            }
+            var mat = new Material(shader) { name = "HexTileVertexColor_Auto" };
+            mat.color = Color.white;
+            return mat;
         }
 
         private void OnEnable()
