@@ -25,14 +25,14 @@ namespace TalesOfTao.Editor
 
         private static void CreateTerrainAssets()
         {
-            CreateTerrain("TerrainType_Plains",    TerrainType.Plains,    "Plains",      1.0f,  0.00f, 1.0f, new Color(0.55f, 0.76f, 0.29f), false);
-            CreateTerrain("TerrainType_Forest",    TerrainType.Forest,    "Forest",      2.0f,  0.25f, 1.1f, new Color(0.18f, 0.42f, 0.18f), false);
-            CreateTerrain("TerrainType_Mountain",  TerrainType.Mountain,  "Mountain",    3.0f,  0.50f, 1.5f, new Color(0.55f, 0.55f, 0.58f), false);
-            CreateTerrain("TerrainType_SacredPeak",TerrainType.SacredPeak,"Sacred Peak", 4.0f,  0.75f, 2.0f, new Color(0.84f, 0.91f, 0.97f), false);
-            CreateTerrain("TerrainType_River",     TerrainType.River,     "River",       1.5f,  0.00f, 1.2f, new Color(0.28f, 0.60f, 0.82f), false);
-            CreateTerrain("TerrainType_Lake",      TerrainType.Lake,      "Lake",        0.0f,  0.00f, 1.3f, new Color(0.10f, 0.28f, 0.62f), true);
-            CreateTerrain("TerrainType_Desert",    TerrainType.Desert,    "Desert",      2.0f,  0.00f, 0.5f, new Color(0.87f, 0.78f, 0.49f), false);
-            CreateTerrain("TerrainType_Swamp",     TerrainType.Swamp,     "Swamp",       3.0f, -0.10f, 0.8f, new Color(0.35f, 0.44f, 0.22f), false);
+            CreateTerrain("TerrainType_Plains",    TerrainType.Plains,    "Plains",      1.0f,  0.00f, 1.0f, new Color(0.45f, 0.72f, 0.28f), false);
+            CreateTerrain("TerrainType_Forest",    TerrainType.Forest,    "Forest",      2.0f,  0.25f, 1.1f, new Color(0.15f, 0.48f, 0.15f), false);
+            CreateTerrain("TerrainType_Mountain",  TerrainType.Mountain,  "Mountain",    3.0f,  0.50f, 1.5f, new Color(0.52f, 0.42f, 0.32f), false);
+            CreateTerrain("TerrainType_SacredPeak",TerrainType.SacredPeak,"Sacred Peak", 4.0f,  0.75f, 2.0f, new Color(0.70f, 0.60f, 0.88f), false);
+            CreateTerrain("TerrainType_River",     TerrainType.River,     "River",       1.5f,  0.00f, 1.2f, new Color(0.22f, 0.52f, 0.82f), false);
+            CreateTerrain("TerrainType_Lake",      TerrainType.Lake,      "Lake",        0.0f,  0.00f, 1.3f, new Color(0.15f, 0.35f, 0.68f), true);
+            CreateTerrain("TerrainType_Desert",    TerrainType.Desert,    "Desert",      2.0f,  0.00f, 0.5f, new Color(0.88f, 0.80f, 0.48f), false);
+            CreateTerrain("TerrainType_Swamp",     TerrainType.Swamp,     "Swamp",       3.0f, -0.10f, 0.8f, new Color(0.30f, 0.40f, 0.18f), false);
         }
 
         private static void CreateTerrain(

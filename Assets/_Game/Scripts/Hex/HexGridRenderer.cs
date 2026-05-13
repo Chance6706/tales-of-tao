@@ -59,14 +59,14 @@ namespace TalesOfTao.Hex
             // Colors match TerrainTypeSO defaults
             var defaultColors = new Dictionary<TerrainType, Color>
             {
-                { TerrainType.Plains,     new Color(0.55f, 0.76f, 0.29f) },
-                { TerrainType.Mountain,   new Color(0.55f, 0.45f, 0.35f) },
-                { TerrainType.Forest,     new Color(0.20f, 0.55f, 0.20f) },
-                { TerrainType.River,      new Color(0.25f, 0.45f, 0.75f) },
-                { TerrainType.Lake,       new Color(0.20f, 0.40f, 0.70f) },
-                { TerrainType.Desert,     new Color(0.85f, 0.75f, 0.50f) },
-                { TerrainType.Swamp,      new Color(0.35f, 0.45f, 0.25f) },
-                { TerrainType.SacredPeak, new Color(0.75f, 0.65f, 0.85f) },
+                { TerrainType.Plains,     new Color(0.45f, 0.72f, 0.28f) },
+                { TerrainType.Mountain,   new Color(0.52f, 0.42f, 0.32f) },
+                { TerrainType.Forest,     new Color(0.15f, 0.48f, 0.15f) },
+                { TerrainType.River,      new Color(0.22f, 0.52f, 0.82f) },
+                { TerrainType.Lake,       new Color(0.15f, 0.35f, 0.68f) },
+                { TerrainType.Desert,     new Color(0.88f, 0.80f, 0.48f) },
+                { TerrainType.Swamp,      new Color(0.30f, 0.40f, 0.18f) },
+                { TerrainType.SacredPeak, new Color(0.70f, 0.60f, 0.88f) },
             };
 
             foreach (var kvp in defaultColors)
@@ -192,8 +192,8 @@ namespace TalesOfTao.Hex
             int startQ = chunkX * _chunkSize - _gridManager.Width / 2;
             int startR = chunkY * _chunkSize - _gridManager.Height / 2;
 
-            // Group tiles by terrain+color so each unique color gets its own sub-mesh
-            // Key: color hash bucket -> mesh data
+            // Group tiles by terrain type SO — each unique terrain gets its own sub-mesh
+            // Key: terrain type index -> mesh data + material color
             var meshGroups = new Dictionary<int, MeshBuildData>();
 
             for (int r = 0; r < _chunkSize; r++)
@@ -205,18 +205,18 @@ namespace TalesOfTao.Hex
                     var tile = _gridManager.GetTile(tileQ, tileR);
                     if (tile == null) continue;
 
-                    Color color = GetTileColor(tile);
+                    // Use terrain type as grouping key
+                    int terrainKey = (int)(tile.Terrain?.Type ?? TerrainType.Plains);
+
+                    if (!meshGroups.TryGetValue(terrainKey, out var data))
+                    {
+                        Color color = GetTileColor(tile);
+                        data = new MeshBuildData { Color = color };
+                        meshGroups[terrainKey] = data;
+                    }
+
                     float elevationOffset = GetElevationOffset(tile.Elevation);
                     var worldPos = tile.Coords.ToWorldPosition(_hexSize);
-
-                    // Use color as grouping key (tiles with same color share a sub-mesh)
-                    int colorKey = ColorToRGBAKey(color);
-
-                    if (!meshGroups.TryGetValue(colorKey, out var data))
-                    {
-                        data = new MeshBuildData { Color = color };
-                        meshGroups[colorKey] = data;
-                    }
 
                     // Generate hex prism mesh into this group's buffers
                     HexTile.GenerateHexMesh(_hexSize, _hexHeight, elevationOffset,
@@ -233,7 +233,7 @@ namespace TalesOfTao.Hex
 
             if (meshGroups.Count == 0) return;
 
-            // Build the final mesh with sub-meshes, one per color group
+            // Build the final mesh with sub-meshes, one per terrain type
             var mesh = new Mesh { name = $"HexChunk_{chunkX}_{chunkY}" };
             mesh.subMeshCount = meshGroups.Count;
 
@@ -260,7 +260,7 @@ namespace TalesOfTao.Hex
                 subMeshTriangles[matIndex] = tris;
                 vertexOffset += data.Vertices.Count;
 
-                TerrainType tt = GetClosestTerrainType(data.Color);
+                TerrainType tt = (TerrainType)kvp.Key;
                 materials[matIndex++] = GetTerrainMaterial(data.Color, tt);
             }
 
@@ -279,54 +279,6 @@ namespace TalesOfTao.Hex
             // Mesh vertices are already in world space — do NOT offset the chunk transform.
         }
 
-        /// <summary>
-        /// Converts a color to an integer key for grouping.
-        /// Quantizes to reduce material count (rounds to nearest 1/32).
-        /// </summary>
-        private static int ColorToRGBAKey(Color c)
-        {
-            int r = Mathf.RoundToInt(c.r * 31f);
-            int g = Mathf.RoundToInt(c.g * 31f);
-            int b = Mathf.RoundToInt(c.b * 31f);
-            int a = Mathf.RoundToInt(c.a * 31f);
-            return (r << 24) | (g << 16) | (b << 8) | a;
-        }
-
-        /// <summary>
-        /// Reverse-maps a color key back to the closest terrain type.
-        /// Used for material selection. Returns Plains as default.
-        /// </summary>
-        private static TerrainType GetClosestTerrainType(Color color)
-        {
-            // Match against default terrain colors
-            var defaults = new (TerrainType type, Color color)[]
-            {
-                (TerrainType.Plains,     new Color(0.55f, 0.76f, 0.29f)),
-                (TerrainType.Mountain,   new Color(0.55f, 0.45f, 0.35f)),
-                (TerrainType.Forest,     new Color(0.20f, 0.55f, 0.20f)),
-                (TerrainType.River,      new Color(0.25f, 0.45f, 0.75f)),
-                (TerrainType.Lake,       new Color(0.20f, 0.40f, 0.70f)),
-                (TerrainType.Desert,     new Color(0.85f, 0.75f, 0.50f)),
-                (TerrainType.Swamp,      new Color(0.35f, 0.45f, 0.25f)),
-                (TerrainType.SacredPeak, new Color(0.75f, 0.65f, 0.85f)),
-            };
-
-            float bestDist = float.MaxValue;
-            TerrainType best = TerrainType.Plains;
-            foreach (var d in defaults)
-            {
-                float dist = (color.r - d.color.r) * (color.r - d.color.r)
-                           + (color.g - d.color.g) * (color.g - d.color.g)
-                           + (color.b - d.color.b) * (color.b - d.color.b);
-                if (dist < bestDist)
-                {
-                    bestDist = dist;
-                    best = d.type;
-                }
-            }
-            return best;
-        }
-
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch
         {
             ElevationLevel.Low    => 0f,
@@ -338,32 +290,9 @@ namespace TalesOfTao.Hex
 
         private Color GetTileColor(HexTileData tile)
         {
-            Color baseColor = tile.Terrain != null
+            return tile.Terrain != null
                 ? tile.Terrain.TintColor
                 : Color.gray;
-
-            float elevationBrightness = tile.Elevation switch
-            {
-                ElevationLevel.Low    => 1.0f,
-                ElevationLevel.Medium => 1.05f,
-                ElevationLevel.High   => 1.1f,
-                ElevationLevel.Summit => 1.2f,
-                _ => 1.0f
-            };
-
-            if (tile.IsLeyLine)
-                baseColor = Color.Lerp(baseColor, new Color(0.4f, 0.7f, 1.0f), 0.35f);
-
-            if (tile.Control == ControlState.SectTerritory)
-                baseColor = Color.Lerp(baseColor, new Color(0.2f, 0.8f, 0.2f), 0.2f);
-            else if (tile.Control == ControlState.SettlementInfluence)
-                baseColor = Color.Lerp(baseColor, new Color(0.9f, 0.8f, 0.2f), 0.15f);
-
-            return new Color(
-                Mathf.Clamp01(baseColor.r * elevationBrightness),
-                Mathf.Clamp01(baseColor.g * elevationBrightness),
-                Mathf.Clamp01(baseColor.b * elevationBrightness),
-                baseColor.a);
         }
 
         private void UpdateChunkVisibility()
