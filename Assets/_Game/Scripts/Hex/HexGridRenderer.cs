@@ -13,7 +13,7 @@ namespace TalesOfTao.Hex
         [Header("Chunk Settings")]
         [SerializeField] private int _chunkSize = 16;
         [SerializeField] private float _hexSize = 1f;
-        [SerializeField] private float _hexHeight = 0.3f;
+        [SerializeField] private float _hexHeight = 0.5f;
 
         [Header("References")]
         [SerializeField] private HexGridManager _gridManager;
