@@ -111,6 +111,7 @@ namespace TalesOfTao.Hex
             }
 
             // Middle mouse drag panning
+            var mouse = Mouse.current;
             if (mouse != null)
             {
                 if (mouse.middleButton.isPressed)
