@@ -56,10 +56,16 @@ namespace TalesOfTao.Hex
         /// </summary>
         public void SetGridManager(HexGridManager manager)
         {
+            if (_gridManager != null)
+                _gridManager.OnMapGenerated -= OnMapGenerated;
+
             _gridManager = manager;
-            _gridManager.OnMapGenerated += OnMapGenerated;
-            if (_gridManager.IsGenerated)
-                BuildAllChunks();
+            if (_gridManager != null)
+            {
+                _gridManager.OnMapGenerated += OnMapGenerated;
+                if (_gridManager.IsGenerated)
+                    BuildAllChunks();
+            }
         }
 
         private void OnDisable()
@@ -176,7 +182,11 @@ namespace TalesOfTao.Hex
             mesh.RecalculateBounds();
 
             chunk.SetMesh(mesh, _defaultMaterial);
-            chunk.transform.position = Vector3.zero;
+            // Position the chunk so its frustum culling uses the correct world-space center.
+            // Each chunk covers _chunkSize hexes; center is at the midpoint of its tile region.
+            float centerX = (chunkX * _chunkSize + _chunkSize * 0.5f - _gridManager.Width * 0.5f) * _hexSize * 1.5f;
+            float centerZ = (chunkY * _chunkSize + _chunkSize * 0.5f - _gridManager.Height * 0.5f) * _hexSize * 1.732051f;
+            chunk.transform.position = new Vector3(centerX, 0f, centerZ);
         }
 
         private float GetElevationOffset(ElevationLevel elevation) => elevation switch

@@ -16,6 +16,8 @@ namespace TalesOfTao.Hex
         public static event Action<HexTileData> TileSelected;
 
         [SerializeField] private LayerMask _hexLayer = 0;
+        [Tooltip("Must match the hex size used by HexGridRenderer.")]
+        [SerializeField] private float _hexSize = 1f;
 
         private Camera _cam;
         private HexTileData _currentSelection;
@@ -58,7 +60,7 @@ namespace TalesOfTao.Hex
                 // Chunk-based raycast
                 if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
                 {
-                    var hexCoords = WorldToHex(hit.point);
+                    var hexCoords = WorldToHex(hit.point, _hexSize);
                     var tile = _gridManager.GetTile(hexCoords.Q, hexCoords.R);
                     if (tile != null)
                     {
@@ -85,9 +87,8 @@ namespace TalesOfTao.Hex
             }
         }
 
-        private static HexCoords WorldToHex(Vector3 worldPos)
+        private static HexCoords WorldToHex(Vector3 worldPos, float size)
         {
-            float size = 1f;
             float sqrt3 = 1.732051f;
 
             float q = (2f / 3f * worldPos.x) / size;

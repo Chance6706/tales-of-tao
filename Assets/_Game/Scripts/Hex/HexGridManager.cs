@@ -44,7 +44,7 @@ namespace TalesOfTao.Hex
 
         private void Awake()
         {
-            if (!_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
         }
 
         /// <summary>
@@ -335,23 +335,9 @@ namespace TalesOfTao.Hex
                 var t = _tiles[i];
                 bool validTerrain = t.Terrain?.Type == TerrainType.Plains || t.Terrain?.Type == TerrainType.Forest;
                 bool validElevation = t.Elevation == ElevationLevel.Low || t.Elevation == ElevationLevel.Medium;
-                bool validQi = t.QiDensity >= QiDensityLevel.Moderate;
-                bool validCaves = t.CaveCount >= 1;
 
-                if (validTerrain && validElevation && validQi && validCaves)
+                if (validTerrain && validElevation)
                     validStarts.Add(i);
-            }
-
-            if (validStarts.Count == 0)
-            {
-                // Relax constraints: just find Plains/Forest at Low/Medium
-                for (int i = 0; i < _tiles.Length; i++)
-                {
-                    var t = _tiles[i];
-                    bool validTerrain = t.Terrain?.Type == TerrainType.Plains || t.Terrain?.Type == TerrainType.Forest;
-                    bool validElevation = t.Elevation == ElevationLevel.Low || t.Elevation == ElevationLevel.Medium;
-                    if (validTerrain && validElevation) validStarts.Add(i);
-                }
             }
 
             if (validStarts.Count > 0)
