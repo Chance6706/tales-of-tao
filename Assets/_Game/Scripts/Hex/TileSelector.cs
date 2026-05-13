@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace TalesOfTao.Hex
 {
@@ -8,35 +9,54 @@ namespace TalesOfTao.Hex
     /// Attach to the Main Camera. Raycasts on left-click to find hex tiles
     /// and raises TileSelected so any listener can respond without a direct reference.
     /// Works with both chunk-based and individual HexTile rendering.
+    /// Automatically detects new vs old Input System based on Player Settings.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class TileSelector : MonoBehaviour
     {
         public static event Action<HexTileData> TileSelected;
 
-        [SerializeField] private LayerMask _hexLayer = ~0; // Default to "Everything"
+        [SerializeField] private LayerMask _hexLayer = ~0;
         [Tooltip("Must match the hex size used by HexGridRenderer.")]
         [SerializeField] private float _hexSize = 1f;
 
         private Camera _cam;
         private HexTileData _currentSelection;
         private HexGridManager _gridManager;
+        private bool _useNewInput;
 
         private void Awake()
         {
             _cam = GetComponent<Camera>();
             _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+            // New Input System is active if Mouse.current is available
+            _useNewInput = Mouse.current != null;
         }
 
         private void Update()
         {
-            if (!Input.GetMouseButtonDown(0)) return;
+            bool leftClicked;
+            Vector3 mousePos;
 
-            var ray = _cam.ScreenPointToRay(Input.mousePosition);
+            if (_useNewInput)
+            {
+                var mouse = Mouse.current;
+                if (mouse == null) return;
+                leftClicked = mouse.leftButton.wasPressedThisFrame;
+                mousePos = mouse.position.ReadValue();
+            }
+            else
+            {
+                leftClicked = Input.GetMouseButtonDown(0);
+                mousePos = Input.mousePosition;
+            }
+
+            if (!leftClicked) return;
+
+            var ray = _cam.ScreenPointToRay(mousePos);
 
             if (_gridManager != null && _gridManager.IsGenerated)
             {
-                // Chunk-based raycast
                 if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
                 {
                     var hexCoords = WorldToHex(hit.point, _hexSize);
@@ -51,7 +71,6 @@ namespace TalesOfTao.Hex
             }
             else
             {
-                // Legacy: individual HexTile GameObjects
                 var hits = Physics.RaycastAll(ray, Mathf.Infinity, _hexLayer)
                     .OrderBy(h => h.distance);
                 foreach (var hit in hits)
