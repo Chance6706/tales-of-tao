@@ -18,7 +18,6 @@ namespace TalesOfTao.Hex
         private MeshRenderer _ringRenderer;
         private Material _ringMaterial;
         private HexCoords _currentCoords;
-        private bool _visible;
 
         private static TileHighlighter _instance;
 
@@ -106,13 +105,11 @@ namespace TalesOfTao.Hex
             var worldPos = coords.ToWorldPosition(_hexSize);
             transform.position = new Vector3(worldPos.x, _ringHeight, worldPos.z);
             gameObject.SetActive(true);
-            _visible = true;
         }
 
         public void Hide()
         {
             gameObject.SetActive(false);
-            _visible = false;
         }
 
         /// <summary>
