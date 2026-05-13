@@ -187,7 +187,7 @@ namespace TalesOfTao.Hex
 
         private void Pass_Biome(System.Random rng)
         {
-            int numSeeds = Mathf.Max(12, _width / 8);
+            int numSeeds = Mathf.Max(20, _width / 4);
             var seedPoints = new List<(HexCoords coords, TerrainType type)>();
 
             for (int i = 0; i < numSeeds; i++)
@@ -200,9 +200,9 @@ namespace TalesOfTao.Hex
 
                 TerrainType type = tile.Elevation switch
                 {
-                    ElevationLevel.Low => Pick3(rng, TerrainType.Plains, TerrainType.River, TerrainType.Lake),
-                    ElevationLevel.Medium => Pick(rng, TerrainType.Forest, TerrainType.Plains),
-                    ElevationLevel.High => Pick(rng, TerrainType.Mountain, TerrainType.Forest),
+                    ElevationLevel.Low => Pick4(rng, TerrainType.Plains, TerrainType.River, TerrainType.Lake, TerrainType.Desert),
+                    ElevationLevel.Medium => Pick3(rng, TerrainType.Forest, TerrainType.Plains, TerrainType.Swamp),
+                    ElevationLevel.High => Pick3(rng, TerrainType.Mountain, TerrainType.Forest, TerrainType.Desert),
                     ElevationLevel.Summit => Pick(rng, TerrainType.Mountain, TerrainType.SacredPeak),
                     _ => TerrainType.Plains
                 };
@@ -558,6 +558,9 @@ namespace TalesOfTao.Hex
 
         private static TerrainType Pick3(System.Random rng, TerrainType a, TerrainType b, TerrainType c) =>
             rng.Next(3) switch { 0 => a, 1 => b, _ => c };
+
+        private static TerrainType Pick4(System.Random rng, TerrainType a, TerrainType b, TerrainType c, TerrainType d) =>
+            rng.Next(4) switch { 0 => a, 1 => b, 2 => c, _ => d };
 
         private TerrainTypeSO GetTerrainTypeSO(TerrainType type)
         {
