@@ -10,7 +10,7 @@ namespace TalesOfTao.UI
     public class SectOverviewScreen : MonoBehaviour
     {
         [SerializeField] private VisualTreeAsset _uxml;
-        [StyleSheet]
+        [SerializeField]
         private StyleSheet _uss;
 
         private VisualElement _root;
