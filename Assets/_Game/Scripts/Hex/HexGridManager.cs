@@ -33,6 +33,9 @@ namespace TalesOfTao.Hex
         private int _height;
         private bool _isGenerated;
 
+        /// <summary>Singleton instance for easy access from other components.</summary>
+        public static HexGridManager Instance { get; private set; }
+
         public int Width => _width;
         public int Height => _height;
         public bool IsGenerated => _isGenerated;
@@ -46,6 +49,7 @@ namespace TalesOfTao.Hex
         {
             if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             AutoLoadTerrainTypes();
+            Instance = this;
         }
 
         /// <summary>
