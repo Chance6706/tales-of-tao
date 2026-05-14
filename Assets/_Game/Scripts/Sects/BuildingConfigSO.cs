@@ -58,5 +58,14 @@ namespace TalesOfTao.Sects
         public Mesh GetTierMesh(int tier) => tier >= 1 && tier <= 3 ? _tierMeshes[tier - 1] : null;
         public Material BuildingMaterial => _buildingMaterial;
         public bool RequiresCollider => _requiresCollider;
+
+        // Editor setters (called by M5BuildingConfigCreator)
+        public void SetTierCost(int tier, ResourceCost cost) { if (tier >= 1 && tier <= 3) _tierCosts[tier - 1] = cost; }
+        public void SetBuildTurns(int tier, int turns) { if (tier >= 1 && tier <= 3) _tierBuildTurns[tier - 1] = turns; }
+        public void SetTierEffect(int tier, string effect) { if (tier >= 1 && tier <= 3) _tierEffects[tier - 1] = effect; }
+        public void SetTierMesh(int tier, Mesh mesh) { if (tier >= 1 && tier <= 3) _tierMeshes[tier - 1] = mesh; }
+        public void SetBuildingMaterial(Material mat) { _buildingMaterial = mat; }
+        public void SetRequiresCollider(bool val) { _requiresCollider = val; }
+        public void SetPrerequisite(string building, int tier) { _prerequisiteBuilding = building; _prerequisiteTier = tier; }
     }
 }

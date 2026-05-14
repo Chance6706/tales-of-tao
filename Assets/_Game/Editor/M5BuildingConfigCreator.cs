@@ -10,7 +10,6 @@ public class M5BuildingConfigCreator
         string dataPath = "Assets/_Game/Data/Buildings";
         EnsureDirectory(dataPath);
 
-        // 11 building types x 3 tiers (DaoSanctum is single-tier wonder)
         CreateConfig(dataPath, "Temple", "Temple", new int[] { 4, 6, 8 });
         CreateConfig(dataPath, "TrainingGrounds", "Training Grounds", new int[] { 3, 5, 7 });
         CreateConfig(dataPath, "Library", "Library", new int[] { 4, 6, 8 });
@@ -52,78 +51,74 @@ public class M5BuildingConfigCreator
             }
 
             BuildingConfigSO config = ScriptableObject.CreateInstance<BuildingConfigSO>();
-            config._buildingTypeId = typeId;
-            config._displayName = displayName + " T" + tier;
 
-            // Tier costs (index 0 = T1)
-            config._tierCosts = new ResourceCost[3];
-            config._tierBuildTurns = new int[3];
-            config._tierEffects = new string[3];
-            config._tierMeshes = new Mesh[3];
+            // Set identity via SerializedObject since _buildingTypeId is private
+            SerializedObject so = new SerializedObject(config);
+            so.FindProperty("_buildingTypeId").stringValue = typeId;
+            so.FindProperty("_displayName").stringValue = displayName + " T" + tier;
+            so.ApplyModifiedProperties();
 
             float mult = tier;
+            ResourceCost cost = new ResourceCost();
+            string effect = "";
 
             switch (typeId)
             {
                 case "Temple":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(100 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Qi generation: +" + (2 * tier);
+                    cost.Tael = Mathf.RoundToInt(100 * mult);
+                    effect = "Qi generation: +" + (2 * tier);
                     break;
                 case "TrainingGrounds":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(60 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Training speed: +" + (5 * tier) + "%";
+                    cost.Tael = Mathf.RoundToInt(60 * mult);
+                    effect = "Training speed: +" + (5 * tier) + "%";
                     break;
                 case "Library":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(80 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Tech bonus: +" + (3 * tier);
+                    cost.Tael = Mathf.RoundToInt(80 * mult);
+                    effect = "Tech bonus: +" + (3 * tier);
                     break;
                 case "MedicineHall":
-                    config._tierCosts[tier - 1] = new ResourceCost { MedicinalHerbs = Mathf.RoundToInt(40 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Healing: +" + (5 * tier) + "%";
+                    cost.MedicinalHerbs = Mathf.RoundToInt(40 * mult);
+                    effect = "Healing: +" + (5 * tier) + "%";
                     break;
                 case "Armory":
-                    config._tierCosts[tier - 1] = new ResourceCost { IronOre = Mathf.RoundToInt(50 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Combat: +" + (3 * tier);
+                    cost.IronOre = Mathf.RoundToInt(50 * mult);
+                    effect = "Combat: +" + (3 * tier);
                     break;
                 case "DiscipleHall":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(40 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Capacity: +" + (5 * tier) + " disciples";
+                    cost.Tael = Mathf.RoundToInt(40 * mult);
+                    effect = "Capacity: +" + (5 * tier) + " disciples";
                     break;
                 case "ElderCouncil":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(150 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Dissent: -" + (2 * tier);
+                    cost.Tael = Mathf.RoundToInt(150 * mult);
+                    effect = "Dissent: -" + (2 * tier);
                     break;
                 case "ExternalAffairs":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(70 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Reputation: +" + (3 * tier);
+                    cost.Tael = Mathf.RoundToInt(70 * mult);
+                    effect = "Reputation: +" + (3 * tier);
                     break;
                 case "MarketPavilion":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(50 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Tael income: +" + (5 * tier);
+                    cost.Tael = Mathf.RoundToInt(50 * mult);
+                    effect = "Tael income: +" + (5 * tier);
                     break;
                 case "BranchSect":
-                    config._tierCosts[tier - 1] = new ResourceCost { Tael = Mathf.RoundToInt(200 * mult) };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Influence: +" + (5 * tier);
+                    cost.Tael = Mathf.RoundToInt(200 * mult);
+                    effect = "Influence: +" + (5 * tier);
                     break;
                 case "DaoSanctum":
-                    config._tierCosts[tier - 1] = new ResourceCost { Jade = 100 };
-                    config._tierBuildTurns[tier - 1] = turns[tier - 1];
-                    config._tierEffects[tier - 1] = "Wonder: +10 Qi, +5 Renown";
+                    cost.Jade = 100;
+                    effect = "Wonder: +10 Qi, +5 Renown";
                     break;
             }
 
-            config._requiresCollider = true;
-            config._prerequisiteTier = (tier > 1) ? tier - 1 : 0;
+            config.SetTierCost(tier, cost);
+            config.SetBuildTurns(tier, turns[tier - 1]);
+            config.SetTierEffect(tier, effect);
+            config.SetRequiresCollider(true);
+
+            if (tier > 1)
+            {
+                config.SetPrerequisite(typeId, tier - 1);
+            }
 
             AssetDatabase.CreateAsset(config, fullPath);
             Debug.Log("Created: " + assetName);
