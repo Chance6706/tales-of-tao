@@ -551,7 +551,7 @@ namespace TalesOfTao.Hex
             }
         }
 
-n        // ── Pass 7b: Qi Density ───────────────────────────────────────────────
+        // ── Pass 7b: Qi Density ───────────────────────────────────────────────
 
         private void Pass_QiDensity(System.Random rng)
         {
