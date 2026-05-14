@@ -37,6 +37,13 @@ namespace TalesOfTao.Hex
             _meshFilter.sharedMesh = mesh;
             _meshRenderer.sharedMaterials = materials ?? new Material[0];
             _meshCollider.sharedMesh = mesh;
+            gameObject.isStatic = true;
+
+            // Also add a box collider for reliable raycasting
+            var boxCol = gameObject.GetComponent<BoxCollider>();
+            if (boxCol == null) boxCol = gameObject.AddComponent<BoxCollider>();
+            boxCol.center = mesh.bounds.center;
+            boxCol.size = mesh.bounds.size;
         }
     }
 }
