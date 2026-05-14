@@ -89,6 +89,7 @@ namespace TalesOfTao.Hex
                         TileHighlighter.SelectTile(tile, elevationY);
                         return;
                     }
+                }
             }
             else
             {
