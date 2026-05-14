@@ -16,6 +16,12 @@ namespace TalesOfTao.Hex
     {
         public static event Action<HexTileData> TileSelected;
 
+        /// <summary>
+        /// Set this to show reachable tiles from the selected position.
+        /// Set to 0 to disable reachable tile display.
+        /// </summary>
+        public static float MovementBudget { get; set; } = 0f;
+
         [SerializeField] private LayerMask _hexLayer = ~0;
         [SerializeField] private float _hexSize = 1f;
 
@@ -47,7 +53,13 @@ namespace TalesOfTao.Hex
             {
                 var go = new GameObject("TileHighlighter");
                 go.AddComponent<TileHighlighter>();
-                Debug.Log("[TileSelector] Created TileHighlighter.");
+            }
+
+            // Ensure ReachableTileOverlay exists
+            if (UnityEngine.Object.FindAnyObjectByType<ReachableTileOverlay>() == null)
+            {
+                var go = new GameObject("ReachableTileOverlay");
+                go.AddComponent<ReachableTileOverlay>();
             }
         }
 
@@ -87,9 +99,18 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
-                        // Get elevation offset for highlight positioning
                         float elevationY = hit.point.y;
                         TileHighlighter.SelectTile(tile, elevationY);
+
+                        // Show reachable tiles if movement budget is set
+                        if (MovementBudget > 0f && _gridManager != null)
+                        {
+                            ReachableTileOverlay.Show(hexCoords.Q, hexCoords.R, MovementBudget, _gridManager);
+                        }
+                        else
+                        {
+                            ReachableTileOverlay.Hide();
+                        }
                         return;
                     }
                     Debug.Log($"[TileSelector] Raycast hit chunk but no tile at ({hexCoords.Q},{hexCoords.R}).");
