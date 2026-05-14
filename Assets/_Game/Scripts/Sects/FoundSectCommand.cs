@@ -41,11 +41,7 @@ namespace TalesOfTao.Sects
 
         public override void Execute()
         {
-            if (!CanExecute())
-            {
-                Debug.LogError("[FoundSectCommand] Cannot execute: invalid tile or missing data.");
-                return;
-            }
+            if (!CanExecute()) return;
 
             var tile = _gridManager.GetTile(_tileQ, _tileR);
 
@@ -79,8 +75,6 @@ namespace TalesOfTao.Sects
             // TODO: Remove Founder unit from roster
 
             _executed = true;
-            Debug.Log($"[FoundSectCommand] Sect '{_config.DisplayName}' founded at ({_tileQ},{_tileR}). " +
-                      $"BaseQi={_createdData.FoundingStats.BaseQiIncome}, CaveBonus={_createdData.FoundingStats.CaveBonus}");
         }
 
         public override void Undo()
@@ -95,7 +89,6 @@ namespace TalesOfTao.Sects
 
             _createdData.IsFounded = false;
             _executed = false;
-            Debug.Log($"[FoundSectCommand] Undone: Sect '{_config.DisplayName}' removed from ({_tileQ},{_tileR})");
         }
 
         private static float GetQiDensityValue(QiDensityLevel density)

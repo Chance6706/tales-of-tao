@@ -101,12 +101,7 @@ namespace TalesOfTao.Sects
 
         private void FoundSect(int q, int r)
         {
-            if (_sectConfig == null)
-            {
-                _statusMessage = "ERROR: No SectConfigSO assigned!";
-                Debug.LogError("[SectFoundingTest] No SectConfigSO assigned!");
-                return;
-            }
+            if (_sectConfig == null) return;
 
             var command = new FoundSectCommand(_sectConfig, q, r, _gridManager);
             if (command.CanExecute())
@@ -115,7 +110,6 @@ namespace TalesOfTao.Sects
                 _sectManager.SetSectData(command.CreatedData);
                 _founded = true;
                 _statusMessage = $"Sect '{_sectConfig.DisplayName}' founded at ({q},{r})!";
-                Debug.Log($"[SectFoundingTest] {_statusMessage}");
             }
             else
             {

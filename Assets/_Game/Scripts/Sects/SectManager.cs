@@ -53,7 +53,6 @@ namespace TalesOfTao.Sects
         {
             _sectData = data;
             OnSectFounded?.Invoke(_sectData);
-            Debug.Log($"[SectManager] Sect '{data.SectName}' founded. Tael={data.Stockpile.Tael}, Qi={data.Stockpile.Qi}");
         }
 
         private void OnPhaseChanged(GamePhase phase)
@@ -118,9 +117,6 @@ namespace TalesOfTao.Sects
 
             OnResourceChanged?.Invoke("Tael");
             OnResourceChanged?.Invoke("Qi");
-
-            Debug.Log($"[SectManager] Income: +{qiIncome} Qi, -{upkeep} Tael upkeep. " +
-                      $"Stockpile: Tael={_sectData.Stockpile.Tael}, Qi={_sectData.Stockpile.Qi}");
         }
 
         /// <summary>
@@ -135,7 +131,6 @@ namespace TalesOfTao.Sects
             if (dissentRate > 0)
             {
                 _sectData.DissentLevel += dissentRate;
-                Debug.Log($"[SectManager] Dissent +{dissentRate} (total: {_sectData.DissentLevel})");
             }
             else
             {
