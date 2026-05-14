@@ -6,10 +6,6 @@ using TalesOfTao.Core.TurnSystem;
 
 namespace TalesOfTao.UI.HUD
 {
-    /// <summary>
-    /// Minimal test HUD for the turn system. Creates its own Canvas.
-    /// Shows current phase, turn number, zodiac year, and End Turn button.
-    /// </summary>
     public class TurnTestHUD : MonoBehaviour
     {
         [SerializeField] private TurnDriver _turnDriver;
@@ -21,6 +17,7 @@ namespace TalesOfTao.UI.HUD
 
         private void Start()
         {
+            // Find or create turn driver
             if (_turnDriver == null)
                 _turnDriver = FindAnyObjectByType<TurnDriver>();
 
@@ -61,28 +58,33 @@ namespace TalesOfTao.UI.HUD
             var scaler = canvasGO.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
+
+            // IMPORTANT: Add an EventSystem if one doesn't exist
+            if (FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var esGO = new GameObject("EventSystem");
+                esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            }
+
             canvasGO.AddComponent<GraphicRaycaster>();
 
-            // Phase text
             _phaseText = CreateLabel(canvasGO, "PhaseText", new Vector2(20, -20), new Vector2(400, 40), 24, Color.white);
-            _phaseText.text = "Event Phase";
-
-            // Turn text
             _turnText = CreateLabel(canvasGO, "TurnText", new Vector2(20, -60), new Vector2(400, 30), 18, Color.yellow);
-            _turnText.text = "Turn 0";
-
-            // Zodiac text
             _zodiacText = CreateLabel(canvasGO, "ZodiacText", new Vector2(20, -90), new Vector2(400, 30), 18, new Color(0.8f, 0.6f, 1f));
-            _zodiacText.text = "Year of the None";
 
-            // End Turn button
             CreateButton(canvasGO);
+
+            // Initial state
+            _phaseText.text = "...";
+            _turnText.text = "...";
+            _zodiacText.text = "...";
         }
 
-        private TextMeshProUGUI CreateLabel(GameObject canvasGO, string name, Vector2 pos, Vector2 size, int fontSize, Color color)
+        private TextMeshProUGUI CreateLabel(GameObject parent, string name, Vector2 pos, Vector2 size, int fontSize, Color color)
         {
             var go = new GameObject(name);
-            go.transform.SetParent(canvasGO.transform, false);
+            go.transform.SetParent(parent.transform, false);
             var text = go.AddComponent<TextMeshProUGUI>();
             text.fontSize = fontSize;
             text.color = color;
@@ -99,10 +101,10 @@ namespace TalesOfTao.UI.HUD
             return text;
         }
 
-        private void CreateButton(GameObject canvasGO)
+        private void CreateButton(GameObject parent)
         {
             var btnGO = new GameObject("EndTurnButton");
-            btnGO.transform.SetParent(canvasGO.transform, false);
+            btnGO.transform.SetParent(parent.transform, false);
 
             var image = btnGO.AddComponent<Image>();
             image.color = new Vector4(0.2f, 0.5f, 0.8f, 0.9f);
@@ -159,11 +161,16 @@ namespace TalesOfTao.UI.HUD
                 _turnText.text = $"Turn {turn}";
 
             if (_zodiacText != null && _turnDriver != null)
-                _zodiacText.text = $"Year of the {_turnDriver.CurrentAnimal}";
+            {
+                string animal = _turnDriver.CurrentAnimal;
+                _zodiacText.text = $"Year of the {animal}";
+                Debug.Log($"[TurnTestHUD] Turn {turn}, Zodiac: {animal}");
+            }
         }
 
         private void OnEndTurnClicked()
         {
+            Debug.Log("[TurnTestHUD] End Turn clicked!");
             _turnDriver?.EndTurn();
         }
     }
