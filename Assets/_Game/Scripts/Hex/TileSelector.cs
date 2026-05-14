@@ -38,7 +38,6 @@ namespace TalesOfTao.Hex
                 _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
             if (_gridManager != null && _gridManager.TileCount == 0)
             {
-                Debug.Log("[TileSelector] Auto-generating map in Play mode...");
                 _gridManager.GenerateMap();
             }
 
@@ -47,7 +46,6 @@ namespace TalesOfTao.Hex
             {
                 var go = new GameObject("TileHighlighter");
                 go.AddComponent<TileHighlighter>();
-                Debug.Log("[TileSelector] Created TileHighlighter.");
             }
         }
 
@@ -87,17 +85,10 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
-                        // Get elevation offset for highlight positioning
                         float elevationY = hit.point.y;
                         TileHighlighter.SelectTile(tile, elevationY);
                         return;
                     }
-                    Debug.Log($"[TileSelector] Raycast hit chunk but no tile at ({hexCoords.Q},{hexCoords.R}).");
-                }
-                else
-                {
-                    Debug.Log("[TileSelector] Raycast hit nothing.");
-                }
             }
             else
             {
