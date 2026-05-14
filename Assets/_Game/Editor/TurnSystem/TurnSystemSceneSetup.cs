@@ -26,12 +26,12 @@ namespace TalesOfTao.Editor.TurnSystem
             var driverGO = new GameObject("TurnDriver");
             var driver = driverGO.AddComponent<TurnDriver>();
 
-            // Create TurnTestHUD
+            // Create TurnTestHUD (auto-finds TurnDriver in Start())
             var hudGO = new GameObject("TurnTestHUD");
-            var hud = hudGO.AddComponent<TurnTestHUD>();
+            hudGO.AddComponent<TurnTestHUD>();
 
-            // Wire up HUD to driver
-            hud.Initialize(driver);
+            // Initialize the driver with the calendar
+            driver.Initialize(calendar, null, null, null, 0f);
 
             // Set up GameManager references
             var gm = GameManager.Instance;
