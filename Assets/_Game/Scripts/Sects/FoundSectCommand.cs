@@ -80,7 +80,7 @@ namespace TalesOfTao.Sects
                     BondedBeast = ""
                 };
                 peon.CalculateStats(_config);
-                data.AddDisciple(peon);
+                _createdData.AddDisciple(peon);
             }
 
             // Mark tile as sect territory
