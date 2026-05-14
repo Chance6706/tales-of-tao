@@ -117,10 +117,18 @@ namespace TalesOfTao.Hex
         /// </summary>
         public static void SelectTile(HexTileData tile)
         {
-            if (_instance != null && tile != null)
+            if (_instance == null)
             {
-                _instance.Show(tile.Coords);
+                Debug.LogWarning("[TileHighlighter] _instance is null!");
+                return;
             }
+            if (tile == null)
+            {
+                Debug.LogWarning("[TileHighlighter] tile is null!");
+                return;
+            }
+            _instance.Show(tile.Coords);
+            Debug.Log($"[TileHighlighter] Show at ({tile.Coords.Q},{tile.Coords.R})");
         }
 
         /// <summary>
