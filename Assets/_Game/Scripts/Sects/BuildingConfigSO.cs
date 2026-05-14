@@ -3,81 +3,6 @@ using UnityEngine;
 namespace TalesOfTao.Sects
 {
     /// <summary>
-    /// Resource cost for building construction or promotion.
-    /// </summary>
-    [System.Serializable]
-    public struct ResourceCost
-    {
-        public int Tael;
-        public int Qi;
-        public int Lumber;
-        public int IronOre;
-        public int Jade;
-        public int MedicinalHerbs;
-        public int SpiritHerbs;
-
-        public bool CanAfford(ResourceCost available)
-        {
-            return available.Tael >= Tael
-                && available.Qi >= Qi
-                && available.Lumber >= Lumber
-                && available.IronOre >= IronOre
-                && available.Jade >= Jade
-                && available.MedicinalHerbs >= MedicinalHerbs
-                && available.SpiritHerbs >= SpiritHerbs;
-        }
-
-        public static ResourceCost operator -(ResourceCost a, ResourceCost b)
-        {
-            return new ResourceCost
-            {
-                Tael = a.Tael - b.Tael,
-                Qi = a.Qi - b.Qi,
-                Lumber = a.Lumber - b.Lumber,
-                IronOre = a.IronOre - b.IronOre,
-                Jade = a.Jade - b.Jade,
-                MedicinalHerbs = a.MedicinalHerbs - b.MedicinalHerbs,
-                SpiritHerbs = a.SpiritHerbs - b.SpiritHerbs
-            };
-        }
-
-        public static ResourceCost FromTael(int tael)
-        {
-            return new ResourceCost { Tael = tael };
-        }
-
-        public static ResourceCost FromTaelQi(int tael, int qi)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi };
-        }
-
-        public static ResourceCost FromTaelQiLumber(int tael, int qi, int lumber)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi, Lumber = lumber };
-        }
-
-        public static ResourceCost FromTaelQiLumberIron(int tael, int qi, int lumber, int iron)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi, Lumber = lumber, IronOre = iron };
-        }
-
-        public static ResourceCost FromTaelQiLumberJade(int tael, int qi, int lumber, int jade)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi, Lumber = lumber, Jade = jade };
-        }
-
-        public static ResourceCost FromTaelQiLumberMedHerbs(int tael, int qi, int lumber, int medHerbs)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi, Lumber = lumber, MedicinalHerbs = medHerbs };
-        }
-
-        public static ResourceCost FromTaelQiLumberSpiritHerbs(int tael, int qi, int lumber, int spiritHerbs)
-        {
-            return new ResourceCost { Tael = tael, Qi = qi, Lumber = lumber, SpiritHerbs = spiritHerbs };
-        }
-    }
-
-    /// <summary>
     /// Static configuration for one building type across all 3 tiers.
     /// Create via Assets > Create > TalesOfTao > Buildings > Building Config.
     /// Save into Assets/_Game/Data/Buildings/.
@@ -111,7 +36,7 @@ namespace TalesOfTao.Sects
         [SerializeField] private string[] _tierEffects = new string[3];
 
         [Header("Meshes")]
-        [Tooltip("Mesh for each tier. Assign .obj meshes from Art/Meshes/Buildings/.")]
+        [Tooltip("Mesh for each tier. Assign meshes from Art/Meshes/Buildings/.")]
         [SerializeField] private Mesh[] _tierMeshes = new Mesh[3];
 
         [Header("Material")]

@@ -1,5 +1,6 @@
 using UnityEngine;
 using TalesOfTao.Core;
+using TalesOfTao.Core.Commands;
 
 namespace TalesOfTao.Sects
 {
@@ -53,7 +54,7 @@ namespace TalesOfTao.Sects
 
             // Check resources
             ResourceCost cost = _config.GetTierCost(_tier);
-            if (!_sect.Resources.CanAfford(cost))
+            if (!_sect.Stockpile.CanAfford(cost))
             {
                 Debug.LogWarning($"[BuildBuildingCommand] Cannot afford {_config.BuildingTypeId} T{_tier}.");
                 return false;
@@ -75,7 +76,7 @@ namespace TalesOfTao.Sects
 
             // Deduct resources
             ResourceCost cost = _config.GetTierCost(_tier);
-            _sect.Resources = _sect.Resources - cost;
+            _sect.Stockpile = _sect.Stockpile - cost;
 
             // Add to build queue
             int turns = _config.GetBuildTurns(_tier);

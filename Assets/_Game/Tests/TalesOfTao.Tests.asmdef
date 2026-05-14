@@ -4,6 +4,7 @@
     "references": [
         "TalesOfTao.Core",
         "TalesOfTao.Hex",
+        "TalesOfTao.Sects",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

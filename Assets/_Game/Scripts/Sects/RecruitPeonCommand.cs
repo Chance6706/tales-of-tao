@@ -1,5 +1,6 @@
 using UnityEngine;
 using TalesOfTao.Core;
+using TalesOfTao.Core.Commands;
 
 namespace TalesOfTao.Sects
 {
@@ -24,7 +25,7 @@ namespace TalesOfTao.Sects
             if (_sect == null || _sectConfig == null) return false;
 
             // Check Tael cost
-            if (_sect.Resources.Tael < RECRUIT_COST)
+            if (_sect.Stockpile.Tael < RECRUIT_COST)
             {
                 Debug.LogWarning("[RecruitPeonCommand] Not enough Tael.");
                 return false;
@@ -47,7 +48,7 @@ namespace TalesOfTao.Sects
             if (!CanExecute()) return;
 
             // Deduct cost
-            _sect.Resources.Tael -= RECRUIT_COST;
+            _sect.Stockpile.Tael -= RECRUIT_COST;
 
             // Create peon disciple
             var disciple = new DiscipleData
