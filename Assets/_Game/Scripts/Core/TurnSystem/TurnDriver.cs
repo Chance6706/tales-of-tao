@@ -1,12 +1,10 @@
 using UnityEngine;
 using TalesOfTao.Core.EventChannels;
-using TalesOfTao.Core.TurnSystem;
 
 namespace TalesOfTao.Core.TurnSystem
 {
     /// <summary>
     /// Simple MonoBehaviour that drives the turn cycle.
-    /// Attach to a GameObject in the scene alongside GameManager.
     /// </summary>
     public class TurnDriver : MonoBehaviour
     {
@@ -16,7 +14,7 @@ namespace TalesOfTao.Core.TurnSystem
         [SerializeField] private ZodiacBonusesEventChannelSO _zodiacBonusesChannel;
 
         [Header("Settings")]
-        [SerializeField] private float _autoAdvanceDelay = 0f; // 0 = manual (End Turn button only)
+        [SerializeField] private float _autoAdvanceDelay = 0f;
         [SerializeField] private bool _logPhases = true;
 
         private ZodiacCalendar _calendar;
@@ -24,6 +22,7 @@ namespace TalesOfTao.Core.TurnSystem
         private int _turnNumber;
         private float _phaseTimer;
         private bool _active;
+        private bool _initialized;
 
         public int TurnNumber => _turnNumber;
         public GamePhase CurrentPhase => (GamePhase)_currentPhase;
@@ -40,11 +39,7 @@ namespace TalesOfTao.Core.TurnSystem
             _turnEndedChannel = turnEndCh;
             _zodiacBonusesChannel = zodiacCh;
             _autoAdvanceDelay = autoDelay;
-        }
-
-        private void Start()
-        {
-            StartTurn();
+            _initialized = true;
         }
 
         private void Update()
@@ -74,6 +69,8 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void StartTurn()
         {
+            if (!_initialized) return;
+
             _turnNumber++;
             _currentPhase = 0;
             _phaseTimer = 0f;

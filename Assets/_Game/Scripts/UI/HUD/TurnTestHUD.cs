@@ -15,51 +15,36 @@ namespace TalesOfTao.UI.HUD
         [Header("References")]
         [SerializeField] private TurnDriver _turnDriver;
 
-        [Header("UI Elements (auto-created)")]
-        [SerializeField] private TextMeshProUGUI _phaseText;
-        [SerializeField] private TextMeshProUGUI _turnText;
-        [SerializeField] private TextMeshProUGUI _zodiacText;
-        [SerializeField] private Button _endTurnButton;
-
         private Canvas _canvas;
-
-        public void Initialize(TurnDriver driver)
-        {
-            _turnDriver = driver;
-            CreateUI();
-
-            if (_turnDriver != null)
-            {
-                _turnDriver.OnPhaseChanged += OnPhaseChanged;
-                _turnDriver.OnTurnStarted += OnTurnStarted;
-            }
-        }
+        private TextMeshProUGUI _phaseText;
+        private TextMeshProUGUI _turnText;
+        private TextMeshProUGUI _zodiacText;
+        private Button _endTurnButton;
 
         private void Start()
         {
-            // Auto-create turn system if not assigned
+            // Find or create turn driver
+            if (_turnDriver == null)
+                _turnDriver = FindFirstObjectByType<TurnDriver>();
+
             if (_turnDriver == null)
             {
-                var existing = FindFirstObjectByType<TurnDriver>();
-                if (existing != null)
-                {
-                    Initialize(existing);
-                }
-                else
-                {
-                    // Create a minimal self-contained turn system
-                    var driverGO = new GameObject("TurnDriver_Auto");
-                    _turnDriver = driverGO.AddComponent<TurnDriver>();
+                // Create a minimal self-contained turn system
+                var calGO = new GameObject("ZodiacCalendar");
+                var calendar = calGO.AddComponent<ZodiacCalendar>();
 
-                    var calGO = new GameObject("ZodiacCalendar_Auto");
-                    var calendar = calGO.AddComponent<ZodiacCalendar>();
-                    _turnDriver.Initialize(calendar, null, null, null, 0f);
-
-                    CreateUI();
-                    _turnDriver.OnPhaseChanged += OnPhaseChanged;
-                    _turnDriver.OnTurnStarted += OnTurnStarted;
-                }
+                var driverGO = new GameObject("TurnDriver");
+                _turnDriver = driverGO.AddComponent<TurnDriver>();
+                _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
+
+            CreateUI();
+
+            _turnDriver.OnPhaseChanged += OnPhaseChanged;
+            _turnDriver.OnTurnStarted += OnTurnStarted;
+
+            // Start the first turn
+            _turnDriver.StartTurn();
         }
 
         private void OnDestroy()
@@ -78,108 +63,99 @@ namespace TalesOfTao.UI.HUD
             _canvas = canvasGO.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 100;
-            canvasGO.AddComponent<CanvasScaler>();
-            canvasGO.AddComponent<GraphicRaycaster>();
 
-            // Create phase text
-            var phaseGO = new GameObject("PhaseText");
-            phaseGO.transform.SetParent(canvasGO.transform, false);
-            _phaseText = phaseGO.AddComponent<TextMeshProUGUI>();
-            _phaseText.fontSize = 24;
-            _phaseText.color = Color.white;
-            _phaseText.alignment = TextAlignmentOptions.TopLeft;
-            var phaseRect = phaseGO.GetComponent<RectTransform>();
-            phaseRect.anchorMin = new Vector2(0, 1);
-            phaseRect.anchorMax = new Vector2(0, 1);
-            phaseRect.pivot = new Vector2(0, 1);
-            phaseRect.anchoredPosition = new Vector2(20, -20);
-            phaseRect.sizeDelta = new Vector2(400, 40);
+            var scaler = canvasGO.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
 
-            // Create turn text
-            var turnGO = new GameObject("TurnText");
-            turnGO.transform.SetParent(canvasGO.transform, false);
-            _turnText = turnGO.AddComponent<TextMeshProUGUI>();
-            _turnText.fontSize = 18;
-            _turnText.color = Color.yellow;
-            _turnText.alignment = TextAlignmentOptions.TopLeft;
-            var turnRect = turnGO.GetComponent<RectTransform>();
-            turnRect.anchorMin = new Vector2(0, 1);
-            turnRect.anchorMax = new Vector2(0, 1);
-            turnRect.pivot = new Vector2(0, 1);
-            turnRect.anchoredPosition = new Vector2(20, -60);
-            turnRect.sizeDelta = new Vector2(400, 30);
+            // GraphicRaycaster is needed for button clicks but blocks 3D raycasts.
+            // We make the canvas NOT block raycasts on 3D objects by using a separate
+            // camera for the UI or by disabling raycast target on background elements.
+            var raycaster = canvasGO.AddComponent<GraphicRaycaster>();
 
-            // Create zodiac text
-            var zodiacGO = new GameObject("ZodiacText");
-            zodiacGO.transform.SetParent(canvasGO.transform, false);
-            _zodiacText = zodiacGO.AddComponent<TextMeshProUGUI>();
-            _zodiacText.fontSize = 18;
-            _zodiacText.color = new Color(0.8f, 0.6f, 1f);
-            _zodiacText.alignment = TextAlignmentOptions.TopLeft;
-            var zodiacRect = zodiacGO.GetComponent<RectTransform>();
-            zodiacRect.anchorMin = new Vector2(0, 1);
-            zodiacRect.anchorMax = new Vector2(0, 1);
-            zodiacRect.pivot = new Vector2(0, 1);
-            zodiacRect.anchoredPosition = new Vector2(20, -90);
-            zodiacRect.sizeDelta = new Vector2(400, 30);
+            // Phase text (top-left)
+            _phaseText = CreateText(canvasGO, "PhaseText", new Vector2(20, -20), new Vector2(400, 40), 24, Color.white, TextAnchor.UpperLeft);
+            _phaseText.text = "Event Phase";
 
-            // Create End Turn button
+            // Turn text
+            _turnText = CreateText(canvasGO, "TurnText", new Vector2(20, -60), new Vector2(400, 30), 18, Color.yellow, TextAnchor.UpperLeft);
+            _turnText.text = "Turn 0";
+
+            // Zodiac text
+            _zodiacText = CreateText(canvasGO, "ZodiacText", new Vector2(20, -90), new Vector2(400, 30), 18, new Color(0.8f, 0.6f, 1f), TextAnchor.UpperLeft);
+            _zodiacText.text = "Year of the None";
+
+            // End Turn button (bottom-right)
+            CreateEndTurnButton(canvasGO);
+        }
+
+        private TextMeshProUGUI CreateText(Canvas canvas, string name, Vector2 pos, Vector2 size, int fontSize, Color color, TextAnchor alignment)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(canvas.transform, false);
+            var text = go.AddComponent<TextMeshProUGUI>();
+            text.fontSize = fontSize;
+            text.color = color;
+            text.alignment = alignment switch
+            {
+                TextAnchor.UpperLeft => TMPro.TextAlignmentOptions.TopLeft,
+                TextAnchor.UpperRight => TMPro.TextAlignmentOptions.TopRight,
+                TextAnchor.LowerLeft => TMPro.TextAlignmentOptions.BottomLeft,
+                TextAnchor.LowerRight => TMPro.TextAlignmentOptions.BottomRight,
+                _ => TMPro.TextAlignmentOptions.Center
+            };
+
+            // Disable raycast target so it doesn't block 3D clicks
+            text.raycastTarget = false;
+
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = new Vector2(0, 1);
+            rect.pivot = new Vector2(0, 1);
+            rect.anchoredPosition = pos;
+            rect.sizeDelta = size;
+
+            return text;
+        }
+
+        private void CreateEndTurnButton(Canvas canvas)
+        {
             var btnGO = new GameObject("EndTurnButton");
-            btnGO.transform.SetParent(canvasGO.transform, false);
+            btnGO.transform.SetParent(canvas.transform, false);
+
+            var image = btnGO.AddComponent<Image>();
+            image.color = new Vector4(0.2f, 0.5f, 0.8f, 0.9f);
+
             _endTurnButton = btnGO.AddComponent<Button>();
-            var btnImage = btnGO.AddComponent<Image>();
-            btnImage.color = new Color(0.2f, 0.5f, 0.8f, 0.9f);
-            var btnRect = btnGO.GetComponent<RectTransform>();
-            btnRect.anchorMin = new Vector2(1, 0);
-            btnRect.anchorMax = new Vector2(1, 0);
-            btnRect.pivot = new Vector2(1, 0);
-            btnRect.anchoredPosition = new Vector2(-20, 20);
-            btnRect.sizeDelta = new Vector2(160, 50);
-
-            // Button text
-            var btnTextGO = new GameObject("Text");
-            btnTextGO.transform.SetParent(btnGO.transform, false);
-            var btnText = btnTextGO.AddComponent<TextMeshProUGUI>();
-            btnText.text = "End Turn";
-            btnText.fontSize = 20;
-            btnText.color = Color.white;
-            btnText.alignment = TextAlignmentOptions.Center;
-            var btnTextRect = btnTextGO.GetComponent<RectTransform>();
-            btnTextRect.anchorMin = Vector2.zero;
-            btnTextRect.anchorMax = Vector2.one;
-            btnTextRect.sizeDelta = Vector2.zero;
-
             _endTurnButton.onClick.AddListener(OnEndTurnClicked);
 
-            UpdatePhaseDisplay(GamePhase.Event);
-            UpdateTurnDisplay(0);
-            UpdateZodiacDisplay("None");
+            var rect = btnGO.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1, 0);
+            rect.anchorMax = new Vector2(1, 0);
+            rect.pivot = new Vector2(1, 0);
+            rect.anchoredPosition = new Vector2(-20, 20);
+            rect.sizeDelta = new Vector2(160, 50);
+
+            // Button text
+            var textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var text = textGO.AddComponent<TextMeshProUGUI>();
+            text.text = "End Turn";
+            text.fontSize = 20;
+            text.color = Color.white;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
+            text.raycastTarget = false;
+
+            var textRect = textGO.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.anchoredPosition = Vector2.zero;
+
+            _endTurnButton.interactable = false;
         }
 
         private void OnPhaseChanged(GamePhase phase)
-        {
-            UpdatePhaseDisplay(phase);
-            if (_endTurnButton != null)
-            {
-                _endTurnButton.interactable = (phase == GamePhase.Action);
-            }
-        }
-
-        private void OnTurnStarted(int turn)
-        {
-            UpdateTurnDisplay(turn);
-            if (_turnDriver != null)
-            {
-                UpdateZodiacDisplay(_turnDriver.CurrentAnimal);
-            }
-        }
-
-        private void OnEndTurnClicked()
-        {
-            _turnDriver?.EndTurn();
-        }
-
-        private void UpdatePhaseDisplay(GamePhase phase)
         {
             if (_phaseText != null)
             {
@@ -194,22 +170,25 @@ namespace TalesOfTao.UI.HUD
                     _                    => "Unknown"
                 };
             }
+
+            if (_endTurnButton != null)
+            {
+                _endTurnButton.interactable = (phase == GamePhase.Action);
+            }
         }
 
-        private void UpdateTurnDisplay(int turn)
+        private void OnTurnStarted(int turn)
         {
             if (_turnText != null)
-            {
                 _turnText.text = $"Turn {turn}";
-            }
+
+            if (_zodiacText != null && _turnDriver != null)
+                _zodiacText.text = $"Year of the {_turnDriver.CurrentAnimal}";
         }
 
-        private void UpdateZodiacDisplay(string animal)
+        private void OnEndTurnClicked()
         {
-            if (_zodiacText != null)
-            {
-                _zodiacText.text = $"Year of the {animal}";
-            }
+            _turnDriver?.EndTurn();
         }
     }
 }
