@@ -68,6 +68,22 @@ namespace TalesOfTao.Sects
             Debug.Log($"[RecruitPeonCommand] Recruited peon: {disciple.Name} (Trait: {disciple.Trait})");
         }
 
+        public override void Undo()
+        {
+            // Remove the last added peon
+            var disciples = _sect.GetDisciples();
+            if (disciples.Count > 0)
+            {
+                var lastDisciple = disciples[disciples.Count - 1];
+                if (lastDisciple.Rank == DiscipleRank.Peon)
+                {
+                    _sect.RemoveDisciple(lastDisciple.Name);
+                    _sect.Stockpile.Tael += RECRUIT_COST;
+                    Debug.Log($"[RecruitPeonCommand] Undone: removed {lastDisciple.Name}, refunded {RECRUIT_COST} Tael");
+                }
+            }
+        }
+
         private static string RollTrait()
         {
             string[] traits = { "Lucky", "Resilient", "Perceptive", "Reckless", "Fragile", "" };

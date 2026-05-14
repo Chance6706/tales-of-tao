@@ -161,6 +161,23 @@ namespace TalesOfTao.Sects
         }
 
         /// <summary>
+        /// Removes a disciple by name.
+        /// </summary>
+        public bool RemoveDisciple(string name)
+        {
+            if (_disciples == null) return false;
+            for (int i = 0; i < _disciples.Count; i++)
+            {
+                if (_disciples[i].Name == name)
+                {
+                    _disciples.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Adds a building record.
         /// </summary>
         public void AddBuilding(string buildingTypeId, int tier, Vector3 position)

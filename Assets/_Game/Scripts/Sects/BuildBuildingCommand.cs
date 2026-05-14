@@ -84,5 +84,34 @@ namespace TalesOfTao.Sects
 
             Debug.Log($"[BuildBuildingCommand] Started construction: {_config.BuildingTypeId} T{_tier} ({turns} turns).");
         }
+
+        public override void Undo()
+        {
+            // Cancel the build if still in queue
+            if (_buildQueue.IsUnderConstruction(_config.BuildingTypeId, _tier))
+            {
+                var queue = _buildQueue.GetQueue();
+                for (int i = 0; i < queue.Length; i++)
+                {
+                    if (queue[i].BuildingTypeId == _config.BuildingTypeId && queue[i].Tier == _tier)
+                    {
+                        _buildQueue.Cancel(i);
+                        break;
+                    }
+                }
+            }
+
+            // Refund resources
+            ResourceCost cost = _config.GetTierCost(_tier);
+            _sect.Stockpile.Tael += cost.Tael;
+            _sect.Stockpile.Qi += cost.Qi;
+            _sect.Stockpile.Lumber += cost.Lumber;
+            _sect.Stockpile.IronOre += cost.IronOre;
+            _sect.Stockpile.Jade += cost.Jade;
+            _sect.Stockpile.MedicinalHerbs += cost.MedicinalHerbs;
+            _sect.Stockpile.SpiritHerbs += cost.SpiritHerbs;
+
+            Debug.Log($"[BuildBuildingCommand] Undone: cancelled {_config.BuildingTypeId} T{_tier}, refunded resources");
+        }
     }
 }
