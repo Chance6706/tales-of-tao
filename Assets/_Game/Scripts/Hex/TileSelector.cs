@@ -43,7 +43,7 @@ namespace TalesOfTao.Hex
             }
 
             // Ensure TileHighlighter exists
-            if (TileHighlighter.Instance == null)
+            if (UnityEngine.Object.FindAnyObjectByType<TileHighlighter>() == null)
             {
                 var go = new GameObject("TileHighlighter");
                 go.AddComponent<TileHighlighter>();
