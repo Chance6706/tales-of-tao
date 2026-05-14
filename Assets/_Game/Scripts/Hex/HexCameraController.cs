@@ -106,9 +106,10 @@ namespace TalesOfTao.Hex
                 if (_mouse != null && _mouse.middleButton.isPressed)
                 {
                     var delta = _mouse.delta.ReadValue();
-                    float zoomScale = _currentZoom / 10f;
-                    panX -= delta.x * _panSpeed * 0.01f * zoomScale;
-                    panZ -= delta.y * _panSpeed * 0.01f * zoomScale;
+                    // Match keyboard pan speed (panSpeed * zoomScale * dt equivalent)
+                    float panSpeed = _panSpeed * (_currentZoom / 5f) * Time.deltaTime * 60f;
+                    panX += delta.x * panSpeed;
+                    panZ -= delta.y * panSpeed;
                 }
             }
             else
@@ -129,11 +130,10 @@ namespace TalesOfTao.Hex
             if (Mathf.Abs(panX) < 0.001f && Mathf.Abs(panZ) < 0.001f) return;
 
             float rad = _currentRotation * Mathf.Deg2Rad;
-            Vector3 worldPan = new Vector3(
-                panX * Mathf.Cos(rad) - panZ * Mathf.Sin(rad),
-                0f,
-                panX * Mathf.Sin(rad) + panZ * Mathf.Cos(rad)
-            );
+            // Transform local pan direction to world space rotation only (no pitch)
+            // Negate Z so W moves north (toward -Z on the map)
+            Vector3 worldPan = new Vector3(-panX, 0f, -panZ);
+            worldPan = Quaternion.Euler(0f, _currentRotation, 0f) * worldPan;
 
             bool keyboardInput = Mathf.Abs(panX) > 0.001f || Mathf.Abs(panZ) > 0.001f;
             float speed = keyboardInput ? _keyboardPanSpeed : 1f;

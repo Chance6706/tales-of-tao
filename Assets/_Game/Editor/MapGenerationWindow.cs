@@ -57,13 +57,16 @@ namespace TalesOfTao.Editor
 
         private void Generate(int? forcedSeed = null)
         {
-            if (_gridManager == null)
+            var mgr = HexGridManager.Instance;
+            if (mgr == null)
+                mgr = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+            if (mgr == null)
             {
-                Debug.LogError("[TalesOfTao] Assign a HexGridManager first.");
+                Debug.LogError("[TalesOfTao] No HexGridManager found. Run '2 - Setup Main Scene' first.");
                 return;
             }
 
-            _gridManager.GenerateMap(forcedSeed);
+            mgr.GenerateMap(forcedSeed);
 
             if (_gridRenderer != null)
             {

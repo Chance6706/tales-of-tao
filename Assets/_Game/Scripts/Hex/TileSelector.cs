@@ -17,7 +17,6 @@ namespace TalesOfTao.Hex
         public static event Action<HexTileData> TileSelected;
 
         [SerializeField] private LayerMask _hexLayer = ~0;
-        [Tooltip("Must match the hex size used by HexGridRenderer.")]
         [SerializeField] private float _hexSize = 1f;
 
         private Camera _cam;
@@ -28,13 +27,35 @@ namespace TalesOfTao.Hex
         private void Awake()
         {
             _cam = GetComponent<Camera>();
-            _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
-            // New Input System is active if Mouse.current is available
             _useNewInput = Mouse.current != null;
+        }
+
+        private void Start()
+        {
+            // Find the grid manager and auto-generate if needed
+            _gridManager = HexGridManager.Instance;
+            if (_gridManager == null)
+                _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+            if (_gridManager != null && _gridManager.TileCount == 0)
+            {
+                Debug.Log("[TileSelector] Auto-generating map in Play mode...");
+                _gridManager.GenerateMap();
+            }
+
+            // Ensure TileHighlighter exists
+            if (UnityEngine.Object.FindAnyObjectByType<TileHighlighter>() == null)
+            {
+                var go = new GameObject("TileHighlighter");
+                go.AddComponent<TileHighlighter>();
+                Debug.Log("[TileSelector] Created TileHighlighter.");
+            }
         }
 
         private void Update()
         {
+            // Find the grid manager that has tile data
+            _gridManager = HexGridManager.Instance;
+
             bool leftClicked;
             Vector3 mousePos;
 
@@ -55,7 +76,8 @@ namespace TalesOfTao.Hex
 
             var ray = _cam.ScreenPointToRay(mousePos);
 
-            if (_gridManager != null && _gridManager.IsGenerated)
+            // Try chunk-based selection if grid manager has tiles (IsGenerated may not be set yet)
+            if (_gridManager != null && _gridManager.TileCount > 0)
             {
                 if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _hexLayer))
                 {
@@ -65,8 +87,16 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
+                        // Get elevation offset for highlight positioning
+                        float elevationY = hit.point.y;
+                        TileHighlighter.SelectTile(tile, elevationY);
                         return;
                     }
+                    Debug.Log($"[TileSelector] Raycast hit chunk but no tile at ({hexCoords.Q},{hexCoords.R}).");
+                }
+                else
+                {
+                    Debug.Log("[TileSelector] Raycast hit nothing.");
                 }
             }
             else

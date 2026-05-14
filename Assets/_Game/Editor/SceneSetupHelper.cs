@@ -67,11 +67,21 @@ namespace TalesOfTao.Editor
 
         private static void SetupMainCamera()
         {
-            if (Camera.main != null) return;
+            Camera cam;
+            if (Camera.main != null)
+            {
+                cam = Camera.main;
+                // Ensure camera has required components
+                if (cam.GetComponent<HexCameraController>() == null)
+                    cam.gameObject.AddComponent<HexCameraController>();
+                if (cam.GetComponent<AudioListener>() == null)
+                    cam.gameObject.AddComponent<AudioListener>();
+                return;
+            }
 
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
-            var cam = camGo.AddComponent<Camera>();
+            cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.15f, 0.15f, 0.2f, 1f);
             cam.orthographic = true;
@@ -142,15 +152,19 @@ namespace TalesOfTao.Editor
         {
             var cam = Camera.main;
             if (cam == null) { Debug.LogWarning("[TalesOfTao] No Main Camera found. TileSelector not added."); return; }
-            if (cam.GetComponent<TileSelector>() != null) return;
+            if (cam.GetComponent<TileSelector>() == null)
+            {
+                cam.gameObject.AddComponent<TileSelector>();
+                Debug.Log("[TalesOfTao] Added TileSelector to Main Camera.");
+            }
 
-            var selector   = cam.gameObject.AddComponent<TileSelector>();
-            int layerIndex = LayerMask.NameToLayer("HexTile");
-            if (layerIndex < 0) layerIndex = 0;
-
-            var ser = new SerializedObject(selector);
-            ser.FindProperty("_hexLayer").intValue = 1 << layerIndex;
-            ser.ApplyModifiedPropertiesWithoutUndo();
+            // Ensure TileHighlighter exists
+            if (Object.FindAnyObjectByType<TileHighlighter>() == null)
+            {
+                var go = new GameObject("TileHighlighter");
+                go.AddComponent<TileHighlighter>();
+                Debug.Log("[TalesOfTao] Created TileHighlighter.");
+            }
         }
 
         private static void SetupTileInfoPanel()
