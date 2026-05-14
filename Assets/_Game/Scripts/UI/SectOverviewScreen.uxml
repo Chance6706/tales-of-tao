@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="sect-overview-root" class="overview-root">
+        <ui:VisualElement name="header" class="overview-header">
+            <ui:Label name="title" text="Sect Overview" class="overview-title"/>
+            <ui:Button name="close-button" text="X" class="overview-close-btn"/>
+        </ui:VisualElement>
+
+        <ui:ScrollView name="content-scroll" class="overview-scroll">
+            <ui:VisualElement name="buildings-panel" class="overview-panel">
+                <ui:Label name="building-status" text="Buildings" class="overview-panel-title"/>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="disciples-panel" class="overview-panel">
+                <ui:Label name="disciple-roster" text="Disciples" class="overview-panel-title"/>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="resources-panel" class="overview-panel">
+                <ui:Label name="resource-summary" text="Resources" class="overview-panel-title"/>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="dissent-panel" class="overview-panel">
+                <ui:Label text="Dissent" class="overview-panel-title"/>
+                <ui:ProgressBar name="dissent-bar" class="overview-dissent-bar"/>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="zodiac-panel" class="overview-panel">
+                <ui:Label name="zodiac-label" text="" class="overview-zodiac"/>
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</UXML>

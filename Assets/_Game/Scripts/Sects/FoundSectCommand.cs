@@ -64,9 +64,24 @@ namespace TalesOfTao.Sects
                     Tael = _config.StartingTael,
                     Qi = _config.StartingQi,
                 },
-                PeonCount = _config.StartingPeons,
                 DissentLevel = 0,
             };
+
+            // Add starting peons
+            for (int i = 0; i < _config.StartingPeons; i++)
+            {
+                var peon = new DiscipleData
+                {
+                    Name = DiscipleData.GenerateName(),
+                    Rank = DiscipleRank.Peon,
+                    IsAlive = true,
+                    Techniques = System.Array.Empty<string>(),
+                    Trait = "",
+                    BondedBeast = ""
+                };
+                peon.CalculateStats(_config);
+                _createdData.AddDisciple(peon);
+            }
 
             // Mark tile as sect territory
             tile.Control = ControlState.SectTerritory;

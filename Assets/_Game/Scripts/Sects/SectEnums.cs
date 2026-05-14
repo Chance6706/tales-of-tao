@@ -52,4 +52,16 @@ namespace TalesOfTao.Sects
         SpiritHerbs = 7,
         TeaLeaves = 8,
     }
+
+    /// <summary>
+    /// Disciple rank in the sect hierarchy. Higher ranks are more powerful.
+    /// </summary>
+    public enum DiscipleRank
+    {
+        Peon = 0,
+        OuterDisciple = 1,
+        InnerDisciple = 2,
+        Elder = 3,
+        HighElder = 4,
+    }
 }
