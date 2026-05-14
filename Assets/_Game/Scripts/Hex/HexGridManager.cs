@@ -108,6 +108,10 @@ namespace TalesOfTao.Hex
             Pass_StartingLocations(rng);
             Pass_Settlements(rng);
             Pass_ResourceDeposits(rng);
+            Pass_QiDensity(rng);
+            Pass_Caves(rng);
+            Pass_Features(rng);
+            Pass_Fortifications(rng);
 
             _isGenerated = true;
             OnMapGenerated?.Invoke();
@@ -547,6 +551,90 @@ namespace TalesOfTao.Hex
             }
         }
 
+n        // ── Pass 7b: Qi Density ───────────────────────────────────────────────
+
+        private void Pass_QiDensity(System.Random rng)
+        {
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                var t = _tiles[i];
+                if (t.QiDensity == QiDensityLevel.LeyLine) continue;
+
+                float roll = (float)rng.NextDouble();
+                t.QiDensity = t.Elevation switch
+                {
+                    ElevationLevel.Summit => roll < 0.5f ? QiDensityLevel.Dense : QiDensityLevel.Moderate,
+                    ElevationLevel.High    => roll < 0.3f ? QiDensityLevel.Moderate : QiDensityLevel.Sparse,
+                    ElevationLevel.Medium  => roll < 0.2f ? QiDensityLevel.Moderate : QiDensityLevel.Sparse,
+                    _                      => roll < 0.15f ? QiDensityLevel.Sparse : QiDensityLevel.None,
+                };
+
+                if (t.Terrain?.Type == TerrainType.SacredPeak && t.QiDensity < QiDensityLevel.Moderate)
+                    t.QiDensity = QiDensityLevel.Moderate;
+            }
+        }
+
+        // ── Pass 7c: Caves ────────────────────────────────────────────────────
+
+        private void Pass_Caves(System.Random rng)
+        {
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                var t = _tiles[i];
+                if (t.Elevation < ElevationLevel.Medium) continue;
+                bool validTerrain = t.Terrain?.Type == TerrainType.Mountain || t.Terrain?.Type == TerrainType.Forest;
+                if (!validTerrain) continue;
+                float chance = t.Terrain?.Type == TerrainType.Mountain ? 0.25f : 0.10f;
+                if (rng.NextDouble() < chance)
+                    t.CaveCount = rng.Next(1, 4);
+            }
+        }
+
+        // ── Pass 7d: Features ─────────────────────────────────────────────────
+
+        private void Pass_Features(System.Random rng)
+        {
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                var t = _tiles[i];
+                if (t.Terrain?.IsImpassable == true) continue;
+                if (t.Terrain?.Type == TerrainType.SacredPeak) continue;
+                float roll = (float)rng.NextDouble();
+                float featureChance = t.Terrain?.Type == TerrainType.Mountain ? 0.08f :
+                                      t.Terrain?.Type == TerrainType.Forest   ? 0.06f :
+                                      t.Terrain?.Type == TerrainType.Swamp    ? 0.06f : 0.04f;
+                if (t.Elevation == ElevationLevel.Summit) featureChance += 0.08f;
+                if (roll < featureChance)
+                {
+                    t.Feature = t.Terrain?.Type == TerrainType.Mountain ? TileFeature.AncientRuins :
+                                t.Terrain?.Type == TerrainType.Forest   ? TileFeature.SpiritVein :
+                                t.Terrain?.Type == TerrainType.Swamp    ? TileFeature.HotSpring : TileFeature.BanditCamp;
+                }
+            }
+        }
+
+        // ── Pass 7e: Fortifications ───────────────────────────────────────────
+
+        private void Pass_Fortifications(System.Random rng)
+        {
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                var t = _tiles[i];
+                if (t.Control == ControlState.Unowned) continue;
+                float roll = (float)rng.NextDouble();
+                if (t.Control == ControlState.SectTerritory)
+                {
+                    if (roll < 0.15f) t.Fortification = FortificationLevel.Watchtower;
+                    else if (roll < 0.05f) t.Fortification = FortificationLevel.Garrison;
+                    else if (roll < 0.01f) t.Fortification = FortificationLevel.Fortress;
+                }
+                else if (t.Control == ControlState.SettlementInfluence)
+                {
+                    if (roll < 0.08f) t.Fortification = FortificationLevel.Watchtower;
+                    else if (roll < 0.02f) t.Fortification = FortificationLevel.Garrison;
+                }
+            }
+        }
         // ── Utility ─────────────────────────────────────────────────────────
 
         private static (int width, int height) GetDimensions(MapSize size) => size switch
