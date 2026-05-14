@@ -45,7 +45,10 @@ namespace TalesOfTao.UI.HUD
 
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
-            _turnDriver.StartTurn();
+
+            // Only start the turn if the driver isn't already active
+            if (!_turnDriver.IsActive)
+                _turnDriver.StartTurn();
         }
 
         private void Update()
