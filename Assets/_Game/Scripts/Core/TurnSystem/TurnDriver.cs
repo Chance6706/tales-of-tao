@@ -87,7 +87,6 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void StartTurn()
         {
-            Debug.Log($"[TurnDriver] StartTurn: _initialized={_initialized}, _active={_active}, _turnNumber={_turnNumber}");
             if (!_initialized) return;
 
             _turnNumber++;

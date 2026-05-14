@@ -39,7 +39,13 @@ namespace TalesOfTao.Sects
                 var driverGO = new GameObject("TurnDriver");
                 _turnDriver = driverGO.AddComponent<TurnDriver>();
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
-                _turnDriver.StartTurn();
+            }
+            else if (!_turnDriver.IsActive)
+            {
+                // Found existing driver but not initialized
+                var calGO = new GameObject("ZodiacCalendar_Auto");
+                var calendar = calGO.AddComponent<ZodiacCalendar>();
+                _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
             // else: existing driver is already running, just use it
 

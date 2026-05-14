@@ -30,39 +30,33 @@ namespace TalesOfTao.UI.HUD
 
         private void Start()
         {
-            Debug.Log("[TurnTestHUD] Start called");
             if (_turnDriver == null)
                 _turnDriver = FindAnyObjectByType<TurnDriver>();
 
             if (_turnDriver == null)
             {
-                Debug.Log("[TurnTestHUD] Creating new turn system");
                 var calGO = new GameObject("ZodiacCalendar");
                 var calendar = calGO.AddComponent<ZodiacCalendar>();
                 var driverGO = new GameObject("TurnDriver");
                 _turnDriver = driverGO.AddComponent<TurnDriver>();
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
-            else
+            else if (!_turnDriver.IsActive)
             {
-                Debug.Log($"[TurnTestHUD] Found existing driver, IsActive={_turnDriver.IsActive}");
+                var calGO = new GameObject("ZodiacCalendar_Auto");
+                var calendar = calGO.AddComponent<ZodiacCalendar>();
+                _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
 
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
 
             if (!_turnDriver.IsActive)
-            {
-                Debug.Log("[TurnTestHUD] Calling StartTurn");
                 _turnDriver.StartTurn();
-                Debug.Log($"[TurnTestHUD] After StartTurn, IsActive={_turnDriver.IsActive}, Phase={_turnDriver.CurrentPhase}");
-            }
 
-            // Force initial UI update with current state
-            Debug.Log($"[TurnTestHUD] Forcing update: Phase={_turnDriver.CurrentPhase}, Turn={_turnDriver.TurnNumber}, Animal={_turnDriver.CurrentAnimal}");
+            // Force initial UI update
             OnPhaseChanged(_turnDriver.CurrentPhase);
             OnTurnStarted(_turnDriver.TurnNumber);
-            Debug.Log($"[TurnTestHUD] After update: phaseText={_phaseText}, turnText={_turnText}, zodiacText={_zodiacText}");
         }
 
         private void Update()
