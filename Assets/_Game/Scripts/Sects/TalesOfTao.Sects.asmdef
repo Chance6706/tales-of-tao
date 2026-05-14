@@ -3,7 +3,8 @@
     "rootNamespace": "TalesOfTao.Sects",
     "references": [
         "TalesOfTao.Core",
-        "TalesOfTao.Hex"
+        "TalesOfTao.Hex",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
