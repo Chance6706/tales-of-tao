@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
 {

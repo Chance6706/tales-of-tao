@@ -1,20 +1,9 @@
 using System;
 using UnityEngine;
+using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
 {
-    /// <summary>
-    /// Interface for each turn phase state.
-    /// Each phase has Enter, Tick (for async operations), and Exit.
-    /// </summary>
-    public interface ITurnState
-    {
-        GamePhase Phase { get; }
-        void Enter();
-        void Tick();
-        void Exit();
-    }
-
     /// <summary>
     /// State machine driving the 6 turn phases.
     /// Transitions are event-driven: each phase signals completion,
@@ -43,7 +32,6 @@ namespace TalesOfTao.Core.TurnSystem
         {
             _calendar = calendar;
 
-            // Create the 6 phase states
             _states = new ITurnState[]
             {
                 new EventState(_zodiacBonusesChannel),
@@ -86,7 +74,6 @@ namespace TalesOfTao.Core.TurnSystem
 
             if (_currentStateIndex >= _states.Length)
             {
-                // Turn complete
                 CompleteTurn();
             }
             else
@@ -96,8 +83,7 @@ namespace TalesOfTao.Core.TurnSystem
         }
 
         /// <summary>
-        /// Ends the player's Action phase and triggers the rest of the turn
-        /// (Resolution phase + next turn's Event/Income/Build/Research).
+        /// Ends the player's Action phase and triggers the rest of the turn.
         /// </summary>
         public void EndTurn()
         {
@@ -108,12 +94,10 @@ namespace TalesOfTao.Core.TurnSystem
                 return;
             }
 
-            // Exit Action phase
             CurrentState.Exit();
             _currentStateIndex = (int)GamePhase.Resolution;
             EnterCurrentPhase();
 
-            // Auto-advance through Resolution
             CurrentState.Exit();
             CompleteTurn();
         }
