@@ -86,6 +86,7 @@ namespace TalesOfTao.Hex
         /// </summary>
         public void GenerateMap(int? forcedSeed = null)
         {
+            Debug.Log($"[HexGridManager] GenerateMap called. Current tileCount={TileCount}");
             if (forcedSeed.HasValue) _seed = forcedSeed.Value;
             else if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
@@ -99,6 +100,7 @@ namespace TalesOfTao.Hex
             Debug.Log($"[HexGrid] Generating {_width}x{_height} map ({totalTiles} tiles, seed={_seed})");
 
             _tiles = new HexTileData[totalTiles];
+            Debug.Log($"[HexGrid] _tiles set. Length={_tiles.Length}, tileCount={TileCount}");
 
             // Initialize all tiles with default coords
             for (int i = 0; i < totalTiles; i++)
