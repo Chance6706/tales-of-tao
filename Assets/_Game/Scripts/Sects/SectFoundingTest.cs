@@ -8,7 +8,7 @@ namespace TalesOfTao.Sects
 {
     /// <summary>
     /// Test harness for sect founding. Self-bootstrapping.
-    /// Press F on a valid tile to found a sect.
+    /// Press T on a valid tile during Action phase to found a sect.
     /// </summary>
     public class SectFoundingTest : MonoBehaviour
     {
@@ -17,7 +17,7 @@ namespace TalesOfTao.Sects
 
         [Header("State")]
         [SerializeField] private bool _founded;
-        [SerializeField] private string _statusMessage = "Move to a valid tile and press F to found sect";
+        [SerializeField] private string _statusMessage = "Wait for Action phase, then press T on a tile to found sect";
 
         private TurnDriver _turnDriver;
         private SectManager _sectManager;
@@ -29,10 +29,11 @@ namespace TalesOfTao.Sects
             _gridManager = HexGridManager.Instance;
             _camera = Camera.main;
 
-            // Find or create turn driver
+            // Find existing turn driver (created by TurnTestHUD or scene)
             _turnDriver = FindAnyObjectByType<TurnDriver>();
             if (_turnDriver == null)
             {
+                // Create minimal turn system
                 var calGO = new GameObject("ZodiacCalendar");
                 var calendar = calGO.AddComponent<ZodiacCalendar>();
                 var driverGO = new GameObject("TurnDriver");
@@ -40,6 +41,7 @@ namespace TalesOfTao.Sects
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
                 _turnDriver.StartTurn();
             }
+            // else: existing driver is already running, just use it
 
             // Create SectManager
             var mgrGO = new GameObject("SectManager");
@@ -54,21 +56,21 @@ namespace TalesOfTao.Sects
             if (_turnDriver != null && _turnDriver.CurrentPhase != GamePhase.Action)
                 return;
 
-            // Check for F key
-            bool fPressed = false;
+            // Check for T key (T for Temple/found)
+            bool tPressed = false;
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
-                if (keyboard.fKey.wasPressedThisFrame)
-                    fPressed = true;
+                if (keyboard.tKey.wasPressedThisFrame)
+                    tPressed = true;
             }
             else
             {
-                if (Input.GetKeyDown(KeyCode.F))
-                    fPressed = true;
+                if (Input.GetKeyDown(KeyCode.T))
+                    tPressed = true;
             }
 
-            if (!fPressed) return;
+            if (!tPressed) return;
 
             // Raycast to find tile under mouse
             var mouse = Mouse.current;
@@ -119,20 +121,26 @@ namespace TalesOfTao.Sects
         {
             GUIStyle style = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 18,
+                fontSize = 16,
                 normal = { textColor = Color.white }
             };
 
+            float y = Screen.height - 30;
+
             GUI.color = new Color(0, 0, 0, 0.7f);
-            GUI.DrawTexture(new Rect(10, Screen.height - 50, 600, 40), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(10, y - 5, 500, 30), Texture2D.whiteTexture);
             GUI.color = Color.white;
 
-            GUI.Label(new Rect(20, Screen.height - 45, 580, 35), _statusMessage, style);
+            GUI.Label(new Rect(20, y, 480, 25), _statusMessage, style);
 
             if (_founded && _sectManager.HasFoundedSect)
             {
                 var data = _sectManager.Data;
-                GUI.Label(new Rect(20, Screen.height - 80, 580, 35),
+                y -= 28;
+                GUI.color = new Color(0, 0, 0, 0.7f);
+                GUI.DrawTexture(new Rect(10, y - 5, 500, 30), Texture2D.whiteTexture);
+                GUI.color = Color.white;
+                GUI.Label(new Rect(20, y, 480, 25),
                     $"Tael: {data.Stockpile.Tael} | Qi: {data.Stockpile.Qi} | Peons: {data.PeonCount} | Dissent: {data.DissentLevel}", style);
             }
         }
