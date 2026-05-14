@@ -57,14 +57,16 @@ namespace TalesOfTao.Editor
 
         private void Generate(int? forcedSeed = null)
         {
-            if (_gridManager == null)
+            // Always use the current instance, not the serialized reference
+            var mgr = HexGridManager.Instance;
+            if (mgr == null)
             {
-                Debug.LogError("[TalesOfTao] Assign a HexGridManager first.");
+                Debug.LogError("[TalesOfTao] No HexGridManager instance found.");
                 return;
             }
 
-            _gridManager.GenerateMap(forcedSeed);
-            Debug.Log($"[MapGenWindow] After GenerateMap: tileCount={_gridManager.TileCount}, instance={_gridManager.GetInstanceID()}");
+            mgr.GenerateMap(forcedSeed);
+            Debug.Log($"[MapGenWindow] After GenerateMap: tileCount={mgr.TileCount}, instance={mgr.GetInstanceID()}");
 
             if (_gridRenderer != null)
             {
