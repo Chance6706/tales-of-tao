@@ -4,6 +4,10 @@ using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
 {
+    /// <summary>
+    /// Drives the turn cycle. Auto-advances through non-Action phases,
+    /// waits for player input during Action phase.
+    /// </summary>
     public class TurnDriver : MonoBehaviour
     {
         [Header("Event Channels")]
@@ -13,7 +17,8 @@ namespace TalesOfTao.Core.TurnSystem
 
         [Header("Settings")]
         [SerializeField] private float _autoAdvanceDelay = 0f;
-        [SerializeField] private bool _logPhases = true;
+        [SerializeField] private float _nonActionPhaseDelay = 0.5f;
+        [SerializeField] private bool _logPhases = false;
 
         private ZodiacCalendar _calendar;
         private int _currentPhase;
@@ -48,9 +53,7 @@ namespace TalesOfTao.Core.TurnSystem
             if ((GamePhase)_currentPhase == GamePhase.Action)
             {
                 bool endTurnPressed = false;
-
-                // Try new Input System first
-                var keyboard = UnityEngine.InputSystem.Keyboard.current;
+                var keyboard = Keyboard.current;
                 if (keyboard != null)
                 {
                     if (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
@@ -58,7 +61,6 @@ namespace TalesOfTao.Core.TurnSystem
                 }
                 else
                 {
-                    // Fallback to old Input
                     if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
                         endTurnPressed = true;
                 }
@@ -70,12 +72,11 @@ namespace TalesOfTao.Core.TurnSystem
                 }
             }
 
-            // Auto-advance phases (for non-Action phases or when delay is set)
-            bool shouldAutoAdvance = _autoAdvanceDelay > 0f || (GamePhase)_currentPhase != GamePhase.Action;
-            if (shouldAutoAdvance)
+            // Auto-advance non-Action phases
+            if ((GamePhase)_currentPhase != GamePhase.Action)
             {
                 _phaseTimer += Time.deltaTime;
-                float delay = _autoAdvanceDelay > 0f ? _autoAdvanceDelay : 0.5f; // default 0.5s for test
+                float delay = _autoAdvanceDelay > 0f ? _autoAdvanceDelay : _nonActionPhaseDelay;
                 if (_phaseTimer >= delay)
                 {
                     _phaseTimer = 0f;
@@ -149,16 +150,17 @@ namespace TalesOfTao.Core.TurnSystem
 
         private void ExitPhase()
         {
-            var phase = (GamePhase)_currentPhase;
             if (_logPhases)
+            {
+                var phase = (GamePhase)_currentPhase;
                 Debug.Log($"[Turn {_turnNumber}] Exiting {phase} phase");
+            }
         }
 
         private void CompleteTurn()
         {
             _active = false;
             _turnEndedChannel?.Raise();
-            Debug.Log($"[TurnDriver] Turn {_turnNumber} complete.");
         }
     }
 }

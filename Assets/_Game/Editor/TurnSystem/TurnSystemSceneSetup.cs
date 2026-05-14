@@ -24,8 +24,15 @@ namespace TalesOfTao.Editor.TurnSystem
             var hudGO = new GameObject("TurnTestHUD");
             hudGO.AddComponent<TurnTestHUD>();
 
+            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var esGO = new GameObject("EventSystem");
+                esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            }
+
             Selection.activeGameObject = hudGO;
-            Debug.Log("[TurnSystemSetup] Complete! Press Play to test.");
+            Debug.Log("[TurnSystemSetup] Complete. Press Play to test.");
         }
 
         private static void CreateEventChannelIfNeeded<T>(string name, string path) where T : ScriptableObject
@@ -37,7 +44,6 @@ namespace TalesOfTao.Editor.TurnSystem
             asset.name = name;
             AssetDatabase.CreateAsset(asset, path);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[TurnSystemSetup] Created: {path}");
         }
     }
 }
