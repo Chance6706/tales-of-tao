@@ -27,11 +27,11 @@ namespace TalesOfTao.Hex
         [Header("References")]
         [SerializeField] private TerrainTypeSO[] _terrainTypes; // 8 types in enum order
 
-        // Generated data
-        private HexTileData[] _tiles;
-        private int _width;
-        private int _height;
-        private bool _isGenerated;
+        // Generated data — static to survive domain reloads
+        private static HexTileData[] _tiles;
+        private static int _width;
+        private static int _height;
+        private static bool _isGenerated;
 
         /// <summary>Singleton instance for easy access from other components.</summary>
         public static HexGridManager Instance { get; set; }
@@ -79,7 +79,6 @@ namespace TalesOfTao.Hex
         /// </summary>
         public void GenerateMap(int? forcedSeed = null)
         {
-            Debug.Log($"[HexGridManager] GenerateMap called. Current tileCount={TileCount}");
             if (forcedSeed.HasValue) _seed = forcedSeed.Value;
             else if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
@@ -93,7 +92,6 @@ namespace TalesOfTao.Hex
             Debug.Log($"[HexGrid] Generating {_width}x{_height} map ({totalTiles} tiles, seed={_seed})");
 
             _tiles = new HexTileData[totalTiles];
-            Debug.Log($"[HexGrid] _tiles set. Length={_tiles.Length}, tileCount={TileCount}");
 
             // Initialize all tiles with default coords
             for (int i = 0; i < totalTiles; i++)

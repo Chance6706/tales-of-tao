@@ -34,21 +34,6 @@ namespace TalesOfTao.Hex
         {
             // Find the grid manager that has tile data
             _gridManager = HexGridManager.Instance;
-            if (_gridManager == null || _gridManager.TileCount == 0)
-            {
-                var all = Resources.FindObjectsOfTypeAll<HexGridManager>();
-                Debug.Log($"[TileSelector] FindObjectsOfTypeAll found {all.Length} managers");
-                foreach (var mgr in all)
-                {
-                    Debug.Log($"[TileSelector] mgr: {mgr.name}, tileCount={mgr.TileCount}, sceneLoaded={mgr.gameObject.scene.isLoaded}");
-                    if (mgr != null && mgr.TileCount > 0 && mgr.gameObject.scene.isLoaded)
-                    {
-                        _gridManager = mgr;
-                        HexGridManager.Instance = mgr;
-                        break;
-                    }
-                }
-            }
 
             bool leftClicked;
             Vector3 mousePos;
@@ -67,8 +52,6 @@ namespace TalesOfTao.Hex
             }
 
             if (!leftClicked) return;
-
-            Debug.Log($"[TileSelector] Click at {mousePos}, tileCount={_gridManager?.TileCount}");
 
             var ray = _cam.ScreenPointToRay(mousePos);
 
