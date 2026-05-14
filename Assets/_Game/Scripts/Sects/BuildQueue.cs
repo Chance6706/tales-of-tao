@@ -129,10 +129,10 @@ namespace TalesOfTao.Sects
                 }
             }
 
-            // Clean up completed/cancelled entries
+            // Clean up cancelled entries only (keep completed for IsComplete checks)
             if (changed)
             {
-                CleanupCompleted();
+                CleanupCancelled();
             }
         }
 
@@ -220,6 +220,38 @@ namespace TalesOfTao.Sects
             foreach (var entry in _queue)
             {
                 if (!entry.IsComplete && !entry.IsCancelled)
+                {
+                    newQueue[idx++] = entry;
+                }
+            }
+            _queue = newQueue;
+        }
+
+        /// <summary>
+        /// Removes only cancelled entries from the queue. Completed entries stay for IsComplete checks.
+        /// </summary>
+        private void CleanupCancelled()
+        {
+            if (_queue == null) return;
+            int keepCount = 0;
+            foreach (var entry in _queue)
+            {
+                if (!entry.IsCancelled) keepCount++;
+            }
+
+            if (keepCount == 0)
+            {
+                _queue = Array.Empty<BuildEntry>();
+                return;
+            }
+
+            if (keepCount == _queue.Length) return; // Nothing to clean
+
+            var newQueue = new BuildEntry[keepCount];
+            int idx = 0;
+            foreach (var entry in _queue)
+            {
+                if (!entry.IsCancelled)
                 {
                     newQueue[idx++] = entry;
                 }
