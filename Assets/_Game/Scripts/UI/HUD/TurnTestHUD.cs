@@ -12,12 +12,12 @@ namespace TalesOfTao.UI.HUD
         private string _zodiacText = "...";
         private bool _canEndTurn;
         private Rect _buttonRect;
+        private GUIStyle _labelStyle;
+        private GUIStyle _buttonStyle;
+        private bool _stylesCreated;
 
         private void Start()
         {
-            Debug.Log("[TurnTestHUD] Start");
-
-            // Always create our own turn system to avoid conflicts
             var calGO = new GameObject("ZodiacCalendar");
             var calendar = calGO.AddComponent<ZodiacCalendar>();
 
@@ -25,13 +25,10 @@ namespace TalesOfTao.UI.HUD
             _turnDriver = driverGO.AddComponent<TurnDriver>();
             _turnDriver.Initialize(calendar, null, null, null, 0f);
 
-            // Subscribe BEFORE starting
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
 
-            Debug.Log("[TurnTestHUD] Subscribed, starting turn...");
             _turnDriver.StartTurn();
-            Debug.Log("[TurnTestHUD] StartTurn returned");
         }
 
         private void OnDestroy()
@@ -43,34 +40,49 @@ namespace TalesOfTao.UI.HUD
             }
         }
 
-        private void OnGUI()
+        private void CreateStyles()
         {
-            GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
+            if (_stylesCreated) return;
+            _stylesCreated = true;
+
+            _labelStyle = new GUIStyle
             {
-                fontSize = 20,
-                normal = { textColor = Color.white }
+                fontSize = 24,
+                normal = { textColor = Color.white },
+                alignment = TextAnchor.UpperLeft
             };
 
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button)
+            _buttonStyle = new GUIStyle(GUI.skin.button)
             {
                 fontSize = 18
             };
+        }
+
+        private void OnGUI()
+        {
+            CreateStyles();
 
             float x = 20;
             float y = 20;
-            float lineHeight = 28;
+            float lineHeight = 32;
 
-            GUI.Label(new Rect(x, y, 400, lineHeight), _phaseText, labelStyle);
-            y += lineHeight;
-            GUI.Label(new Rect(x, y, 400, lineHeight), _turnText, labelStyle);
-            y += lineHeight;
-            GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, labelStyle);
+            // Draw a dark background box for readability
+            GUI.color = new Color(0, 0, 0, 0.7f);
+            GUI.DrawTexture(new Rect(10, 10, 420, lineHeight * 3 + 20), Texture2D.whiteTexture);
+            GUI.color = Color.white;
 
+            GUI.Label(new Rect(x, y, 400, lineHeight), _phaseText, _labelStyle);
+            y += lineHeight;
+            GUI.Label(new Rect(x, y, 400, lineHeight), _turnText, _labelStyle);
+            y += lineHeight;
+            GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, _labelStyle);
+
+            // End Turn button
             float btnW = 160;
             float btnH = 50;
             _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
 
-            // Consume mouse events over the button to prevent TileSelector raycast
+            // Consume mouse events over button
             Event e = Event.current;
             if (e.isMouse && _buttonRect.Contains(e.mousePosition))
             {
@@ -80,9 +92,8 @@ namespace TalesOfTao.UI.HUD
                 }
             }
 
-            if (GUI.Button(_buttonRect, "End Turn", buttonStyle))
+            if (GUI.Button(_buttonRect, "End Turn", _buttonStyle))
             {
-                Debug.Log("[TurnTestHUD] Button clicked!");
                 OnEndTurnClicked();
             }
 
@@ -91,7 +102,6 @@ namespace TalesOfTao.UI.HUD
             {
                 if (_canEndTurn)
                 {
-                    Debug.Log("[TurnTestHUD] Key pressed!");
                     OnEndTurnClicked();
                     e.Use();
                 }
@@ -100,7 +110,6 @@ namespace TalesOfTao.UI.HUD
 
         private void OnPhaseChanged(GamePhase phase)
         {
-            Debug.Log($"[TurnTestHUD] OnPhaseChanged: {phase}");
             _phaseText = phase switch
             {
                 GamePhase.Event      => "Event Phase",
@@ -116,19 +125,15 @@ namespace TalesOfTao.UI.HUD
 
         private void OnTurnStarted(int turn)
         {
-            Debug.Log($"[TurnTestHUD] OnTurnStarted: {turn}");
             _turnText = $"Turn {turn}";
             if (_turnDriver != null)
             {
-                string animal = _turnDriver.CurrentAnimal;
-                _zodiacText = $"Year of the {animal}";
-                Debug.Log($"[TurnTestHUD] Zodiac: {animal}");
+                _zodiacText = $"Year of the {_turnDriver.CurrentAnimal}";
             }
         }
 
         private void OnEndTurnClicked()
         {
-            Debug.Log("[TurnTestHUD] End Turn!");
             _turnDriver?.EndTurn();
         }
     }
