@@ -27,7 +27,13 @@ namespace TalesOfTao.Hex
         private void Awake()
         {
             _cam = GetComponent<Camera>();
-            // Find the grid manager that has actually generated data
+            _useNewInput = Mouse.current != null;
+        }
+
+        private void Update()
+        {
+            // Always find the grid manager with tile data
+            _gridManager = null;
             var managers = UnityEngine.Object.FindObjectsByType<HexGridManager>();
             foreach (var mgr in managers)
             {
@@ -35,29 +41,6 @@ namespace TalesOfTao.Hex
                 {
                     _gridManager = mgr;
                     break;
-                }
-            }
-            if (_gridManager == null)
-                _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
-            _useNewInput = Mouse.current != null;
-        }
-
-        private void Update()
-        {
-            // Refresh grid manager reference if we don't have tiles yet
-            if (_gridManager == null || _gridManager.TileCount == 0)
-            {
-                var managers = UnityEngine.Object.FindObjectsByType<HexGridManager>();
-                Debug.Log($"[TileSelector] Searching {managers.Length} HexGridManager(s)...");
-                foreach (var mgr in managers)
-                {
-                    Debug.Log($"[TileSelector] Found mgr: {mgr.name}, tileCount={mgr.TileCount}, isGenerated={mgr.IsGenerated}");
-                    if (mgr != null && mgr.TileCount > 0)
-                    {
-                        _gridManager = mgr;
-                        Debug.Log($"[TileSelector] Selected mgr with {mgr.TileCount} tiles.");
-                        break;
-                    }
                 }
             }
 
