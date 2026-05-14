@@ -16,7 +16,8 @@ public class M5AssetImporter : EditorWindow
         string tilesPath = prefabsPath + "/HexTiles";
         string featuresPath = prefabsPath + "/Features";
 
-        EnsureDirectory(materialsPath);
+        EnsureDirectory(artRoot + "/Materials");
+        EnsureDirectory(prefabsPath);
         EnsureDirectory(buildingsPath);
         EnsureDirectory(unitsPath);
         EnsureDirectory(tilesPath);
@@ -58,12 +59,13 @@ public class M5AssetImporter : EditorWindow
 
     static void EnsureDirectory(string path)
     {
-        if (!AssetDatabase.IsValidFolder(path))
-        {
-            string parent = Path.GetDirectoryName(path);
-            string name = Path.GetFileName(path);
-            AssetDatabase.CreateFolder(parent, name);
-        }
+        if (string.IsNullOrEmpty(path) || path == "Assets") return;
+        if (AssetDatabase.IsValidFolder(path)) return;
+        string parent = Path.GetDirectoryName(path);
+        string name = Path.GetFileName(path);
+        if (string.IsNullOrEmpty(parent) || string.IsNullOrEmpty(name)) return;
+        EnsureDirectory(parent);
+        AssetDatabase.CreateFolder(parent, name);
     }
 
     static void CreateMaterial(string path, string name, Color color)
