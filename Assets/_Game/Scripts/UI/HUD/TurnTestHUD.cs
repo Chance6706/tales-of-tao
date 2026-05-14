@@ -83,7 +83,7 @@ namespace TalesOfTao.UI.HUD
             y += lineHeight;
             GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, _labelStyle);
 
-            // End Turn button
+            // End Turn button — only clickable during Action phase
             float btnW = 160;
             float btnH = 50;
             _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
@@ -93,10 +93,17 @@ namespace TalesOfTao.UI.HUD
             IsMouseOverButton = _buttonRect.Contains(e.mousePosition);
             GameState.IsMouseOverUI = IsMouseOverButton;
 
+            // Dim the button when not in Action phase
+            if (!_canEndTurn)
+                GUI.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+
             if (GUI.Button(_buttonRect, "End Turn", _buttonStyle))
             {
-                OnEndTurnClicked();
+                if (_canEndTurn)
+                    OnEndTurnClicked();
             }
+
+            GUI.color = Color.white;
 
             // Keyboard shortcut
             if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
