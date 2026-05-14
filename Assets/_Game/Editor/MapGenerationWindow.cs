@@ -67,7 +67,6 @@ namespace TalesOfTao.Editor
             }
 
             mgr.GenerateMap(forcedSeed);
-            Debug.Log($"[MapGenWindow] After GenerateMap: tileCount={mgr.TileCount}, instance={mgr.GetInstanceID()}");
 
             if (_gridRenderer != null)
             {
