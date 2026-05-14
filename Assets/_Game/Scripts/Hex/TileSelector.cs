@@ -30,6 +30,19 @@ namespace TalesOfTao.Hex
             _useNewInput = Mouse.current != null;
         }
 
+        private void Start()
+        {
+            // Find the grid manager and auto-generate if needed
+            _gridManager = HexGridManager.Instance;
+            if (_gridManager == null)
+                _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+            if (_gridManager != null && _gridManager.TileCount == 0)
+            {
+                Debug.Log("[TileSelector] Auto-generating map in Play mode...");
+                _gridManager.GenerateMap();
+            }
+        }
+
         private void Update()
         {
             // Find the grid manager that has tile data

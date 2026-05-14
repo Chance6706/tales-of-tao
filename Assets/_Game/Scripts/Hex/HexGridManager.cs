@@ -27,11 +27,11 @@ namespace TalesOfTao.Hex
         [Header("References")]
         [SerializeField] private TerrainTypeSO[] _terrainTypes; // 8 types in enum order
 
-        // Generated data — static to survive domain reloads
-        private static HexTileData[] _tiles;
-        private static int _width;
-        private static int _height;
-        private static bool _isGenerated;
+        // Generated data
+        private HexTileData[] _tiles;
+        private int _width;
+        private int _height;
+        private bool _isGenerated;
 
         /// <summary>Singleton instance for easy access from other components.</summary>
         public static HexGridManager Instance { get; set; }
