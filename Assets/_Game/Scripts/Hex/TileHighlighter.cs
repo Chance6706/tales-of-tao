@@ -4,106 +4,81 @@ namespace TalesOfTao.Hex
 {
     /// <summary>
     /// Visual highlight for the selected hex tile.
-    /// Creates a flat ring around the selected tile.
+    /// Uses a simple quad mesh that's easy to see.
     /// </summary>
     public class TileHighlighter : MonoBehaviour
     {
         [SerializeField] private float _hexSize = 1f;
-        [SerializeField] private float _ringHeight = 0.15f;
-        [SerializeField] private float _ringThickness = 0.08f;
-        [SerializeField] private Color _ringColor = new Color(1f, 0.85f, 0.2f, 0.9f); // gold
+        [SerializeField] private float _highlightHeight = 0.3f;
+        [SerializeField] private Color _highlightColor = new Color(1f, 0.9f, 0.2f, 0.85f);
 
-        private GameObject _ringObject;
-        private MeshFilter _ringFilter;
-        private MeshRenderer _ringRenderer;
-        private Material _ringMaterial;
-        private HexCoords _currentCoords;
-
+        private MeshFilter _meshFilter;
+        private MeshRenderer _meshRenderer;
+        private Material _material;
         private static TileHighlighter _instance;
 
         private void Awake()
         {
             _instance = this;
-            CreateRingMesh();
+            CreateHighlightMesh();
             gameObject.SetActive(false);
         }
 
-        private void OnDestroy()
+        private void CreateHighlightMesh()
         {
-            if (_ringObject != null) Destroy(_ringObject);
-            if (_ringMaterial != null) Destroy(_ringMaterial);
-        }
+            var meshFilter = gameObject.GetComponent<MeshFilter>();
+            if (meshFilter == null) meshFilter = gameObject.AddComponent<MeshFilter>();
+            _meshFilter = meshFilter;
 
-        private void CreateRingMesh()
-        {
-            _ringObject = new GameObject("SelectionRing");
-            _ringObject.transform.SetParent(transform, false);
-            _ringFilter = _ringObject.AddComponent<MeshFilter>();
-            _ringRenderer = _ringObject.AddComponent<MeshRenderer>();
+            var meshRenderer = gameObject.GetComponent<MeshRenderer>();
+            if (meshRenderer == null) meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            _meshRenderer = meshRenderer;
 
-            // Create ring mesh (hexagon with hole)
-            _ringFilter.sharedMesh = GenerateRingMesh(_hexSize, _ringThickness);
-
-            // Create unlit transparent material
-            Shader shader = Shader.Find("TalesOfTao/HexColorPerTile")
-                         ?? Shader.Find("Universal Render Pipeline/Unlit")
-                         ?? Shader.Find("Standard");
-            _ringMaterial = new Material(shader)
-            {
-                name = "SelectionRingMat",
-                color = _ringColor
-            };
-            _ringRenderer.sharedMaterial = _ringMaterial;
-        }
-
-        private static Mesh GenerateRingMesh(float size, float thickness)
-        {
-            var mesh = new Mesh { name = "HexRing" };
+            // Create a simple hexagon mesh (flat, facing up)
+            var mesh = new Mesh { name = "HexHighlight" };
             int segments = 6;
-            int vertCount = segments * 2; // inner + outer ring
-            var verts = new Vector3[vertCount + 1]; // +1 for center
-            var tris = new int[segments * 6]; // 2 triangles per segment
+            var verts = new Vector3[segments + 1];
+            var tris = new int[segments * 3];
+            var colors = new Color[segments + 1];
 
-            float outerR = size * 0.95f;
-            float innerR = outerR - thickness;
-
-            // Center vertex
+            float radius = _hexSize * 0.9f;
             verts[0] = Vector3.zero;
+            colors[0] = _highlightColor;
 
             for (int i = 0; i < segments; i++)
             {
                 float angle = Mathf.Deg2Rad * 60f * i;
-                float xOuter = outerR * Mathf.Cos(angle);
-                float zOuter = outerR * Mathf.Sin(angle);
-                float xInner = innerR * Mathf.Cos(angle);
-                float zInner = innerR * Mathf.Sin(angle);
+                verts[1 + i] = new Vector3(radius * Mathf.Cos(angle), 0f, radius * Mathf.Sin(angle));
+                colors[1 + i] = _highlightColor;
 
-                verts[1 + i * 2] = new Vector3(xOuter, 0f, zOuter); // outer
-                verts[2 + i * 2] = new Vector3(xInner, 0f, zInner); // inner
-
-                // Triangle: center -> outer[i] -> inner[i]
-                tris[i * 6 + 0] = 0;
-                tris[i * 6 + 1] = 1 + i * 2;
-                tris[i * 6 + 2] = 2 + i * 2;
-
-                // Triangle: center -> inner[i] -> outer[i+1]
-                int nextOuter = 1 + ((i + 1) % segments) * 2;
-                tris[i * 6 + 3] = 0;
-                tris[i * 6 + 4] = 2 + i * 2;
-                tris[i * 6 + 5] = nextOuter;
+                tris[i * 3 + 0] = 0;
+                tris[i * 3 + 1] = 1 + i;
+                tris[i * 3 + 2] = 1 + ((i + 1) % segments);
             }
 
             mesh.vertices = verts;
             mesh.triangles = tris;
+            mesh.colors = colors;
             mesh.RecalculateNormals();
-            return mesh;
+            _meshFilter.sharedMesh = mesh;
+
+            // Use unlit shader so it's always visible
+            Shader shader = Shader.Find("TalesOfTao/HexColorPerTile")
+                         ?? Shader.Find("Universal Render Pipeline/Unlit")
+                         ?? Shader.Find("Standard");
+            _material = new Material(shader)
+            {
+                name = "HighlightMat",
+                color = _highlightColor
+            };
+            _material.SetFloat("_ColorMask", 15);
+            _meshRenderer.sharedMaterial = _material;
         }
 
         public void Show(HexCoords coords)
         {
-            _currentCoords = coords;
             var worldPos = coords.ToWorldPosition(_hexSize);
-            transform.position = new Vector3(worldPos.x, _ringHeight, worldPos.z);
+            transform.position = new Vector3(worldPos.x, _highlightHeight, worldPos.z);
             gameObject.SetActive(true);
         }
 
@@ -112,9 +87,6 @@ namespace TalesOfTao.Hex
             gameObject.SetActive(false);
         }
 
-        /// <summary>
-        /// Call this from TileSelector when a tile is selected.
-        /// </summary>
         public static void SelectTile(HexTileData tile)
         {
             if (_instance == null)
@@ -128,12 +100,9 @@ namespace TalesOfTao.Hex
                 return;
             }
             _instance.Show(tile.Coords);
-            Debug.Log($"[TileHighlighter] Show at ({tile.Coords.Q},{tile.Coords.R})");
+            Debug.Log($"[TileHighlighter] Show at ({tile.Coords.Q},{tile.Coords.R}), worldPos=({tile.Coords.ToWorldPosition(1f)})");
         }
 
-        /// <summary>
-        /// Call this to clear selection.
-        /// </summary>
         public static void ClearSelection()
         {
             if (_instance != null) _instance.Hide();
