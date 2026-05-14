@@ -61,12 +61,7 @@ namespace TalesOfTao.Hex
 
         public static void SelectTile(HexTileData tile, float elevationY = 0f)
         {
-            if (_instance == null)
-            {
-                Debug.LogWarning("[TileHighlighter] _instance is null!");
-                return;
-            }
-            if (tile == null) return;
+            if (_instance == null || tile == null) return;
             _instance.Show(tile.Coords, elevationY);
         }
 
