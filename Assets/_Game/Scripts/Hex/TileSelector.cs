@@ -36,10 +36,11 @@ namespace TalesOfTao.Hex
             _gridManager = HexGridManager.Instance;
             if (_gridManager == null || _gridManager.TileCount == 0)
             {
-                // Instance may be stale after domain reload, search ALL objects
                 var all = Resources.FindObjectsOfTypeAll<HexGridManager>();
+                Debug.Log($"[TileSelector] FindObjectsOfTypeAll found {all.Length} managers");
                 foreach (var mgr in all)
                 {
+                    Debug.Log($"[TileSelector] mgr: {mgr.name}, tileCount={mgr.TileCount}, sceneLoaded={mgr.gameObject.scene.isLoaded}");
                     if (mgr != null && mgr.TileCount > 0 && mgr.gameObject.scene.isLoaded)
                     {
                         _gridManager = mgr;
