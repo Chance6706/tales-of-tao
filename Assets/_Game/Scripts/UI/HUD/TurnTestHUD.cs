@@ -53,16 +53,12 @@ namespace TalesOfTao.UI.HUD
 
             if (!_turnDriver.IsActive)
             {
-                Debug.Log("[TurnTestHUD] Starting turn");
                 _turnDriver.StartTurn();
             }
-            else
-            {
-                Debug.Log("[TurnTestHUD] Driver already active, forcing initial update");
-                // Force initial update since we missed the first events
-                OnPhaseChanged(_turnDriver.CurrentPhase);
-                OnTurnStarted(_turnDriver.TurnNumber);
-            }
+
+            // Force initial UI update with current state
+            OnPhaseChanged(_turnDriver.CurrentPhase);
+            OnTurnStarted(_turnDriver.TurnNumber);
         }
 
         private void Update()
