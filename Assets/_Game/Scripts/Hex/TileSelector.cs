@@ -34,9 +34,23 @@ namespace TalesOfTao.Hex
         {
             // Always find the grid manager with tile data
             _gridManager = null;
-            var mgr = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
-            if (mgr != null && mgr.TileCount > 0)
-                _gridManager = mgr;
+#if UNITY_EDITOR
+            // In editor, search all objects including inactive
+            var allManagers = Resources.FindObjectsOfTypeAll<HexGridManager>();
+            foreach (var m in allManagers)
+            {
+                if (m != null && m.TileCount > 0)
+                {
+                    _gridManager = m;
+                    break;
+                }
+            }
+#endif
+            if (_gridManager == null)
+            {
+                var mgr = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+                if (mgr != null && mgr.TileCount > 0) _gridManager = mgr;
+            }
 
             bool leftClicked;
             Vector3 mousePos;
