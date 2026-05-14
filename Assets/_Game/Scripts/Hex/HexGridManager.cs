@@ -49,7 +49,15 @@ namespace TalesOfTao.Hex
         {
             if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             AutoLoadTerrainTypes();
-            Instance = this;
+            if (Instance == null)
+            {
+                Instance = this;
+                Debug.Log($"[HexGridManager] Instance set. tileCount={TileCount}");
+            }
+            else
+            {
+                Debug.Log($"[HexGridManager] Duplicate instance detected! Existing tileCount={Instance.TileCount}, new tileCount={TileCount}");
+            }
         }
 
         /// <summary>
