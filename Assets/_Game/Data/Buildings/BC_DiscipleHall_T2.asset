@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c70e49e39eb49d40b31899ff993a73e, type: 3}
+  m_Name: BC_DiscipleHall_T2
+  m_EditorClassIdentifier: TalesOfTao.Sects::TalesOfTao.Sects.BuildingConfigSO
+  _buildingTypeId: DiscipleHall
+  _displayName: Disciple Hall T2
+  _tierCosts:
+  - Tael: 0
+    Qi: 0
+    Lumber: 0
+    IronOre: 0
+    Jade: 0
+    MedicinalHerbs: 0
+    SpiritHerbs: 0
+  - Tael: 80
+    Qi: 0
+    Lumber: 0
+    IronOre: 0
+    Jade: 0
+    MedicinalHerbs: 0
+    SpiritHerbs: 0
+  - Tael: 0
+    Qi: 0
+    Lumber: 0
+    IronOre: 0
+    Jade: 0
+    MedicinalHerbs: 0
+    SpiritHerbs: 0
+  _tierBuildTurns: 000000000300000000000000
+  _prerequisiteBuilding: DiscipleHall
+  _prerequisiteTier: 1
+  _tierEffects:
+  - 
+  - 'Capacity: +10 disciples'
+  - 
+  _tierMeshes:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _buildingMaterial: {fileID: 0}
+  _requiresCollider: 1
