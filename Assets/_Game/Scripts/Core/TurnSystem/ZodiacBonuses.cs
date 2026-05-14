@@ -6,28 +6,28 @@ namespace TalesOfTao.Core.TurnSystem
     /// Data struct broadcast when zodiac bonuses change.
     /// All subscribing systems read from this for the duration of the turn.
     /// </summary>
-    public readonly struct ZodiacBonuses
+    public struct ZodiacBonuses
     {
-        public readonly int Year;           // 1-12
-        public readonly string Animal;      // e.g. "Dragon"
-        public readonly float TaelIncomeMultiplier;
-        public readonly float QiIncomeMultiplier;
-        public readonly float CombatStatMultiplier;
-        public readonly float ResearchSpeedMultiplier;
-        public readonly float RenownMultiplier;
-        public readonly float BuildingSpeedMultiplier;
-        public readonly float TradeRouteMultiplier;
-        public readonly float HerbYieldMultiplier;
-        public readonly float DefenseMultiplier;
-        public readonly float TrustGainMultiplier;
-        public readonly float DissentRecoveryMultiplier;
-        public readonly float MovementBonus;
-        public readonly float SpyDetectionModifier;
-        public readonly float TribulationFailureModifier;
+        public int Year;
+        public string Animal;
+        public float TaelIncomeMultiplier;
+        public float QiIncomeMultiplier;
+        public float CombatStatMultiplier;
+        public float ResearchSpeedMultiplier;
+        public float RenownMultiplier;
+        public float BuildingSpeedMultiplier;
+        public float TradeRouteMultiplier;
+        public float HerbYieldMultiplier;
+        public float DefenseMultiplier;
+        public float TrustGainMultiplier;
+        public float DissentRecoveryMultiplier;
+        public float MovementBonus;
+        public float SpyDetectionModifier;
+        public float TribulationFailureModifier;
 
         public static ZodiacBonuses ForYear(int year)
         {
-            int idx = ((year - 1) % 12 + 12) % 12; // Normalize to 0-11
+            int idx = ((year - 1) % 12 + 12) % 12;
             return idx switch
             {
                 0  => new ZodiacBonuses { Year = year, Animal = "Rat",     TaelIncomeMultiplier = 1.15f, SpyDetectionModifier = -0.10f },
