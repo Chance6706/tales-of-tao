@@ -141,7 +141,7 @@ namespace TalesOfTao.Sects
                 GUI.DrawTexture(new Rect(10, y - 5, 500, 30), Texture2D.whiteTexture);
                 GUI.color = Color.white;
                 GUI.Label(new Rect(20, y, 480, 25),
-                    $"Tael: {data.Stockpile.Tael} | Qi: {data.Stockpile.Qi} | Peons: {data.PeonCount} | Dissent: {data.DissentLevel}", style);
+                    $"Tael: {data.Stockpile.Tael} | Qi: {data.Stockpile.Qi} | Peons: {data.GetDiscipleCount(DiscipleRank.Peon)} | Dissent: {data.DissentLevel}", style);
             }
         }
 
