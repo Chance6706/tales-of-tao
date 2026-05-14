@@ -4,10 +4,6 @@ using TalesOfTao.Core.TurnSystem;
 
 namespace TalesOfTao.UI.HUD
 {
-    /// <summary>
-    /// Minimal test HUD using IMGUI (OnGUI). No Canvas/EventSystem needed.
-    /// Shows phase, turn, zodiac, and End Turn button.
-    /// </summary>
     public class TurnTestHUD : MonoBehaviour
     {
         [SerializeField] private TurnDriver _turnDriver;
@@ -17,6 +13,7 @@ namespace TalesOfTao.UI.HUD
         private string _zodiacText = "...";
         private bool _canEndTurn;
         private bool _started;
+        private Rect _buttonRect;
 
         private void Start()
         {
@@ -33,10 +30,13 @@ namespace TalesOfTao.UI.HUD
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
 
+            // Subscribe to events BEFORE starting the turn
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
-            _turnDriver.StartTurn();
             _started = true;
+
+            // Now start the turn (events will fire and be caught)
+            _turnDriver.StartTurn();
         }
 
         private void OnDestroy()
@@ -52,7 +52,7 @@ namespace TalesOfTao.UI.HUD
         {
             if (!_started) return;
 
-            GUIStyle style = new GUIStyle(GUI.skin.label)
+            GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 20,
                 normal = { textColor = Color.white }
@@ -63,35 +63,41 @@ namespace TalesOfTao.UI.HUD
                 fontSize = 18
             };
 
-            // Top-left: phase info
             float x = 20;
             float y = 20;
             float lineHeight = 28;
 
-            GUI.Label(new Rect(x, y, 400, lineHeight), _phaseText, style);
+            GUI.Label(new Rect(x, y, 400, lineHeight), _phaseText, labelStyle);
             y += lineHeight;
-            GUI.Label(new Rect(x, y, 400, lineHeight), _turnText, style);
+            GUI.Label(new Rect(x, y, 400, lineHeight), _turnText, labelStyle);
             y += lineHeight;
-            GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, style);
+            GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, labelStyle);
 
-            // Bottom-right: End Turn button
             float btnW = 160;
             float btnH = 50;
-            float btnX = Screen.width - btnW - 20;
-            float btnY = Screen.height - btnH - 20;
+            _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
 
-            if (GUI.Button(new Rect(btnX, btnY, btnW, btnH), "End Turn", buttonStyle))
+            // Check if mouse is over the button — if so, consume the event so TileSelector doesn't fire
+            Event e = Event.current;
+            bool mouseOverButton = _buttonRect.Contains(e.mousePosition);
+
+            if (mouseOverButton && e.type == EventType.MouseDown)
+            {
+                e.Use(); // Consume the event so it doesn't reach TileSelector
+            }
+
+            if (GUI.Button(_buttonRect, "End Turn", buttonStyle))
             {
                 OnEndTurnClicked();
             }
 
-            // Also handle keyboard
-            if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space))
+            // Keyboard shortcut
+            if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
             {
                 if (_canEndTurn)
                 {
                     OnEndTurnClicked();
-                    Event.current.Use();
+                    e.Use();
                 }
             }
         }
