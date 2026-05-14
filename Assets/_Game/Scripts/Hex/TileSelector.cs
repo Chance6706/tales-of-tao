@@ -27,13 +27,37 @@ namespace TalesOfTao.Hex
         private void Awake()
         {
             _cam = GetComponent<Camera>();
-            _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
-            // New Input System is active if Mouse.current is available
+            // Find the grid manager that has actually generated data
+            var managers = UnityEngine.Object.FindObjectsByType<HexGridManager>();
+            foreach (var mgr in managers)
+            {
+                if (mgr != null && mgr.TileCount > 0)
+                {
+                    _gridManager = mgr;
+                    break;
+                }
+            }
+            if (_gridManager == null)
+                _gridManager = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
             _useNewInput = Mouse.current != null;
         }
 
         private void Update()
         {
+            // Refresh grid manager reference if we don't have tiles yet
+            if (_gridManager == null || _gridManager.TileCount == 0)
+            {
+                var managers = UnityEngine.Object.FindObjectsByType<HexGridManager>();
+                foreach (var mgr in managers)
+                {
+                    if (mgr != null && mgr.TileCount > 0)
+                    {
+                        _gridManager = mgr;
+                        break;
+                    }
+                }
+            }
+
             bool leftClicked;
             Vector3 mousePos;
 
