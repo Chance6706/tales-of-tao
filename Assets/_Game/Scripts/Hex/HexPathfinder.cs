@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace TalesOfTao.Hex
@@ -14,17 +13,6 @@ namespace TalesOfTao.Hex
     {
         private const int MaxPathLength = 256;
 
-        /// <summary>
-        /// Finds the shortest path from start to goal using A*.
-        /// Returns null if no path exists or if the goal is unreachable within the budget.
-        /// </summary>
-        /// <param name="grid">The hex grid manager providing tile data.</param>
-        /// <param name="startQ">Starting tile Q coordinate.</param>
-        /// <param name="startR">Starting tile R coordinate.</param>
-        /// <param name="goalQ">Goal tile Q coordinate.</param>
-        /// <param name="goalR">Goal tile R coordinate.</param>
-        /// <param name="maxCost">Maximum total movement cost allowed (movement budget). 0 = unlimited.</param>
-        /// <returns>Array of HexCoords from start to goal (inclusive), or null if no path.</returns>
         public static HexCoords[] FindPath(
             HexGridManager grid,
             int startQ, int startR,
@@ -42,96 +30,94 @@ namespace TalesOfTao.Hex
             if (startTile == null || goalTile == null) return null;
             if (goalTile.IsImpassable) return null;
 
-            // Use axial coordinate hashing for the closed set
             int width = grid.Width;
             int height = grid.Height;
             int totalTiles = width * height;
 
-            using var gScore = new NativeArray<float>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
-            using var cameFrom = new NativeArray<int>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
-            using var inOpenSet = new NativeArray<bool>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+            var gScore = new NativeArray<float>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+            var cameFrom = new NativeArray<int>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+            var inOpenSet = new NativeArray<bool>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
 
-            // Initialize gScore to infinity
-            for (int i = 0; i < totalTiles; i++)
+            try
             {
-                gScore[i] = float.MaxValue;
-                cameFrom[i] = -1;
-            }
-
-            int startIdx = AxialToIndex(startQ, startR, width, height);
-            int goalIdx = AxialToIndex(goalQ, goalR, width, height);
-
-            if (startIdx < 0 || goalIdx < 0) return null;
-
-            gScore[startIdx] = 0f;
-
-            // Priority queue using sorted list (binary search insert)
-            var openSet = new SortedSet<(float fScore, int index)>(Comparer<(float, int)>.Create((a, b) =>
-            {
-                int cmp = a.Item1.CompareTo(b.Item1);
-                return cmp != 0 ? cmp : a.Item2.CompareTo(b.Item2);
-            }));
-
-            openSet.Add((Heuristic(start, goal), startIdx));
-            inOpenSet[startIdx] = true;
-
-            while (openSet.Count > 0)
-            {
-                var current = openSet.Min;
-                openSet.Remove(current);
-                int currentIdx = current.index;
-                inOpenSet[currentIdx] = false;
-
-                if (currentIdx == goalIdx)
+                for (int i = 0; i < totalTiles; i++)
                 {
-                    // Reconstruct path
-                    return ReconstructPath(cameFrom, currentIdx, width, height, start);
+                    gScore[i] = float.MaxValue;
+                    cameFrom[i] = -1;
                 }
 
-                var currentCoords = IndexToAxial(currentIdx, width, height);
-                float currentG = gScore[currentIdx];
+                int startIdx = AxialToIndex(startQ, startR, width, height);
+                int goalIdx = AxialToIndex(goalQ, goalR, width, height);
 
-                // Check all 6 neighbors
-                for (int dir = 0; dir < 6; dir++)
+                if (startIdx < 0 || goalIdx < 0) return null;
+
+                gScore[startIdx] = 0f;
+
+                var openSet = new SortedSet<(float fScore, int index)>(Comparer<(float, int)>.Create((a, b) =>
                 {
-                    var neighbor = currentCoords.Neighbour(dir);
-                    int nIdx = AxialToIndex(neighbor.Q, neighbor.R, width, height);
-                    if (nIdx < 0 || nIdx >= totalTiles) continue;
+                    int cmp = a.Item1.CompareTo(b.Item1);
+                    return cmp != 0 ? cmp : a.Item2.CompareTo(b.Item2);
+                }));
 
-                    var neighborTile = grid.GetTile(neighbor.Q, neighbor.R);
-                    if (neighborTile == null || neighborTile.IsImpassable) continue;
+                openSet.Add((Heuristic(start, goal), startIdx));
+                inOpenSet[startIdx] = true;
 
-                    float tentativeG = currentG + neighborTile.MovementCost;
+                while (openSet.Count > 0)
+                {
+                    var current = openSet.Min;
+                    openSet.Remove(current);
+                    int currentIdx = current.index;
+                    inOpenSet[currentIdx] = false;
 
-                    // Check movement budget
-                    if (maxCost > 0f && tentativeG > maxCost) continue;
-
-                    if (tentativeG < gScore[nIdx])
+                    if (currentIdx == goalIdx)
                     {
-                        gScore[nIdx] = tentativeG;
-                        cameFrom[nIdx] = currentIdx;
+                        return ReconstructPath(cameFrom, currentIdx, width, height);
+                    }
 
-                        float fScore = tentativeG + Heuristic(neighbor, goal);
+                    var currentCoords = IndexToAxial(currentIdx, width, height);
+                    float currentG = gScore[currentIdx];
 
-                        if (inOpenSet[nIdx])
+                    for (int dir = 0; dir < 6; dir++)
+                    {
+                        var neighbor = currentCoords.Neighbour(dir);
+                        int nIdx = AxialToIndex(neighbor.Q, neighbor.R, width, height);
+                        if (nIdx < 0 || nIdx >= totalTiles) continue;
+
+                        var neighborTile = grid.GetTile(neighbor.Q, neighbor.R);
+                        if (neighborTile == null || neighborTile.IsImpassable) continue;
+
+                        float tentativeG = currentG + neighborTile.MovementCost;
+
+                        if (maxCost > 0f && tentativeG > maxCost) continue;
+
+                        if (tentativeG < gScore[nIdx])
                         {
-                            // Remove old entry and re-add with updated fScore
-                            openSet.RemoveWhere(t => t.index == nIdx);
-                        }
+                            gScore[nIdx] = tentativeG;
+                            cameFrom[nIdx] = currentIdx;
 
-                        openSet.Add((fScore, nIdx));
-                        inOpenSet[nIdx] = true;
+                            float fScore = tentativeG + Heuristic(neighbor, goal);
+
+                            if (inOpenSet[nIdx])
+                            {
+                                openSet.RemoveWhere(t => t.index == nIdx);
+                            }
+
+                            openSet.Add((fScore, nIdx));
+                            inOpenSet[nIdx] = true;
+                        }
                     }
                 }
-            }
 
-            return null; // No path found
+                return null;
+            }
+            finally
+            {
+                gScore.Dispose();
+                cameFrom.Dispose();
+                inOpenSet.Dispose();
+            }
         }
 
-        /// <summary>
-        /// Finds all tiles reachable from (startQ, startR) within the given movement budget.
-        /// Returns a dictionary of tile coords to their movement cost.
-        /// </summary>
         public static Dictionary<HexCoords, float> FindReachableTiles(
             HexGridManager grid,
             int startQ, int startR,
@@ -147,66 +133,68 @@ namespace TalesOfTao.Hex
             int height = grid.Height;
             int totalTiles = width * height;
 
-            using var gScore = new NativeArray<float>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+            var gScore = new NativeArray<float>(totalTiles, Allocator.TempJob, NativeArrayOptions.ClearMemory);
 
-            for (int i = 0; i < totalTiles; i++)
-                gScore[i] = float.MaxValue;
-
-            int startIdx = AxialToIndex(startQ, startR, width, height);
-            if (startIdx < 0) return result;
-
-            gScore[startIdx] = 0f;
-
-            var openSet = new SortedSet<(float gScore, int index)>(Comparer<(float, int)>.Create((a, b) =>
+            try
             {
-                int cmp = a.Item1.CompareTo(b.Item1);
-                return cmp != 0 ? cmp : a.Item2.CompareTo(b.Item2);
-            }));
+                for (int i = 0; i < totalTiles; i++)
+                    gScore[i] = float.MaxValue;
 
-            openSet.Add((0f, startIdx));
+                int startIdx = AxialToIndex(startQ, startR, width, height);
+                if (startIdx < 0) return result;
 
-            while (openSet.Count > 0)
-            {
-                var current = openSet.Min;
-                openSet.Remove(current);
-                int currentIdx = current.index;
-                float currentG = current.gScore;
+                gScore[startIdx] = 0f;
 
-                var currentCoords = IndexToAxial(currentIdx, width, height);
-
-                // Add to result if within budget
-                if (currentG <= maxCost)
+                var openSet = new SortedSet<(float gScore, int index)>(Comparer<(float, int)>.Create((a, b) =>
                 {
-                    result[currentCoords] = currentG;
-                }
+                    int cmp = a.Item1.CompareTo(b.Item1);
+                    return cmp != 0 ? cmp : a.Item2.CompareTo(b.Item2);
+                }));
 
-                for (int dir = 0; dir < 6; dir++)
+                openSet.Add((0f, startIdx));
+
+                while (openSet.Count > 0)
                 {
-                    var neighbor = currentCoords.Neighbour(dir);
-                    int nIdx = AxialToIndex(neighbor.Q, neighbor.R, width, height);
-                    if (nIdx < 0 || nIdx >= totalTiles) continue;
+                    var current = openSet.Min;
+                    openSet.Remove(current);
+                    int currentIdx = current.index;
+                    float currentG = current.gScore;
 
-                    var neighborTile = grid.GetTile(neighbor.Q, neighbor.R);
-                    if (neighborTile == null || neighborTile.IsImpassable) continue;
+                    var currentCoords = IndexToAxial(currentIdx, width, height);
 
-                    float tentativeG = currentG + neighborTile.MovementCost;
-                    if (tentativeG > maxCost) continue;
-
-                    if (tentativeG < gScore[nIdx])
+                    if (currentG <= maxCost)
                     {
-                        gScore[nIdx] = tentativeG;
-                        openSet.Add((tentativeG, nIdx));
+                        result[currentCoords] = currentG;
+                    }
+
+                    for (int dir = 0; dir < 6; dir++)
+                    {
+                        var neighbor = currentCoords.Neighbour(dir);
+                        int nIdx = AxialToIndex(neighbor.Q, neighbor.R, width, height);
+                        if (nIdx < 0 || nIdx >= totalTiles) continue;
+
+                        var neighborTile = grid.GetTile(neighbor.Q, neighbor.R);
+                        if (neighborTile == null || neighborTile.IsImpassable) continue;
+
+                        float tentativeG = currentG + neighborTile.MovementCost;
+                        if (tentativeG > maxCost) continue;
+
+                        if (tentativeG < gScore[nIdx])
+                        {
+                            gScore[nIdx] = tentativeG;
+                            openSet.Add((tentativeG, nIdx));
+                        }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            }
+            finally
+            {
+                gScore.Dispose();
+            }
         }
 
-        /// <summary>
-        /// Heuristic for hex grid: axial distance.
-        /// Admissible and consistent for A*.
-        /// </summary>
         private static float Heuristic(HexCoords a, HexCoords b)
         {
             return HexCoords.Distance(a, b);
@@ -215,8 +203,7 @@ namespace TalesOfTao.Hex
         private static HexCoords[] ReconstructPath(
             NativeArray<int> cameFrom,
             int currentIdx,
-            int width, int height,
-            HexCoords start)
+            int width, int height)
         {
             var path = new List<HexCoords>();
             int idx = currentIdx;
@@ -229,7 +216,6 @@ namespace TalesOfTao.Hex
 
             path.Reverse();
 
-            // Safety: limit path length
             if (path.Count > MaxPathLength)
             {
                 path.RemoveRange(MaxPathLength, path.Count - MaxPathLength);

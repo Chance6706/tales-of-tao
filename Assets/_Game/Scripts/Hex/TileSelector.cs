@@ -86,6 +86,9 @@ namespace TalesOfTao.Hex
 
             if (!leftClicked) return;
 
+            // Don't select tiles if mouse is over a UI element
+            if (Core.GameState.IsMouseOverUI) return;
+
             var ray = _cam.ScreenPointToRay(mousePos);
 
             // Try chunk-based selection if grid manager has tiles (IsGenerated may not be set yet)
