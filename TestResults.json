@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="28" result="Failed(Child)" total="28" passed="25" failed="3" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.0778254">
+  <test-suite type="TestSuite" id="1040" name="TalesOfTao" fullname="TalesOfTao" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.077825" total="28" passed="25" failed="3" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1032" name="TalesOfTao.Tests.dll" fullname="D:/Repo/tales-of-tao/Library/ScriptAssemblies/TalesOfTao.Tests.dll" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.071748" total="28" passed="25" failed="3" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="6596" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1033" name="TalesOfTao" fullname="TalesOfTao" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.071211" total="28" passed="25" failed="3" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1034" name="Tests" fullname="TalesOfTao.Tests" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.070952" total="28" passed="25" failed="3" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1036" name="Core" fullname="TalesOfTao.Tests.Core" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.027584" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1022" name="CommandQueueTests" fullname="TalesOfTao.Tests.Core.CommandQueueTests" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.026740" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1030" name="ClearHistory_ClearsBothStacks" fullname="TalesOfTao.Tests.Core.CommandQueueTests.ClearHistory_ClearsBothStacks" methodname="ClearHistory_ClearsBothStacks" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="218346575" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.012567" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Execute_ClearsRedoStack" fullname="TalesOfTao.Tests.Core.CommandQueueTests.Execute_ClearsRedoStack" methodname="Execute_ClearsRedoStack" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1998799935" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000243" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="Execute_PushesCommandOntoUndoStack" fullname="TalesOfTao.Tests.Core.CommandQueueTests.Execute_PushesCommandOntoUndoStack" methodname="Execute_PushesCommandOntoUndoStack" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="942272633" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000322" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="Execute_ReturnsFalse_WhenCanExecuteIsFalse" fullname="TalesOfTao.Tests.Core.CommandQueueTests.Execute_ReturnsFalse_WhenCanExecuteIsFalse" methodname="Execute_ReturnsFalse_WhenCanExecuteIsFalse" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1653605183" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000210" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1031" name="Execute_ThrowsOnNullCommand" fullname="TalesOfTao.Tests.Core.CommandQueueTests.Execute_ThrowsOnNullCommand" methodname="Execute_ThrowsOnNullCommand" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1646459128" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.001606" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="TryRedo_ReExecutesAndPushesToUndoStack" fullname="TalesOfTao.Tests.Core.CommandQueueTests.TryRedo_ReExecutesAndPushesToUndoStack" methodname="TryRedo_ReExecutesAndPushesToUndoStack" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1823800301" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000217" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1027" name="TryRedo_ReturnsFalse_WhenRedoStackEmpty" fullname="TalesOfTao.Tests.Core.CommandQueueTests.TryRedo_ReturnsFalse_WhenRedoStackEmpty" methodname="TryRedo_ReturnsFalse_WhenRedoStackEmpty" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1585799690" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000074" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1026" name="TryUndo_CallsUndoAndPushesToRedoStack" fullname="TalesOfTao.Tests.Core.CommandQueueTests.TryUndo_CallsUndoAndPushesToRedoStack" methodname="TryUndo_CallsUndoAndPushesToRedoStack" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="2004079514" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000121" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="TryUndo_ReturnsFalse_WhenStackEmpty" fullname="TalesOfTao.Tests.Core.CommandQueueTests.TryUndo_ReturnsFalse_WhenStackEmpty" methodname="TryUndo_ReturnsFalse_WhenStackEmpty" classname="TalesOfTao.Tests.Core.CommandQueueTests" runstate="Runnable" seed="1305442903" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000054" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1035" name="Hex" fullname="TalesOfTao.Tests.Hex" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.007872" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1007" name="HexCoordsTests" fullname="TalesOfTao.Tests.Hex.HexCoordsTests" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.007235" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1018" name="Addition_Works" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Addition_Works" methodname="Addition_Works" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="788959774" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000712" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1011" name="Distance_IsSymmetric" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Distance_IsSymmetric" methodname="Distance_IsSymmetric" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="1359872008" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000342" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1012" name="Distance_ToNeighbour_IsOne" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Distance_ToNeighbour_IsOne" methodname="Distance_ToNeighbour_IsOne" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="456026897" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000344" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1010" name="Distance_ToSelf_IsZero" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Distance_ToSelf_IsZero" methodname="Distance_ToSelf_IsZero" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="1761605465" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000131" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1016" name="Equality_DifferentCoords_AreNotEqual" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Equality_DifferentCoords_AreNotEqual" methodname="Equality_DifferentCoords_AreNotEqual" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="966689440" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.002157" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="Equality_SameCoords_AreEqual" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Equality_SameCoords_AreEqual" methodname="Equality_SameCoords_AreEqual" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="724966698" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000170" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="GetHashCode_SameCoords_Match" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.GetHashCode_SameCoords_Match" methodname="GetHashCode_SameCoords_Match" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="1145645148" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000217" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="Neighbour_NegativeDirection_WrapsCorrectly" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Neighbour_NegativeDirection_WrapsCorrectly" methodname="Neighbour_NegativeDirection_WrapsCorrectly" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="274315383" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000102" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="Neighbour_WrapsDirection" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Neighbour_WrapsDirection" methodname="Neighbour_WrapsDirection" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="1508725178" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000083" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="S_IsDerivedFromQAndR" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.S_IsDerivedFromQAndR" methodname="S_IsDerivedFromQAndR" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="948507788" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000119" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="ScalarMultiplication_Works" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.ScalarMultiplication_Works" methodname="ScalarMultiplication_Works" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="1983523161" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000227" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1019" name="Subtraction_Works" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Subtraction_Works" methodname="Subtraction_Works" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="363998014" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000216" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="ToString_IncludesAllCoordinates" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.ToString_IncludesAllCoordinates" methodname="ToString_IncludesAllCoordinates" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="293210310" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000506" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="Zero_IsOrigin" fullname="TalesOfTao.Tests.Hex.HexCoordsTests.Zero_IsOrigin" methodname="Zero_IsOrigin" classname="TalesOfTao.Tests.Hex.HexCoordsTests" runstate="Runnable" seed="259447670" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.000175" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1001" name="M5PlayModeTest" fullname="TalesOfTao.Tests.M5PlayModeTest" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.035156" total="5" passed="2" failed="3" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1003" name="Verify_BuildTrainingGrounds" fullname="TalesOfTao.Tests.M5PlayModeTest.Verify_BuildTrainingGrounds" methodname="Verify_BuildTrainingGrounds" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" seed="1337147514" result="Failed" label="Error" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.015293" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[System.IndexOutOfRangeException : Index was outside the bounds of the array.]]></message>
+                <stack-trace><![CDATA[  at TalesOfTao.Tests.M5PlayModeTest+<Verify_BuildTrainingGrounds>d__8.MoveNext () [0x0009f] in D:\Repo\tales-of-tao\Assets\_Game\Tests\M5PlayModeTest.cs:111 
+  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@76560ee600cb\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44 ]]></stack-trace>
+              </failure>
+              <output><![CDATA[[BuildQueue] Queued TrainingGrounds T1 (8 turns). Active: 1/1
+[M5Test] Build phase 1/8, turns remaining: 7
+[M5Test] Build phase 2/8, turns remaining: 6
+[M5Test] Build phase 3/8, turns remaining: 5
+[M5Test] Build phase 4/8, turns remaining: 4
+[M5Test] Build phase 5/8, turns remaining: 3
+[M5Test] Build phase 6/8, turns remaining: 2
+[M5Test] Build phase 7/8, turns remaining: 1
+[BuildQueue] Construction complete: TrainingGrounds T1
+]]></output>
+            </test-case>
+            <test-case id="1006" name="Verify_DissentAccumulation" fullname="TalesOfTao.Tests.M5PlayModeTest.Verify_DissentAccumulation" methodname="Verify_DissentAccumulation" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" seed="581959649" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.003354" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[M5Test] ✓ Dissent rate: 20 with 20 peons and 1 outer disciples
+]]></output>
+            </test-case>
+            <test-case id="1005" name="Verify_ManagementRatio" fullname="TalesOfTao.Tests.M5PlayModeTest.Verify_ManagementRatio" methodname="Verify_ManagementRatio" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" seed="1267091682" result="Passed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.004125" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[RecruitPeonCommand] Recruited peon: Wang Shan (Trait: )
+[RecruitPeonCommand] Recruited peon: Huang Yun (Trait: )
+[RecruitPeonCommand] Recruited peon: Sun Xing (Trait: Fragile)
+[RecruitPeonCommand] Recruited peon: Zhang Qiang (Trait: Resilient)
+[RecruitPeonCommand] Recruited peon: Huang Wei (Trait: )
+[RecruitPeonCommand] Management ratio exceeded. Need more Outer Disciples.
+[M5Test] ✓ Management ratio enforced
+]]></output>
+            </test-case>
+            <test-case id="1004" name="Verify_PeonToOuterDisciple" fullname="TalesOfTao.Tests.M5PlayModeTest.Verify_PeonToOuterDisciple" methodname="Verify_PeonToOuterDisciple" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" seed="1270169794" result="Failed" label="Error" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.003315" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index]]></message>
+                <stack-trace><![CDATA[  at System.Collections.Generic.List`1[T].get_Item (System.Int32 index) [0x00009] in <f713e1c3c5f545ce9b1df47230f4f853>:0 
+  at TalesOfTao.Tests.M5PlayModeTest+<Verify_PeonToOuterDisciple>d__9.MoveNext () [0x00037] in D:\Repo\tales-of-tao\Assets\_Game\Tests\M5PlayModeTest.cs:128 
+  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@76560ee600cb\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44 ]]></stack-trace>
+              </failure>
+              <output><![CDATA[[RecruitPeonCommand] Management ratio exceeded. Need more Outer Disciples.
+]]></output>
+            </test-case>
+            <test-case id="1002" name="Verify_Recruit3Peons" fullname="TalesOfTao.Tests.M5PlayModeTest.Verify_Recruit3Peons" methodname="Verify_Recruit3Peons" classname="TalesOfTao.Tests.M5PlayModeTest" runstate="Runnable" seed="1723319889" result="Failed" start-time="2026-05-14 22:05:25Z" end-time="2026-05-14 22:05:25Z" duration="0.006747" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Should be able to recruit peon 1
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at TalesOfTao.Tests.M5PlayModeTest+<Verify_Recruit3Peons>d__7.MoveNext () [0x00036] in D:\Repo\tales-of-tao\Assets\_Game\Tests\M5PlayModeTest.cs:72
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@76560ee600cb\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[[RecruitPeonCommand] Management ratio exceeded. Need more Outer Disciples.
+Saving results to: C:/Users/joshe/AppData/LocalLow/DefaultCompany/TalesOfTao\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

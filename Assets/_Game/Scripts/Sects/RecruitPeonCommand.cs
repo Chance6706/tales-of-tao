@@ -34,7 +34,7 @@ namespace TalesOfTao.Sects
             // Check management ratio: peons must be <= 5x Outer Disciples
             int outerCount = _sect.GetDiscipleCount(DiscipleRank.OuterDisciple);
             int peonCount = _sect.GetDiscipleCount(DiscipleRank.Peon);
-            if (peonCount + 1 > outerCount * 5)
+            if (outerCount > 0 && peonCount + 1 > outerCount * 5)
             {
                 Debug.LogWarning("[RecruitPeonCommand] Management ratio exceeded. Need more Outer Disciples.");
                 return false;
