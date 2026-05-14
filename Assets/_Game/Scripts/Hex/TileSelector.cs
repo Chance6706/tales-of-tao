@@ -48,11 +48,14 @@ namespace TalesOfTao.Hex
             if (_gridManager == null || _gridManager.TileCount == 0)
             {
                 var managers = UnityEngine.Object.FindObjectsByType<HexGridManager>();
+                Debug.Log($"[TileSelector] Searching {managers.Length} HexGridManager(s)...");
                 foreach (var mgr in managers)
                 {
+                    Debug.Log($"[TileSelector] Found mgr: {mgr.name}, tileCount={mgr.TileCount}, isGenerated={mgr.IsGenerated}");
                     if (mgr != null && mgr.TileCount > 0)
                     {
                         _gridManager = mgr;
+                        Debug.Log($"[TileSelector] Selected mgr with {mgr.TileCount} tiles.");
                         break;
                     }
                 }
