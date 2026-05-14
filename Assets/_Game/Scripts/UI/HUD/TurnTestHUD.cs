@@ -16,6 +16,12 @@ namespace TalesOfTao.UI.HUD
         private GUIStyle _buttonStyle;
         private bool _stylesCreated;
 
+        /// <summary>
+        /// Set to true while mouse is over the End Turn button.
+        /// TileSelector checks this to avoid selecting tiles through the button.
+        /// </summary>
+        public static bool IsMouseOverButton { get; private set; }
+
         private void Start()
         {
             var calGO = new GameObject("ZodiacCalendar");
@@ -66,7 +72,7 @@ namespace TalesOfTao.UI.HUD
             float y = 20;
             float lineHeight = 32;
 
-            // Draw a dark background box for readability
+            // Dark background for readability
             GUI.color = new Color(0, 0, 0, 0.7f);
             GUI.DrawTexture(new Rect(10, 10, 420, lineHeight * 3 + 20), Texture2D.whiteTexture);
             GUI.color = Color.white;
@@ -82,15 +88,9 @@ namespace TalesOfTao.UI.HUD
             float btnH = 50;
             _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
 
-            // Consume mouse events over button
+            // Track if mouse is over the button
             Event e = Event.current;
-            if (e.isMouse && _buttonRect.Contains(e.mousePosition))
-            {
-                if (e.type == EventType.MouseDown || e.type == EventType.MouseUp)
-                {
-                    e.Use();
-                }
-            }
+            IsMouseOverButton = _buttonRect.Contains(e.mousePosition);
 
             if (GUI.Button(_buttonRect, "End Turn", _buttonStyle))
             {

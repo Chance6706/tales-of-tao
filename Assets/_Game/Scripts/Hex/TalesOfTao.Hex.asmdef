@@ -5,7 +5,8 @@
         "TalesOfTao.Core",
         "Unity.InputSystem",
         "Unity.Collections",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "TalesOfTao.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
