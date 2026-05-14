@@ -53,12 +53,16 @@ namespace TalesOfTao.UI.HUD
 
             if (!_turnDriver.IsActive)
             {
+                Debug.Log("[TurnTestHUD] Calling StartTurn");
                 _turnDriver.StartTurn();
+                Debug.Log($"[TurnTestHUD] After StartTurn, IsActive={_turnDriver.IsActive}, Phase={_turnDriver.CurrentPhase}");
             }
 
             // Force initial UI update with current state
+            Debug.Log($"[TurnTestHUD] Forcing update: Phase={_turnDriver.CurrentPhase}, Turn={_turnDriver.TurnNumber}, Animal={_turnDriver.CurrentAnimal}");
             OnPhaseChanged(_turnDriver.CurrentPhase);
             OnTurnStarted(_turnDriver.TurnNumber);
+            Debug.Log($"[TurnTestHUD] After update: phaseText={_phaseText}, turnText={_turnText}, zodiacText={_zodiacText}");
         }
 
         private void Update()
