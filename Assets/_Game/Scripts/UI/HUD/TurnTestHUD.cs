@@ -6,37 +6,32 @@ namespace TalesOfTao.UI.HUD
 {
     public class TurnTestHUD : MonoBehaviour
     {
-        [SerializeField] private TurnDriver _turnDriver;
-
+        private TurnDriver _turnDriver;
         private string _phaseText = "...";
         private string _turnText = "...";
         private string _zodiacText = "...";
         private bool _canEndTurn;
-        private bool _started;
         private Rect _buttonRect;
 
         private void Start()
         {
-            if (_turnDriver == null)
-                _turnDriver = FindAnyObjectByType<TurnDriver>();
+            Debug.Log("[TurnTestHUD] Start");
 
-            if (_turnDriver == null)
-            {
-                var calGO = new GameObject("ZodiacCalendar");
-                var calendar = calGO.AddComponent<ZodiacCalendar>();
+            // Always create our own turn system to avoid conflicts
+            var calGO = new GameObject("ZodiacCalendar");
+            var calendar = calGO.AddComponent<ZodiacCalendar>();
 
-                var driverGO = new GameObject("TurnDriver");
-                _turnDriver = driverGO.AddComponent<TurnDriver>();
-                _turnDriver.Initialize(calendar, null, null, null, 0f);
-            }
+            var driverGO = new GameObject("TurnDriver");
+            _turnDriver = driverGO.AddComponent<TurnDriver>();
+            _turnDriver.Initialize(calendar, null, null, null, 0f);
 
-            // Subscribe to events BEFORE starting the turn
+            // Subscribe BEFORE starting
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
-            _started = true;
 
-            // Now start the turn (events will fire and be caught)
+            Debug.Log("[TurnTestHUD] Subscribed, starting turn...");
             _turnDriver.StartTurn();
+            Debug.Log("[TurnTestHUD] StartTurn returned");
         }
 
         private void OnDestroy()
@@ -50,8 +45,6 @@ namespace TalesOfTao.UI.HUD
 
         private void OnGUI()
         {
-            if (!_started) return;
-
             GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 20,
@@ -77,17 +70,19 @@ namespace TalesOfTao.UI.HUD
             float btnH = 50;
             _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
 
-            // Check if mouse is over the button — if so, consume the event so TileSelector doesn't fire
+            // Consume mouse events over the button to prevent TileSelector raycast
             Event e = Event.current;
-            bool mouseOverButton = _buttonRect.Contains(e.mousePosition);
-
-            if (mouseOverButton && e.type == EventType.MouseDown)
+            if (e.isMouse && _buttonRect.Contains(e.mousePosition))
             {
-                e.Use(); // Consume the event so it doesn't reach TileSelector
+                if (e.type == EventType.MouseDown || e.type == EventType.MouseUp)
+                {
+                    e.Use();
+                }
             }
 
             if (GUI.Button(_buttonRect, "End Turn", buttonStyle))
             {
+                Debug.Log("[TurnTestHUD] Button clicked!");
                 OnEndTurnClicked();
             }
 
@@ -96,6 +91,7 @@ namespace TalesOfTao.UI.HUD
             {
                 if (_canEndTurn)
                 {
+                    Debug.Log("[TurnTestHUD] Key pressed!");
                     OnEndTurnClicked();
                     e.Use();
                 }
@@ -104,6 +100,7 @@ namespace TalesOfTao.UI.HUD
 
         private void OnPhaseChanged(GamePhase phase)
         {
+            Debug.Log($"[TurnTestHUD] OnPhaseChanged: {phase}");
             _phaseText = phase switch
             {
                 GamePhase.Event      => "Event Phase",
@@ -119,11 +116,13 @@ namespace TalesOfTao.UI.HUD
 
         private void OnTurnStarted(int turn)
         {
+            Debug.Log($"[TurnTestHUD] OnTurnStarted: {turn}");
             _turnText = $"Turn {turn}";
             if (_turnDriver != null)
             {
-                _zodiacText = $"Year of the {_turnDriver.CurrentAnimal}";
-                Debug.Log($"[TurnTestHUD] Turn {turn}, Zodiac: {_turnDriver.CurrentAnimal}");
+                string animal = _turnDriver.CurrentAnimal;
+                _zodiacText = $"Year of the {animal}";
+                Debug.Log($"[TurnTestHUD] Zodiac: {animal}");
             }
         }
 

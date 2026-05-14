@@ -3,9 +3,6 @@ using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
 {
-    /// <summary>
-    /// Simple MonoBehaviour that drives the turn cycle.
-    /// </summary>
     public class TurnDriver : MonoBehaviour
     {
         [Header("Event Channels")]
@@ -40,17 +37,18 @@ namespace TalesOfTao.Core.TurnSystem
             _zodiacBonusesChannel = zodiacCh;
             _autoAdvanceDelay = autoDelay;
             _initialized = true;
+            Debug.Log($"[TurnDriver] Initialized with calendar={calendar != null}, autoDelay={autoDelay}");
         }
 
         private void Update()
         {
             if (!_active) return;
 
-            // Keyboard shortcut: Enter or Space to end turn during Action phase
             if ((GamePhase)_currentPhase == GamePhase.Action)
             {
                 if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
                 {
+                    Debug.Log("[TurnDriver] Keyboard EndTurn");
                     EndTurn();
                     return;
                 }
@@ -69,6 +67,7 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void StartTurn()
         {
+            Debug.Log($"[TurnDriver] StartTurn called, _initialized={_initialized}");
             if (!_initialized) return;
 
             _turnNumber++;
@@ -79,13 +78,17 @@ namespace TalesOfTao.Core.TurnSystem
             if (_calendar != null)
             {
                 if (_turnNumber == 1)
+                {
                     _calendar.Initialize();
+                    Debug.Log($"[TurnDriver] Calendar initialized, animal={_calendar.CurrentAnimal}");
+                }
                 else
                     _calendar.AdvanceTurn();
             }
 
             EnterPhase();
             OnTurnStarted?.Invoke(_turnNumber);
+            Debug.Log($"[TurnDriver] Turn {_turnNumber} started, OnPhaseChanged has {OnPhaseChanged?.GetInvocationList().Length ?? 0} listeners");
         }
 
         public void AdvancePhase()
@@ -114,7 +117,7 @@ namespace TalesOfTao.Core.TurnSystem
             }
 
             ExitPhase();
-            _currentPhase = 5; // Resolution
+            _currentPhase = 5;
             EnterPhase();
             ExitPhase();
             CompleteTurn();
