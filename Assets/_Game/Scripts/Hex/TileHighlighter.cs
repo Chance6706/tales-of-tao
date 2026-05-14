@@ -33,9 +33,7 @@ namespace TalesOfTao.Hex
 
             // Make it gold/yellow and transparent
             var renderer = _highlightObj.GetComponent<Renderer>();
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit")
-                         ?? Shader.Find("Unlit/Color")
-                         ?? Shader.Find("Standard"));
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Standard"));
             mat.color = new Color(1f, 0.85f, 0.1f, 0.7f);
             mat.SetFloat("_Surface", 1); // Transparent
             mat.SetFloat("_Blend", 0);   // Alpha blend

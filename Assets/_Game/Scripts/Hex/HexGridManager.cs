@@ -47,8 +47,10 @@ namespace TalesOfTao.Hex
 
         private void Awake()
         {
+            if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             AutoLoadTerrainTypes();
             Instance = this;
+            Debug.Log($"[HexGridManager] Instance set. tileCount={TileCount}");
         }
 
         /// <summary>
@@ -68,6 +70,7 @@ namespace TalesOfTao.Hex
                 if (so != null) list.Add(so);
             }
             _terrainTypes = list.Count > 0 ? list.ToArray() : null;
+            Debug.Log($"[HexGrid] AutoLoadTerrainTypes: loaded {list.Count} terrain types.");
 #endif
         }
 
@@ -548,7 +551,7 @@ namespace TalesOfTao.Hex
             }
         }
 
-        // ── Pass 7b: Qi Density ───────────────────────────────────────────────
+n        // ── Pass 7b: Qi Density ───────────────────────────────────────────────
 
         private void Pass_QiDensity(System.Random rng)
         {
@@ -603,13 +606,9 @@ namespace TalesOfTao.Hex
                 if (t.Elevation == ElevationLevel.Summit) featureChance += 0.08f;
                 if (roll < featureChance)
                 {
-                    t.Feature = t.Terrain?.Type switch
-                    {
-                        TerrainType.Mountain => Pick(rng, TileFeature.AncientRuins, TileFeature.HotSpring, TileFeature.SpiritVein),
-                        TerrainType.Forest   => Pick(rng, TileFeature.AncientRuins, TileFeature.SpiritVein, TileFeature.WanderingMaster),
-                        TerrainType.Swamp    => Pick(rng, TileFeature.HotSpring, TileFeature.BanditCamp, TileFeature.SpiritVein),
-                        _                    => Pick(rng, TileFeature.BanditCamp, TileFeature.WanderingMaster, TileFeature.AncientRuins),
-                    };
+                    t.Feature = t.Terrain?.Type == TerrainType.Mountain ? TileFeature.AncientRuins :
+                                t.Terrain?.Type == TerrainType.Forest   ? TileFeature.SpiritVein :
+                                t.Terrain?.Type == TerrainType.Swamp    ? TileFeature.HotSpring : TileFeature.BanditCamp;
                 }
             }
         }
@@ -655,9 +654,6 @@ namespace TalesOfTao.Hex
 
         private static TerrainType Pick4(System.Random rng, TerrainType a, TerrainType b, TerrainType c, TerrainType d) =>
             rng.Next(4) switch { 0 => a, 1 => b, 2 => c, _ => d };
-
-        private static T Pick<T>(System.Random rng, T a, T b, T c) where T : Enum =>
-            rng.Next(3) switch { 0 => a, 1 => b, _ => c };
 
         private TerrainTypeSO GetTerrainTypeSO(TerrainType type)
         {
