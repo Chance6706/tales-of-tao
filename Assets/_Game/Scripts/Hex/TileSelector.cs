@@ -41,6 +41,14 @@ namespace TalesOfTao.Hex
                 Debug.Log("[TileSelector] Auto-generating map in Play mode...");
                 _gridManager.GenerateMap();
             }
+
+            // Ensure TileHighlighter exists
+            if (TileHighlighter.Instance == null)
+            {
+                var go = new GameObject("TileHighlighter");
+                go.AddComponent<TileHighlighter>();
+                Debug.Log("[TileSelector] Created TileHighlighter.");
+            }
         }
 
         private void Update()

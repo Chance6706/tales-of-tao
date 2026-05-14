@@ -106,9 +106,10 @@ namespace TalesOfTao.Hex
                 if (_mouse != null && _mouse.middleButton.isPressed)
                 {
                     var delta = _mouse.delta.ReadValue();
-                    float zoomScale = _currentZoom / 10f;
-                    panX += delta.x * _panSpeed * 0.01f * zoomScale;
-                    panZ -= delta.y * _panSpeed * 0.01f * zoomScale;
+                    // Match keyboard pan speed (panSpeed * zoomScale * dt equivalent)
+                    float speed = _panSpeed * (_currentZoom / 5f) * Time.deltaTime * 60f;
+                    panX += delta.x * speed;
+                    panZ -= delta.y * speed;
                 }
             }
             else
