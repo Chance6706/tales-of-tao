@@ -30,25 +30,39 @@ namespace TalesOfTao.UI.HUD
 
         private void Start()
         {
+            Debug.Log("[TurnTestHUD] Start called");
             if (_turnDriver == null)
                 _turnDriver = FindAnyObjectByType<TurnDriver>();
 
             if (_turnDriver == null)
             {
+                Debug.Log("[TurnTestHUD] Creating new turn system");
                 var calGO = new GameObject("ZodiacCalendar");
                 var calendar = calGO.AddComponent<ZodiacCalendar>();
-
                 var driverGO = new GameObject("TurnDriver");
                 _turnDriver = driverGO.AddComponent<TurnDriver>();
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
+            }
+            else
+            {
+                Debug.Log($"[TurnTestHUD] Found existing driver, IsActive={_turnDriver.IsActive}");
             }
 
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
 
-            // Only start the turn if the driver isn't already active
             if (!_turnDriver.IsActive)
+            {
+                Debug.Log("[TurnTestHUD] Starting turn");
                 _turnDriver.StartTurn();
+            }
+            else
+            {
+                Debug.Log("[TurnTestHUD] Driver already active, forcing initial update");
+                // Force initial update since we missed the first events
+                OnPhaseChanged(_turnDriver.CurrentPhase);
+                OnTurnStarted(_turnDriver.TurnNumber);
+            }
         }
 
         private void Update()
