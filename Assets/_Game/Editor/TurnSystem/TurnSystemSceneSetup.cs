@@ -24,7 +24,7 @@ namespace TalesOfTao.Editor.TurnSystem
             var hudGO = new GameObject("TurnTestHUD");
             hudGO.AddComponent<TurnTestHUD>();
 
-            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 var esGO = new GameObject("EventSystem");
                 esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
