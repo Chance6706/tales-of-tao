@@ -87,7 +87,9 @@ namespace TalesOfTao.Hex
                     {
                         _currentSelection = tile;
                         TileSelected?.Invoke(tile);
-                        TileHighlighter.SelectTile(tile);
+                        // Get elevation offset for highlight positioning
+                        float elevationY = hit.point.y;
+                        TileHighlighter.SelectTile(tile, elevationY);
                         return;
                     }
                     Debug.Log($"[TileSelector] Raycast hit chunk but no tile at ({hexCoords.Q},{hexCoords.R}).");

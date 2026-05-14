@@ -43,11 +43,12 @@ namespace TalesOfTao.Hex
             _highlightObj.SetActive(false);
         }
 
-        public void Show(HexCoords coords)
+        public void Show(HexCoords coords, float elevationY = 0f)
         {
             if (_highlightObj == null) return;
             var worldPos = coords.ToWorldPosition(_hexSize);
-            transform.position = new Vector3(worldPos.x, _highlightHeight, worldPos.z);
+            float yPos = Mathf.Max(elevationY, _highlightHeight) + 0.15f;
+            transform.position = new Vector3(worldPos.x, yPos, worldPos.z);
             _highlightObj.SetActive(true);
             gameObject.SetActive(true);
         }
@@ -58,7 +59,7 @@ namespace TalesOfTao.Hex
             gameObject.SetActive(false);
         }
 
-        public static void SelectTile(HexTileData tile)
+        public static void SelectTile(HexTileData tile, float elevationY = 0f)
         {
             if (_instance == null)
             {
@@ -66,7 +67,7 @@ namespace TalesOfTao.Hex
                 return;
             }
             if (tile == null) return;
-            _instance.Show(tile.Coords);
+            _instance.Show(tile.Coords, elevationY);
         }
 
         public static void ClearSelection()
