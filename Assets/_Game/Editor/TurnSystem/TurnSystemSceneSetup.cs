@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEditor;
+using TalesOfTao.Core;
 using TalesOfTao.Core.EventChannels;
 using TalesOfTao.Core.TurnSystem;
+using TalesOfTao.UI.HUD;
 
 namespace TalesOfTao.Editor.TurnSystem
 {

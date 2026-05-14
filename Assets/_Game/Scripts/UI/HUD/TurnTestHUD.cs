@@ -40,7 +40,7 @@ namespace TalesOfTao.UI.HUD
             // Auto-create turn system if not assigned
             if (_turnDriver == null)
             {
-                var existing = FindObjectOfType<TurnDriver>();
+                var existing = FindFirstObjectByType<TurnDriver>();
                 if (existing != null)
                 {
                     Initialize(existing);
