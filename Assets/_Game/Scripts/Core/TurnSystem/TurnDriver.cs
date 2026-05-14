@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
@@ -46,7 +47,23 @@ namespace TalesOfTao.Core.TurnSystem
             // Keyboard shortcut: Enter or Space to end turn during Action phase
             if ((GamePhase)_currentPhase == GamePhase.Action)
             {
-                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
+                bool endTurnPressed = false;
+
+                // Try new Input System first
+                var keyboard = UnityEngine.InputSystem.Keyboard.current;
+                if (keyboard != null)
+                {
+                    if (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
+                        endTurnPressed = true;
+                }
+                else
+                {
+                    // Fallback to old Input
+                    if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
+                        endTurnPressed = true;
+                }
+
+                if (endTurnPressed)
                 {
                     EndTurn();
                     return;

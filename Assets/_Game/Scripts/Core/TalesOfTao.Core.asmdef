@@ -1,7 +1,9 @@
 {
     "name": "TalesOfTao.Core",
     "rootNamespace": "TalesOfTao.Core",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
