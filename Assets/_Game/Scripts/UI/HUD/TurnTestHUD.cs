@@ -37,15 +37,26 @@ namespace TalesOfTao.UI.HUD
             {
                 var calGO = new GameObject("ZodiacCalendar");
                 var calendar = calGO.AddComponent<ZodiacCalendar>();
-
                 var driverGO = new GameObject("TurnDriver");
                 _turnDriver = driverGO.AddComponent<TurnDriver>();
+                _turnDriver.Initialize(calendar, null, null, null, 0f);
+            }
+            else if (!_turnDriver.IsActive)
+            {
+                var calGO = new GameObject("ZodiacCalendar_Auto");
+                var calendar = calGO.AddComponent<ZodiacCalendar>();
                 _turnDriver.Initialize(calendar, null, null, null, 0f);
             }
 
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
-            _turnDriver.StartTurn();
+
+            if (!_turnDriver.IsActive)
+                _turnDriver.StartTurn();
+
+            // Force initial UI update
+            OnPhaseChanged(_turnDriver.CurrentPhase);
+            OnTurnStarted(_turnDriver.TurnNumber);
         }
 
         private void Update()

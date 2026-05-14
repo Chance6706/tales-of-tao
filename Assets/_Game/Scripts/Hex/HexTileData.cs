@@ -17,7 +17,7 @@ namespace TalesOfTao.Hex
         public int CaveCount { get; internal set; }
         public DepositType[] Deposits { get; internal set; } = Array.Empty<DepositType>();
         public TileFeature Feature { get; internal set; } = TileFeature.None;
-        public ControlState Control { get; internal set; } = ControlState.Unowned;
+        public ControlState Control { get; set; } = ControlState.Unowned;
         public FortificationLevel Fortification { get; internal set; } = FortificationLevel.None;
 
         /// <summary>True if this tile lies within 1 hex of a generated Ley Line path.</summary>

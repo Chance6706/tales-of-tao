@@ -4,6 +4,7 @@ using TalesOfTao.Core;
 using TalesOfTao.Core.EventChannels;
 using TalesOfTao.Core.TurnSystem;
 using TalesOfTao.UI.HUD;
+using TalesOfTao.Sects;
 
 namespace TalesOfTao.Editor.TurnSystem
 {
@@ -24,15 +25,15 @@ namespace TalesOfTao.Editor.TurnSystem
             var hudGO = new GameObject("TurnTestHUD");
             hudGO.AddComponent<TurnTestHUD>();
 
-            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
-            {
-                var esGO = new GameObject("EventSystem");
-                esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
+            var sectGO = new GameObject("SectFoundingTest");
+            sectGO.AddComponent<SectFoundingTest>();
+
+            var fixGO = new GameObject("EventSystemFix");
+            fixGO.AddComponent<EventSystemFix>();
 
             Selection.activeGameObject = hudGO;
             Debug.Log("[TurnSystemSetup] Complete. Press Play to test.");
+            Debug.Log("Wait for Action phase, then press T on a hex tile to found a sect.");
         }
 
         private static void CreateEventChannelIfNeeded<T>(string name, string path) where T : ScriptableObject
