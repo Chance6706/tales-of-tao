@@ -91,6 +91,7 @@ namespace TalesOfTao.UI.HUD
             // Track if mouse is over the button
             Event e = Event.current;
             IsMouseOverButton = _buttonRect.Contains(e.mousePosition);
+            GameState.IsMouseOverUI = IsMouseOverButton;
 
             if (GUI.Button(_buttonRect, "End Turn", _buttonStyle))
             {

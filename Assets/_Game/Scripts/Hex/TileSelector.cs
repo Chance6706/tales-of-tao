@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TalesOfTao.UI.HUD;
 
 namespace TalesOfTao.Hex
 {
@@ -87,8 +86,8 @@ namespace TalesOfTao.Hex
 
             if (!leftClicked) return;
 
-            // Don't select tiles if clicking on the HUD button
-            if (TurnTestHUD.IsMouseOverButton) return;
+            // Don't select tiles if mouse is over a UI element
+            if (Core.GameState.IsMouseOverUI) return;
 
             var ray = _cam.ScreenPointToRay(mousePos);
 
