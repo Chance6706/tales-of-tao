@@ -24,12 +24,9 @@ namespace TalesOfTao.Editor.TurnSystem
             var hudGO = new GameObject("TurnTestHUD");
             hudGO.AddComponent<TurnTestHUD>();
 
-            if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
-            {
-                var esGO = new GameObject("EventSystem");
-                esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
+            // Note: EventSystem not needed for IMGUI-based HUD.
+            // If using Canvas-based UI, ensure EventSystem uses InputSystemUIInputModule
+            // instead of StandaloneInputModule (which conflicts with New Input System).
 
             Selection.activeGameObject = hudGO;
             Debug.Log("[TurnSystemSetup] Complete. Press Play to test.");
