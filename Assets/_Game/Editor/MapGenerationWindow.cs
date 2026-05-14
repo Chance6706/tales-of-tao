@@ -57,11 +57,12 @@ namespace TalesOfTao.Editor
 
         private void Generate(int? forcedSeed = null)
         {
-            // Always use the current instance, not the serialized reference
             var mgr = HexGridManager.Instance;
             if (mgr == null)
+                mgr = UnityEngine.Object.FindAnyObjectByType<HexGridManager>();
+            if (mgr == null)
             {
-                Debug.LogError("[TalesOfTao] No HexGridManager instance found.");
+                Debug.LogError("[TalesOfTao] No HexGridManager found. Run '2 - Setup Main Scene' first.");
                 return;
             }
 
