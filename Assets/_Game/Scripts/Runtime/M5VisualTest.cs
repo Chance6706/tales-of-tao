@@ -53,6 +53,7 @@ namespace TalesOfTao.Runtime
         private int _testsPassed;
         private int _testsFailed;
         private int _testsTotal;
+        private bool _autoTestCompleted;
 
         private void Start()
         {
@@ -220,7 +221,7 @@ namespace TalesOfTao.Runtime
         {
             _timer += Time.deltaTime;
 
-            if (_autoRun && !_autoTestRunning && _timer > _autoRunDelay)
+            if (_autoRun && !_autoTestRunning && !_autoTestCompleted && _timer > _autoRunDelay)
             {
                 _autoTestRunning = true;
                 _autoTestStep = 0;
@@ -312,6 +313,7 @@ namespace TalesOfTao.Runtime
 
                 case 6:
                     _autoTestRunning = false;
+                    _autoTestCompleted = true;
                     _status = $"Auto test complete: {_testsPassed}/{_testsTotal} passed, {_testsFailed} failed";
                     Debug.Log($"[M5VisualTest] === RESULTS: {_testsPassed}/{_testsTotal} passed, {_testsFailed} failed ===");
                     break;

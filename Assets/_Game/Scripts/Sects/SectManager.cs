@@ -154,11 +154,9 @@ namespace TalesOfTao.Sects
         {
             if (_buildingFactory == null || _sectData == null) return;
 
-            // Find the building config
-            // Note: In a full implementation, we'd look up the config from a registry.
-            // For now, the BuildingFactory handles creation when called by the game setup.
-
-            _sectData.AddBuilding(buildingTypeId, 1, Vector3.zero); // Position set by caller
+            // Note: The event only passes the buildingTypeId. In a full implementation,
+            // we'd include the tier as well. For now, default to tier 1.
+            _sectData.AddBuilding(buildingTypeId, 1, Vector3.zero);
             OnBuildingCompleted?.Invoke(buildingTypeId);
 
             Debug.Log($"[SectManager] Building completed: {buildingTypeId}");

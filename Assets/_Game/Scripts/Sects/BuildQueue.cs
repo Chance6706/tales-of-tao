@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using TalesOfTao.Core;
 using TalesOfTao.Core.EventChannels;
@@ -27,10 +28,10 @@ namespace TalesOfTao.Sects
         [SerializeField] private StringEventChannelSO _onBuildingCompleted;
 
         [Header("State")]
-        [SerializeField] private BuildEntry[] _queue = Array.Empty<BuildEntry>();
+        [SerializeField] private List<BuildEntry> _queue = new();
 
-        public event Action<string> OnBuildingCompleted;
-        public int QueueLength => _queue != null ? _queue.Length : 0;
+        public event Action<string, int> OnBuildingCompleted;
+        public int QueueLength => _queue != null ? _queue.Count : 0;
         public int MaxConcurrent { get; set; } = 1; // Set by Temple tier
 
         /// <summary>
@@ -41,7 +42,6 @@ namespace TalesOfTao.Sects
             if (string.IsNullOrEmpty(buildingTypeId)) return false;
             if (tier < 1 || tier > 3) return false;
 
-            // Check if already built or queued
             if (_queue != null)
             {
                 foreach (var entry in _queue)
@@ -50,14 +50,12 @@ namespace TalesOfTao.Sects
                         && entry.BuildingTypeId == buildingTypeId
                         && entry.Tier == tier)
                     {
-                        return false; // Already queued
+                        return false;
                     }
                 }
             }
 
-            // Check concurrent limit
-            int activeCount = GetActiveCount();
-            return activeCount < MaxConcurrent;
+            return GetActiveCount() < MaxConcurrent;
         }
 
         /// <summary>
@@ -71,7 +69,7 @@ namespace TalesOfTao.Sects
                 return;
             }
 
-            var entry = new BuildEntry
+            _queue.Add(new BuildEntry
             {
                 BuildingTypeId = buildingTypeId,
                 Tier = tier,
@@ -79,19 +77,7 @@ namespace TalesOfTao.Sects
                 TotalTurns = turns,
                 IsComplete = false,
                 IsCancelled = false
-            };
-
-            if (_queue == null)
-            {
-                _queue = new BuildEntry[] { entry };
-            }
-            else
-            {
-                var newQueue = new BuildEntry[_queue.Length + 1];
-                _queue.CopyTo(newQueue, 0);
-                newQueue[_queue.Length] = entry;
-                _queue = newQueue;
-            }
+            });
 
             Debug.Log($"[BuildQueue] Queued {buildingTypeId} T{tier} ({turns} turns). Active: {GetActiveCount()}/{MaxConcurrent}");
         }
@@ -101,10 +87,10 @@ namespace TalesOfTao.Sects
         /// </summary>
         public void ProcessBuildPhase()
         {
-            if (_queue == null || _queue.Length == 0) return;
+            if (_queue == null || _queue.Count == 0) return;
 
             bool changed = false;
-            for (int i = 0; i < _queue.Length; i++)
+            for (int i = _queue.Count - 1; i >= 0; i--)
             {
                 var entry = _queue[i];
                 if (entry.IsComplete || entry.IsCancelled) continue;
@@ -118,9 +104,7 @@ namespace TalesOfTao.Sects
                     _queue[i] = entry;
 
                     Debug.Log($"[BuildQueue] Construction complete: {entry.BuildingTypeId} T{entry.Tier}");
-
-                    // Fire events
-                    OnBuildingCompleted?.Invoke(entry.BuildingTypeId);
+                    OnBuildingCompleted?.Invoke(entry.BuildingTypeId, entry.Tier);
                     _onBuildingCompleted?.Raise(entry.BuildingTypeId);
                 }
                 else
@@ -129,7 +113,6 @@ namespace TalesOfTao.Sects
                 }
             }
 
-            // Clean up cancelled entries only (keep completed for IsComplete checks)
             if (changed)
             {
                 CleanupCancelled();
@@ -141,7 +124,7 @@ namespace TalesOfTao.Sects
         /// </summary>
         public void Cancel(int index)
         {
-            if (_queue == null || index < 0 || index >= _queue.Length) return;
+            if (_queue == null || index < 0 || index >= _queue.Count) return;
 
             var entry = _queue[index];
             if (entry.IsComplete) return;
@@ -155,9 +138,9 @@ namespace TalesOfTao.Sects
         /// <summary>
         /// Gets the current queue state (for UI display).
         /// </summary>
-        public BuildEntry[] GetQueue()
+        public List<BuildEntry> GetQueue()
         {
-            return _queue ?? Array.Empty<BuildEntry>();
+            return _queue ?? new List<BuildEntry>();
         }
 
         /// <summary>
@@ -200,63 +183,10 @@ namespace TalesOfTao.Sects
             return count;
         }
 
-        private void CleanupCompleted()
-        {
-            if (_queue == null) return;
-            int activeCount = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsComplete && !entry.IsCancelled) activeCount++;
-            }
-
-            if (activeCount == 0)
-            {
-                _queue = Array.Empty<BuildEntry>();
-                return;
-            }
-
-            var newQueue = new BuildEntry[activeCount];
-            int idx = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsComplete && !entry.IsCancelled)
-                {
-                    newQueue[idx++] = entry;
-                }
-            }
-            _queue = newQueue;
-        }
-
-        /// <summary>
-        /// Removes only cancelled entries from the queue. Completed entries stay for IsComplete checks.
-        /// </summary>
         private void CleanupCancelled()
         {
             if (_queue == null) return;
-            int keepCount = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsCancelled) keepCount++;
-            }
-
-            if (keepCount == 0)
-            {
-                _queue = Array.Empty<BuildEntry>();
-                return;
-            }
-
-            if (keepCount == _queue.Length) return; // Nothing to clean
-
-            var newQueue = new BuildEntry[keepCount];
-            int idx = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsCancelled)
-                {
-                    newQueue[idx++] = entry;
-                }
-            }
-            _queue = newQueue;
+            _queue.RemoveAll(e => e.IsCancelled);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using TalesOfTao.Core;
 using TalesOfTao.Core.EventChannels;
@@ -28,10 +29,10 @@ namespace TalesOfTao.Sects
         [SerializeField] private StringEventChannelSO _onDiscipleTrained;
 
         [Header("State")]
-        [SerializeField] private TrainingEntry[] _queue = Array.Empty<TrainingEntry>();
+        [SerializeField] private List<TrainingEntry> _queue = new();
 
         public event Action<string, DiscipleRank> OnTrainingCompleted;
-        public int QueueLength => _queue != null ? _queue.Length : 0;
+        public int QueueLength => _queue != null ? _queue.Count : 0;
         public int MaxConcurrent { get; set; } = 5; // Set by Training Grounds tier
 
         /// <summary>
@@ -39,12 +40,10 @@ namespace TalesOfTao.Sects
         /// </summary>
         public bool CanQueue(DiscipleRank from, DiscipleRank to)
         {
-            if (from >= to) return false; // Can only promote upward
+            if (from >= to) return false;
             if (to > DiscipleRank.HighElder) return false;
 
-            // Check if already at max capacity
-            int activeCount = GetActiveCount();
-            return activeCount < MaxConcurrent;
+            return GetActiveCount() < MaxConcurrent;
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace TalesOfTao.Sects
                 return;
             }
 
-            var entry = new TrainingEntry
+            _queue.Add(new TrainingEntry
             {
                 DiscipleName = discipleName,
                 FromRank = from,
@@ -67,19 +66,7 @@ namespace TalesOfTao.Sects
                 TotalTurns = turns,
                 IsComplete = false,
                 IsCancelled = false
-            };
-
-            if (_queue == null)
-            {
-                _queue = new TrainingEntry[] { entry };
-            }
-            else
-            {
-                var newQueue = new TrainingEntry[_queue.Length + 1];
-                _queue.CopyTo(newQueue, 0);
-                newQueue[_queue.Length] = entry;
-                _queue = newQueue;
-            }
+            });
 
             Debug.Log($"[TrainingQueue] Queued {discipleName}: {from} -> {to} ({turns} turns). Active: {GetActiveCount()}/{MaxConcurrent}");
         }
@@ -89,10 +76,10 @@ namespace TalesOfTao.Sects
         /// </summary>
         public void ProcessBuildPhase()
         {
-            if (_queue == null || _queue.Length == 0) return;
+            if (_queue == null || _queue.Count == 0) return;
 
             bool changed = false;
-            for (int i = 0; i < _queue.Length; i++)
+            for (int i = _queue.Count - 1; i >= 0; i--)
             {
                 var entry = _queue[i];
                 if (entry.IsComplete || entry.IsCancelled) continue;
@@ -106,8 +93,6 @@ namespace TalesOfTao.Sects
                     _queue[i] = entry;
 
                     Debug.Log($"[TrainingQueue] Training complete: {entry.DiscipleName} is now {entry.ToRank}");
-
-                    // Fire events
                     OnTrainingCompleted?.Invoke(entry.DiscipleName, entry.ToRank);
                     _onDiscipleTrained?.Raise(entry.DiscipleName);
                 }
@@ -128,7 +113,7 @@ namespace TalesOfTao.Sects
         /// </summary>
         public void Cancel(int index)
         {
-            if (_queue == null || index < 0 || index >= _queue.Length) return;
+            if (_queue == null || index < 0 || index >= _queue.Count) return;
 
             var entry = _queue[index];
             if (entry.IsComplete) return;
@@ -142,9 +127,9 @@ namespace TalesOfTao.Sects
         /// <summary>
         /// Gets the current queue state (for UI display).
         /// </summary>
-        public TrainingEntry[] GetQueue()
+        public List<TrainingEntry> GetQueue()
         {
-            return _queue ?? Array.Empty<TrainingEntry>();
+            return _queue ?? new List<TrainingEntry>();
         }
 
         private int GetActiveCount()
@@ -161,28 +146,7 @@ namespace TalesOfTao.Sects
         private void CleanupCompleted()
         {
             if (_queue == null) return;
-            int activeCount = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsComplete && !entry.IsCancelled) activeCount++;
-            }
-
-            if (activeCount == 0)
-            {
-                _queue = Array.Empty<TrainingEntry>();
-                return;
-            }
-
-            var newQueue = new TrainingEntry[activeCount];
-            int idx = 0;
-            foreach (var entry in _queue)
-            {
-                if (!entry.IsComplete && !entry.IsCancelled)
-                {
-                    newQueue[idx++] = entry;
-                }
-            }
-            _queue = newQueue;
+            _queue.RemoveAll(e => e.IsComplete || e.IsCancelled);
         }
     }
 }
