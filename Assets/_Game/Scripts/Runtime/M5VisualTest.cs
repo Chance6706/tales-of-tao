@@ -75,8 +75,14 @@ namespace TalesOfTao.Runtime
                 _grid = gridGO.AddComponent<HexGridManager>();
             }
 
+            // Create grid renderer so tiles are visible
+            EnsureGridRenderer();
+
             // Generate map
             RegenerateMap();
+
+            // Position camera to look down at the hex grid
+            PositionCamera();
 
             // Create turn system — ZodiacCalendar must exist before TurnDriver
             EnsureTurnSystem();
@@ -90,6 +96,37 @@ namespace TalesOfTao.Runtime
             if (_unitPrefabs.Length == 0)
                 _status += " WARNING: No unit prefabs found!";
             _timer = 0f;
+        }
+
+        /// <summary>
+        /// Creates a HexGridRenderer and wires it to the grid manager.
+        /// The renderer subscribes to OnMapGenerated and builds chunk meshes.
+        /// </summary>
+        private void EnsureGridRenderer()
+        {
+            // Check if a renderer already exists
+            var existing = FindAnyObjectByType<HexGridRenderer>();
+            if (existing != null) return;
+
+            var rendererGO = new GameObject("HexGridRenderer");
+            var renderer = rendererGO.AddComponent<HexGridRenderer>();
+
+            // Wire up the grid manager reference via reflection since the field is serialized
+            var field = typeof(HexGridRenderer).GetField("_gridManager",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            field?.SetValue(renderer, _grid);
+        }
+
+        /// <summary>
+        /// Positions the camera for a good top-down view of the hex grid.
+        /// </summary>
+        private void PositionCamera()
+        {
+            if (_cam == null) return;
+            _cam.transform.position = new Vector3(0, 40, -30);
+            _cam.transform.rotation = Quaternion.Euler(60, 0, 0);
+            _cam.orthographic = false;
+            _cam.fieldOfView = 60;
         }
 
         /// <summary>
