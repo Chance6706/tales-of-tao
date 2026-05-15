@@ -95,7 +95,6 @@ namespace TalesOfTao.Sects
 
         private void PlaceTempleBuilding(HexTileData tile)
         {
-            // Find the Temple BuildingConfigSO
             var templeConfig = FindTempleConfig();
             if (templeConfig == null)
             {
@@ -109,7 +108,6 @@ namespace TalesOfTao.Sects
             // Create the Temple building GameObject
             string objectName = $"Building_Temple_T1";
             var go = new GameObject(objectName);
-            go.transform.position = worldPos + Vector3.up * 0.1f; // Slightly above tile
 
             // Add MeshFilter + MeshRenderer
             var meshFilter = go.AddComponent<MeshFilter>();
@@ -141,6 +139,23 @@ namespace TalesOfTao.Sects
                 collider.sharedMesh = mesh;
                 collider.convex = true;
             }
+
+            // Raycast down from above the tile to find the exact surface position
+            float surfaceY = worldPos.y;
+            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out var hit, 20f, ~0))
+            {
+                surfaceY = hit.point.y;
+            }
+
+            // Place the building so its base sits on the tile surface
+            // The mesh pivot is typically at the center, so we offset by half the mesh height
+            float yOffset = 0.01f;
+            if (mesh != null)
+            {
+                yOffset = mesh.bounds.extents.y + 0.01f;
+            }
+
+            go.transform.position = new Vector3(worldPos.x, surfaceY + yOffset, worldPos.z);
 
             // Register the building in SectData
             _createdData.AddBuilding("Temple", 1, go.transform.position);
