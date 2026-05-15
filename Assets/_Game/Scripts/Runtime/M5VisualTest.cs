@@ -61,6 +61,7 @@ namespace TalesOfTao.Runtime
             SetupCamera();
             SetupGrid();
             SetupInteraction();
+            SetupSectFounding();
             LoadPrefabs();
 
             _status = "Ready. Press T for auto test, 1-5 for units, B for buildings, S for status.";
@@ -131,6 +132,30 @@ namespace TalesOfTao.Runtime
             {
                 var hudGO = new GameObject("TurnTestHUD");
                 hudGO.AddComponent<TurnTestHUD>();
+            }
+        }
+
+        /// <summary>
+        /// Sets up sect founding. Press T on a tile to found a sect.
+        /// </summary>
+        private void SetupSectFounding()
+        {
+            var existing = FindAnyObjectByType<SectFoundingTest>();
+            if (existing != null) return;
+
+            var go = new GameObject("SectFoundingTest");
+            var test = go.AddComponent<SectFoundingTest>();
+
+            // Load a sect config from Resources
+            var config = Resources.Load<SectConfigSO>("Sects/SC_WuDang");
+            if (config != null)
+            {
+                test.SetConfig(config);
+                Debug.Log("[M5VisualTest] SectFoundingTest created with Wu Dang config. Press T on a tile to found sect.");
+            }
+            else
+            {
+                Debug.LogWarning("[M5VisualTest] No SectConfig found in Resources. Sect founding will not work.");
             }
         }
 
