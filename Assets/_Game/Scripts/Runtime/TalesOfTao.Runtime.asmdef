@@ -6,6 +6,7 @@
         "TalesOfTao.Hex",
         "TalesOfTao.Sects",
         "TalesOfTao.Economy",
+        "TalesOfTao.UI",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

@@ -13,7 +13,7 @@ namespace TalesOfTao.Core
     {
         private void Awake()
         {
-            var es = FindFirstObjectByType<EventSystem>();
+            var es = FindAnyObjectByType<EventSystem>();
             if (es != null)
             {
                 var oldModule = es.GetComponent<StandaloneInputModule>();
