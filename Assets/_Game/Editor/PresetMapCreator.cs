@@ -159,8 +159,8 @@ namespace TalesOfTao.Editor
                     // Tibetan Plateau (west, high altitude)
                     else if (x < 0.2f)
                     {
-                        map.TerrainTypes[idx] = ElevationLevel.Summit ? TerrainType.SacredPeak :
-                                               ElevationLevel.High ? TerrainType.Mountain :
+                        map.TerrainTypes[idx] = map.Elevations[idx] == ElevationLevel.Summit ? TerrainType.SacredPeak :
+                                               map.Elevations[idx] == ElevationLevel.High ? TerrainType.Mountain :
                                                TerrainType.Plains;
                     }
                     // Central Plains (fertile heartland)
