@@ -226,16 +226,17 @@ namespace TalesOfTao.Runtime
 
         private GameObject LoadPrefabByName(string name)
         {
-            // Search all prefabs in the project by name
-            var allPrefabs = Resources.FindObjectsOfTypeAll<GameObject>();
-            foreach (var prefab in allPrefabs)
-            {
-                if (prefab.name == name && prefab.scene.rootCount == 0)
-                {
-                    // This is a prefab asset (not a scene instance)
-                    return prefab;
-                }
-            }
+            // Load from Resources folder
+            var prefab = Resources.Load<GameObject>(name);
+            if (prefab != null) return prefab;
+            
+            // Try with subfolder path
+            prefab = Resources.Load<GameObject>("Buildings/" + name);
+            if (prefab != null) return prefab;
+            
+            prefab = Resources.Load<GameObject>("Units/" + name);
+            if (prefab != null) return prefab;
+            
             return null;
         }
 
