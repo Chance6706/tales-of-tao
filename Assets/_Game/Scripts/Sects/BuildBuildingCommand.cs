@@ -91,7 +91,7 @@ namespace TalesOfTao.Sects
             if (_buildQueue.IsUnderConstruction(_config.BuildingTypeId, _tier))
             {
                 var queue = _buildQueue.GetQueue();
-                for (int i = 0; i < queue.Length; i++)
+                for (int i = 0; i < queue.Count; i++)
                 {
                     if (queue[i].BuildingTypeId == _config.BuildingTypeId && queue[i].Tier == _tier)
                     {

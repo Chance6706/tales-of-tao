@@ -44,6 +44,10 @@ namespace TalesOfTao.Hex
             Shader shader = Shader.Find("TalesOfTao/HexColorPerTile");
             if (shader == null)
             {
+                shader = Shader.Find("TalesOfTao_HexColorPerTile");
+            }
+            if (shader == null)
+            {
                 // Fallback: URP/Unlit (also no lighting)
                 shader = Shader.Find("Universal Render Pipeline/Unlit");
             }
