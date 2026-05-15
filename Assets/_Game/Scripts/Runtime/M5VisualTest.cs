@@ -105,17 +105,16 @@ namespace TalesOfTao.Runtime
         /// </summary>
         private void EnsureGridRenderer()
         {
-            // Check if a renderer already exists
             var existing = FindAnyObjectByType<HexGridRenderer>();
             if (existing != null) return;
 
             var rendererGO = new GameObject("HexGridRenderer");
             var renderer = rendererGO.AddComponent<HexGridRenderer>();
 
-            // Wire up the grid manager reference via reflection since the field is serialized
-            var field = typeof(HexGridRenderer).GetField("_gridManager",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field?.SetValue(renderer, _grid);
+            // Use the public method to wire up the grid manager.
+            // This subscribes to OnMapGenerated so the renderer builds meshes
+            // when GenerateMap() is called.
+            renderer.SetGridManager(_grid);
         }
 
         /// <summary>
