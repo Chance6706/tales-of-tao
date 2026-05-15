@@ -60,7 +60,7 @@ namespace TalesOfTao.Runtime
             SetupCamera();
             SetupGrid();
             SetupInteraction();
-            SetupTurnSystem();
+            EnsureTurnSystem();
             LoadPrefabs();
 
             _status = "Ready. Press T for auto test, 1-5 for units, B for buildings, S for status.";
