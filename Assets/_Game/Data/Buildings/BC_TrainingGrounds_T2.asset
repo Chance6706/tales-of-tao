@@ -15,34 +15,34 @@ MonoBehaviour:
   _buildingTypeId: TrainingGrounds
   _displayName: Training Grounds T2
   _tierCosts:
-  - Tael: 0
+  - Tael: 50
     Qi: 0
-    Lumber: 0
+    Lumber: 20
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
   - Tael: 120
     Qi: 0
-    Lumber: 0
-    IronOre: 0
+    Lumber: 50
+    IronOre: 10
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+  - Tael: 250
+    Qi: 20
+    Lumber: 100
+    IronOre: 30
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000500000000000000
-  _prerequisiteBuilding: TrainingGrounds
+  _tierBuildTurns: 040000000600000008000000
+  _prerequisiteBuilding: Temple
   _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 'Training speed: +10%'
-  - 
+  - '8-turn training; cap 5/batch'
+  - '6-turn training; cap 8/batch; +5% combat'
+  - '5-turn training; cap 10/batch; free T1 technique'
   _tierMeshes:
   - {fileID: 0}
   - {fileID: 0}

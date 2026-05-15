@@ -15,13 +15,6 @@ MonoBehaviour:
   _buildingTypeId: Temple
   _displayName: Temple T1
   _tierCosts:
-  - Tael: 100
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
-    Jade: 0
-    MedicinalHerbs: 0
-    SpiritHerbs: 0
   - Tael: 0
     Qi: 0
     Lumber: 0
@@ -36,13 +29,20 @@ MonoBehaviour:
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 040000000000000000000000
+  - Tael: 0
+    Qi: 0
+    Lumber: 0
+    IronOre: 0
+    Jade: 0
+    MedicinalHerbs: 0
+    SpiritHerbs: 0
+  _tierBuildTurns: 000000000000000000000000
   _prerequisiteBuilding: 
   _prerequisiteTier: 0
   _tierEffects:
-  - 'Qi generation: +2'
-  - 
-  - 
+  - 'Qi +10/turn; 1 build slot'
+  - 'Qi +20/turn; 2 build slots; +5% income'
+  - 'Qi +35/turn; 3 build slots; Dao Sanctum option'
   _tierMeshes:
   - {fileID: 0}
   - {fileID: 0}

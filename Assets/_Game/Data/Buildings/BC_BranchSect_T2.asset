@@ -15,34 +15,34 @@ MonoBehaviour:
   _buildingTypeId: BranchSect
   _displayName: Branch Sect Outpost T2
   _tierCosts:
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+  - Tael: 200
+    Qi: 10
+    Lumber: 60
+    IronOre: 10
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
   - Tael: 400
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+    Qi: 25
+    Lumber: 120
+    IronOre: 25
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
-    Jade: 0
+  - Tael: 800
+    Qi: 50
+    Lumber: 250
+    IronOre: 50
+    Jade: 5
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000a00000000000000
-  _prerequisiteBuilding: BranchSect
+  _tierBuildTurns: 0c000000120000001a000000
+  _prerequisiteBuilding: ElderCouncil
   _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 'Influence: +10'
-  - 
+  - 'Basic gathering; Peon housing'
+  - 'Can build Training Grounds + Medicine Hall'
+  - 'Can build all non-wonder buildings'
   _tierMeshes:
   - {fileID: 0}
   - {fileID: 0}

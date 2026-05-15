@@ -15,34 +15,34 @@ MonoBehaviour:
   _buildingTypeId: Library
   _displayName: Library T1
   _tierCosts:
-  - Tael: 80
-    Qi: 0
-    Lumber: 0
+  - Tael: 100
+    Qi: 20
+    Lumber: 40
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 200
+    Qi: 45
+    Lumber: 80
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 400
+    Qi: 90
+    Lumber: 150
     IronOre: 0
-    Jade: 0
+    Jade: 5
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 040000000000000000000000
-  _prerequisiteBuilding: 
-  _prerequisiteTier: 0
+  _tierBuildTurns: 080000000c00000012000000
+  _prerequisiteBuilding: DiscipleHall
+  _prerequisiteTier: 1
   _tierEffects:
-  - 'Tech bonus: +3'
-  - 
-  - 
+  - 'Research queue; 5 scrolls'
+  - 'Research +30%; 15 scrolls'
+  - 'Copy enemy scrolls; 30 scrolls'
   _tierMeshes:
   - {fileID: 0}
   - {fileID: 0}
