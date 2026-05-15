@@ -106,7 +106,7 @@ namespace TalesOfTao.Tests
             {
                 _buildQueue.ProcessBuildPhase();
                 var queue = _buildQueue.GetQueue();
-                if (queue.Length > 0)
+                if (queue.Count > 0)
                 {
                     Debug.Log($"[M5Test] Build phase {turn}/8, turns remaining: {queue[0].TurnsRemaining}");
                 }
