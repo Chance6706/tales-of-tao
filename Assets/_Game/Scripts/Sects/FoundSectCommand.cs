@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using TalesOfTao.Core.Commands;
 using TalesOfTao.Hex;
-using TalesOfTao.Sects;
 
 namespace TalesOfTao.Sects
 {
