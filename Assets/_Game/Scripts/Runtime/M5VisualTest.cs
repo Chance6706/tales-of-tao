@@ -280,8 +280,8 @@ namespace TalesOfTao.Runtime
                 _buildingIndex = (_buildingIndex + 1) % _buildingPrefabs.Length;
             }
 
-            // R: Regenerate
-            if (kb.rKey.wasPressedThisFrame) RegenerateMap();
+            // G: Regenerate map
+            if (kb.gKey.wasPressedThisFrame) RegenerateMap();
 
             // F5: Run auto test
             if (kb.f5Key.wasPressedThisFrame && !_autoTestRunning)
@@ -329,6 +329,7 @@ namespace TalesOfTao.Runtime
                     break;
 
                 case 5:
+                    EnsureTurnSystem();
                     TestTurnSystem();
                     _autoTestStep = 6;
                     break;
