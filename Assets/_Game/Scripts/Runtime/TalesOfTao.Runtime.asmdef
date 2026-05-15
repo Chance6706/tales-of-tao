@@ -1,0 +1,20 @@
+{
+    "name": "TalesOfTao.Runtime",
+    "rootNamespace": "TalesOfTao.Runtime",
+    "references": [
+        "TalesOfTao.Core",
+        "TalesOfTao.Hex",
+        "TalesOfTao.Sects",
+        "TalesOfTao.Economy",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
