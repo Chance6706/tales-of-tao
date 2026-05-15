@@ -456,7 +456,16 @@ namespace TalesOfTao.Runtime
         private Vector3 GetMouseWorldPos()
         {
             var mouse = Mouse.current;
-            var mousePos = mouse != null ? mouse.position.ReadValue() : (Vector3)Input.mousePosition;
+            Vector3 mousePos;
+            if (mouse != null)
+            {
+                var mp = mouse.position.ReadValue();
+                mousePos = new Vector3(mp.x, mp.y, 0f);
+            }
+            else
+            {
+                mousePos = Input.mousePosition;
+            }
             var ray = _cam.ScreenPointToRay(mousePos);
 
             if (Physics.Raycast(ray, out var hit, 100f, ~0))
