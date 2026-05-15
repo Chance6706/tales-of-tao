@@ -21,8 +21,8 @@ namespace TalesOfTao.Runtime
     ///   1-5  - Spawn disciple unit at mouse position (T1-T5)
     ///   B    - Place next building prefab at mouse position
     ///   R    - Regenerate map
-    ///   T    - Run automated test sequence
-    ///   S    - Print status report to console
+    ///   F5   - Run automated test sequence
+    ///   F6   - Print status report to console
     /// </summary>
     public class M5VisualTest : MonoBehaviour
     {
@@ -283,8 +283,8 @@ namespace TalesOfTao.Runtime
             // R: Regenerate
             if (kb.rKey.wasPressedThisFrame) RegenerateMap();
 
-            // T: Run auto test
-            if (kb.tKey.wasPressedThisFrame && !_autoTestRunning)
+            // F5: Run auto test
+            if (kb.f5Key.wasPressedThisFrame && !_autoTestRunning)
             {
                 _autoTestRunning = true;
                 _autoTestStep = 0;
@@ -294,8 +294,8 @@ namespace TalesOfTao.Runtime
                 _status = "Auto test running...";
             }
 
-            // S: Status
-            if (kb.sKey.wasPressedThisFrame) PrintStatus();
+            // F6: Status
+            if (kb.f6Key.wasPressedThisFrame) PrintStatus();
         }
 
         private void RunAutoTestStep()
@@ -585,13 +585,16 @@ namespace TalesOfTao.Runtime
         {
             CreateStyles();
 
-            float x = 20, y = 20;
+            float x = 20;
             float lineH = 22;
             float panelW = 500;
             float panelH = lineH * 9 + 20;
 
+            // Position at bottom-left to avoid overlapping TurnTestHUD at top-left
+            float y = Screen.height - panelH - 10;
+
             GUI.color = new Color(0, 0, 0, 0.75f);
-            GUI.DrawTexture(new Rect(10, 10, panelW, panelH), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(10, y - 10, panelW, panelH), Texture2D.whiteTexture);
             GUI.color = Color.white;
 
             GUI.Label(new Rect(x, y, panelW - 40, lineH + 4), "M5 Visual Test", _titleStyle);
@@ -608,7 +611,7 @@ namespace TalesOfTao.Runtime
 
             y += lineH;
 
-            string controls = "Controls: 1-5 = Units | B = Building | R = Regen | T = Test | S = Status";
+            string controls = "1-5 = Units | B = Building | R = Regen | F5 = Test | F6 = Status";
             GUI.Label(new Rect(x, y, panelW - 40, lineH), controls, _labelStyle);
         }
     }
