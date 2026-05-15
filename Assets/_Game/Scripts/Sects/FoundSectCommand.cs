@@ -189,7 +189,6 @@ namespace TalesOfTao.Sects
             mesh.RecalculateBounds();
             return mesh;
         }
-        }
 
         public override void Undo()
         {
