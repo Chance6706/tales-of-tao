@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using TalesOfTao.Core.TurnSystem;
 using TalesOfTao.Hex;
 using TalesOfTao.Sects;
+using TalesOfTao.UI.HUD;
 
 namespace TalesOfTao.Runtime
 {
