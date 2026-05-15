@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using TalesOfTao.Hex;
 using System.Text;
 
 public class CreatePresetMaps : EditorWindow
@@ -50,7 +51,7 @@ public class CreatePresetMaps : EditorWindow
             elevArr.GetArrayElementAtIndex(i).enumValueIndex = 0; // Low
         
         // Initialize Qi densities array
-        var qiArr = new SerializedProperty();
+        SerializedProperty qiArr = null;
         // Find the property
         var iter = so.GetIterator();
         while (iter.NextVisible(true))

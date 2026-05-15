@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using TalesOfTao.Hex;
 using System.Text;
 
 public class CreatePresetMapsNow : EditorWindow
