@@ -60,7 +60,6 @@ namespace TalesOfTao.Runtime
             SetupCamera();
             SetupGrid();
             SetupInteraction();
-            EnsureTurnSystem();
             LoadPrefabs();
 
             _status = "Ready. Press T for auto test, 1-5 for units, B for buildings, S for status.";
@@ -115,14 +114,23 @@ namespace TalesOfTao.Runtime
         }
 
         /// <summary>
-        /// Adds tile selection and highlighting components to the camera.
+        /// Adds tile selection, highlighting, and the turn HUD.
         /// TileSelector auto-creates TileHighlighter and ReachableTileOverlay.
+        /// TurnTestHUD provides phase/turn display and End Turn button.
         /// </summary>
         private void SetupInteraction()
         {
             var selector = _cam.GetComponent<TileSelector>();
             if (selector == null)
                 _cam.gameObject.AddComponent<TileSelector>();
+
+            // Add the turn HUD for phase/turn display and End Turn button
+            var hud = FindAnyObjectByType<TurnTestHUD>();
+            if (hud == null)
+            {
+                var hudGO = new GameObject("TurnTestHUD");
+                hudGO.AddComponent<TurnTestHUD>();
+            }
         }
 
         /// <summary>
