@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.IO;
+using System.Linq;
 
 namespace TalesOfTao.Editor
 {
@@ -16,17 +17,20 @@ namespace TalesOfTao.Editor
         {
             string scenePath = "Assets/_Game/Scenes/M5VisualTest.unity";
 
-            // Create the scene if it doesn't exist
             if (!File.Exists(scenePath))
             {
-                // Create a new empty scene
                 var newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
 
-                // Add the visual test component to the scene
                 var testGO = new GameObject("M5VisualTest");
-                testGO.AddComponent<Tests.M5VisualTest>();
+                var testType = System.AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => { try { return a.GetTypes(); } catch { return Enumerable.Empty<System.Type>(); } })
+                    .FirstOrDefault(t => t.Name == "M5VisualTest" && t.IsSubclassOf(typeof(MonoBehaviour)));
 
-                // Save the scene
+                if (testType != null)
+                    testGO.AddComponent(testType);
+                else
+                    Debug.LogWarning("[M5VisualTest] M5VisualTest type not found. Add component manually via Add Component.");
+
                 EditorSceneManager.SaveScene(newScene, scenePath);
                 Debug.Log($"[M5VisualTest] Created test scene at {scenePath}");
             }
