@@ -57,38 +57,10 @@ namespace TalesOfTao.Runtime
 
         private void Start()
         {
-            _cam = Camera.main;
-            if (_cam == null)
-            {
-                var camGO = new GameObject("Main Camera");
-                _cam = camGO.AddComponent<Camera>();
-                camGO.AddComponent<AudioListener>();
-                camGO.tag = "MainCamera";
-                camGO.transform.position = new Vector3(0, 15, -15);
-                camGO.transform.LookAt(Vector3.zero);
-            }
-
-            // Ensure grid exists
-            _grid = HexGridManager.Instance;
-            if (_grid == null)
-            {
-                var gridGO = new GameObject("HexGridManager");
-                _grid = gridGO.AddComponent<HexGridManager>();
-            }
-
-            // Create grid renderer so tiles are visible
-            EnsureGridRenderer();
-
-            // Generate map
-            RegenerateMap();
-
-            // Position camera to look down at the hex grid
-            PositionCamera();
-
-            // Create turn system — ZodiacCalendar must exist before TurnDriver
-            EnsureTurnSystem();
-
-            // Load prefabs from project
+            SetupCamera();
+            SetupGrid();
+            SetupInteraction();
+            SetupTurnSystem();
             LoadPrefabs();
 
             _status = "Ready. Press T for auto test, 1-5 for units, B for buildings, S for status.";
@@ -97,6 +69,60 @@ namespace TalesOfTao.Runtime
             if (_unitPrefabs.Length == 0)
                 _status += " WARNING: No unit prefabs found!";
             _timer = 0f;
+        }
+
+        /// <summary>
+        /// Sets up the main camera with controller and audio listener.
+        /// The HexCameraController handles positioning based on its pivot/zoom/tilt.
+        /// </summary>
+        private void SetupCamera()
+        {
+            _cam = Camera.main;
+            if (_cam == null)
+            {
+                var camGO = new GameObject("Main Camera");
+                _cam = camGO.AddComponent<Camera>();
+                camGO.AddComponent<AudioListener>();
+                camGO.tag = "MainCamera";
+            }
+
+            // Configure camera for perspective view
+            _cam.orthographic = false;
+            _cam.fieldOfView = 60;
+            _cam.nearClipPlane = 0.3f;
+            _cam.farClipPlane = 500f;
+
+            // Add camera controller for mouse-based navigation (pan, zoom, orbit)
+            var camController = _cam.GetComponent<HexCameraController>();
+            if (camController == null)
+                _cam.gameObject.AddComponent<HexCameraController>();
+        }
+
+        /// <summary>
+        /// Creates the hex grid manager, renderer, and generates the map.
+        /// </summary>
+        private void SetupGrid()
+        {
+            _grid = HexGridManager.Instance;
+            if (_grid == null)
+            {
+                var gridGO = new GameObject("HexGridManager");
+                _grid = gridGO.AddComponent<HexGridManager>();
+            }
+
+            EnsureGridRenderer();
+            RegenerateMap();
+        }
+
+        /// <summary>
+        /// Adds tile selection and highlighting components to the camera.
+        /// TileSelector auto-creates TileHighlighter and ReachableTileOverlay.
+        /// </summary>
+        private void SetupInteraction()
+        {
+            var selector = _cam.GetComponent<TileSelector>();
+            if (selector == null)
+                _cam.gameObject.AddComponent<TileSelector>();
         }
 
         /// <summary>
@@ -115,18 +141,6 @@ namespace TalesOfTao.Runtime
             // This subscribes to OnMapGenerated so the renderer builds meshes
             // when GenerateMap() is called.
             renderer.SetGridManager(_grid);
-        }
-
-        /// <summary>
-        /// Positions the camera for a good top-down view of the hex grid.
-        /// </summary>
-        private void PositionCamera()
-        {
-            if (_cam == null) return;
-            _cam.transform.position = new Vector3(0, 40, -30);
-            _cam.transform.rotation = Quaternion.Euler(60, 0, 0);
-            _cam.orthographic = false;
-            _cam.fieldOfView = 60;
         }
 
         /// <summary>
