@@ -6,11 +6,6 @@ using TalesOfTao.Core.TurnSystem;
 
 namespace TalesOfTao.Sects
 {
-    /// <summary>
-    /// Manages sect state: income processing, compound management, upkeep.
-    /// Subscribes to turn events. Processes during Income phase.
-    /// Handles Build phase (construction + training) and building completion.
-    /// </summary>
     public class SectManager : MonoBehaviour
     {
         [Header("Event Channels")]
@@ -30,7 +25,7 @@ namespace TalesOfTao.Sects
         [SerializeField] private BuildingFactory _buildingFactory;
 
         public SectData Data => _sectData;
-        public bool HasFoundedSect => _sectData.IsFounded;
+        public bool HasFoundedSect => _sectData != null && _sectData.IsFounded;
         public BuildQueue BuildQueue => _buildQueue;
         public TrainingQueue TrainingQueue => _trainingQueue;
         public BuildingFactory BuildingFactory => _buildingFactory;
@@ -68,34 +63,22 @@ namespace TalesOfTao.Sects
                 _onDiscipleTrained.Unsubscribe(OnDiscipleTrainedEvent);
         }
 
-        /// <summary>
-        /// Called by FoundSectCommand after successful execution.
-        /// </summary>
         public void SetSectData(SectData data)
         {
             _sectData = data;
             OnSectFounded?.Invoke(_sectData);
         }
 
-        /// <summary>
-        /// Sets the build queue reference. Called during initialization.
-        /// </summary>
         public void SetBuildQueue(BuildQueue queue)
         {
             _buildQueue = queue;
         }
 
-        /// <summary>
-        /// Sets the training queue reference. Called during initialization.
-        /// </summary>
         public void SetTrainingQueue(TrainingQueue queue)
         {
             _trainingQueue = queue;
         }
 
-        /// <summary>
-        /// Sets the building factory reference. Called during initialization.
-        /// </summary>
         public void SetBuildingFactory(BuildingFactory factory)
         {
             _buildingFactory = factory;
@@ -103,7 +86,7 @@ namespace TalesOfTao.Sects
 
         private void OnPhaseChanged(GamePhase phase)
         {
-            if (!_sectData.IsFounded) return;
+            if (_sectData == null || !_sectData.IsFounded) return;
 
             switch (phase)
             {
@@ -119,55 +102,73 @@ namespace TalesOfTao.Sects
             }
         }
 
-        private void OnTurnEnded()
-        {
-            // End-of-turn cleanup if needed
-        }
+        private void OnTurnEnded() { }
 
-        private void OnZodiacBonuses(ZodiacBonuses bonuses)
-        {
-            // Store current bonuses for income calculations
-            // Applied during Income phase
-        }
+        private void OnZodiacBonuses(ZodiacBonuses bonuses) { }
 
-        /// <summary>
-        /// Handles building construction and disciple training during Build phase.
-        /// </summary>
         private void ProcessBuildPhase()
         {
             if (_buildQueue != null)
-            {
                 _buildQueue.ProcessBuildPhase();
-            }
-
             if (_trainingQueue != null)
-            {
                 _trainingQueue.ProcessBuildPhase();
-            }
         }
 
-        /// <summary>
-        /// Called when a building finishes construction (via BuildQueue event).
-        /// Creates the building GameObject and adds it to SectData.
-        /// </summary>
         private void OnBuildingCompletedEvent(string buildingTypeId)
         {
-            if (_buildingFactory == null || _sectData == null) return;
+            if (_sectData == null) return;
 
-            // Find the building config
-            // Note: In a full implementation, we'd look up the config from a registry.
-            // For now, the BuildingFactory handles creation when called by the game setup.
-
-            _sectData.AddBuilding(buildingTypeId, 1, Vector3.zero); // Position set by caller
+            _sectData.AddBuilding(buildingTypeId, 1, Vector3.zero);
             OnBuildingCompleted?.Invoke(buildingTypeId);
 
-            Debug.Log($"[SectManager] Building completed: {buildingTypeId}");
+            // When Training Grounds completes, auto-start training a peon if available
+            if (buildingTypeId == "TrainingGrounds" && _trainingQueue != null)
+            {
+                AutoEnqueueTraining();
+            }
+
+            Debug.Log("[SectManager] Building completed: " + buildingTypeId);
         }
 
         /// <summary>
-        /// Called when a disciple finishes training (via TrainingQueue event).
-        /// Promotes the disciple in SectData.
+        /// Automatically finds an untrained peon and starts training them to Outer Disciple.
+        /// Training Grounds T1: 8 turns, cap 5/batch.
         /// </summary>
+        private void AutoEnqueueTraining()
+        {
+            if (_sectData == null || _trainingQueue == null) return;
+
+            // Find a peon that's not already being trained
+            var disciples = _sectData.GetDisciples();
+            foreach (var d in disciples)
+            {
+                if (d.Rank == DiscipleRank.Peon && d.IsAlive)
+                {
+                    // Check if this peon is already in the training queue
+                    bool alreadyTraining = false;
+                    var queue = _trainingQueue.GetQueue();
+                    foreach (var entry in queue)
+                    {
+                        if (entry.DiscipleName == d.Name && !entry.IsComplete && !entry.IsCancelled)
+                        {
+                            alreadyTraining = true;
+                            break;
+                        }
+                    }
+
+                    if (!alreadyTraining && _trainingQueue.CanQueue(DiscipleRank.Peon, DiscipleRank.OuterDisciple))
+                    {
+                        // Training Grounds T1: 8 turns per GDD
+                        _trainingQueue.Enqueue(d.Name, DiscipleRank.Peon, DiscipleRank.OuterDisciple, 8);
+                        Debug.Log("[SectManager] Auto-enqueued training for " + d.Name + " (Peon -> Outer Disciple, 8 turns)");
+                        return; // Only enqueue one per building completion
+                    }
+                }
+            }
+
+            Debug.Log("[SectManager] Training Grounds complete but no available peons to train");
+        }
+
         private void OnDiscipleTrainedEvent(string discipleName)
         {
             if (_sectData == null) return;
@@ -175,7 +176,7 @@ namespace TalesOfTao.Sects
             var disciple = _sectData.FindDisciple(discipleName);
             if (disciple == null)
             {
-                Debug.LogWarning($"[SectManager] Trained disciple not found: {discipleName}");
+                Debug.LogWarning("[SectManager] Trained disciple not found: " + discipleName);
                 return;
             }
 
@@ -184,25 +185,16 @@ namespace TalesOfTao.Sects
             {
                 var newDisciple = _sectData.FindDisciple(discipleName);
                 OnDisciplePromoted?.Invoke(discipleName, newDisciple.Rank);
-                Debug.Log($"[SectManager] Disciple promoted: {discipleName} {oldRank} -> {newDisciple.Rank}");
+                Debug.Log("[SectManager] Disciple promoted: " + discipleName + " " + oldRank + " -> " + newDisciple.Rank);
             }
         }
 
-        /// <summary>
-        /// Processes Tael and Qi income for the turn.
-        /// Called during Income phase.
-        /// </summary>
         private void ProcessIncome()
         {
-            if (!_sectData.IsFounded) return;
+            if (_sectData == null || !_sectData.IsFounded) return;
 
-            // Base Qi income from founding tile
             float qiIncome = _sectData.FoundingStats.BaseQiIncome + _sectData.FoundingStats.CaveBonus;
 
-            // Apply zodiac bonus if applicable
-            // TODO: Apply zodiac multiplier
-
-            // Apply sect trait bonus
             if (_sectData.Config != null)
             {
                 switch (_sectData.Config.Trait)
@@ -211,14 +203,13 @@ namespace TalesOfTao.Sects
                         qiIncome *= 1.20f;
                         break;
                     case SectTrait.TaelBonus:
-                        _sectData.Stockpile.Tael += Mathf.RoundToInt(5); // +10% of base 50
+                        _sectData.Stockpile.Tael += Mathf.RoundToInt(5);
                         break;
                 }
             }
 
             _sectData.Stockpile.Qi += Mathf.RoundToInt(qiIncome);
 
-            // Deduct upkeep
             int upkeep = _sectData.CalculateUpkeep();
             _sectData.Stockpile.Tael -= upkeep;
 
@@ -226,47 +217,29 @@ namespace TalesOfTao.Sects
             OnResourceChanged?.Invoke("Qi");
         }
 
-        /// <summary>
-        /// Processes Dissent accumulation/recovery.
-        /// Called during Resolution phase.
-        /// </summary>
         private void ProcessDissent()
         {
-            if (!_sectData.IsFounded) return;
+            if (_sectData == null || !_sectData.IsFounded) return;
 
             int dissentRate = _sectData.CalculateDissentRate();
             if (dissentRate > 0)
-            {
                 _sectData.DissentLevel += dissentRate;
-            }
             else
-            {
-                // Recover 5 per turn when ratios are in bounds
                 _sectData.DissentLevel = Mathf.Max(0, _sectData.DissentLevel - 5);
-            }
         }
 
-        /// <summary>
-        /// Adds Tael to the stockpile.
-        /// </summary>
         public void AddTael(int amount)
         {
             _sectData.Stockpile.Tael += amount;
             OnResourceChanged?.Invoke("Tael");
         }
 
-        /// <summary>
-        /// Adds Qi to the stockpile.
-        /// </summary>
         public void AddQi(int amount)
         {
             _sectData.Stockpile.Qi += amount;
             OnResourceChanged?.Invoke("Qi");
         }
 
-        /// <summary>
-        /// Attempts to spend Tael. Returns true if successful.
-        /// </summary>
         public bool TrySpendTael(int amount)
         {
             if (_sectData.Stockpile.Tael < amount) return false;

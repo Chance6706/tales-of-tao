@@ -484,7 +484,7 @@ namespace TalesOfTao.Runtime
             int recruited = 0;
             for (int i = 0; i < 3; i++)
             {
-                var cmd = new RecruitPeonCommand(data, config);
+                var cmd = new RecruitPeonCommand(data, config, _grid, null);
                 if (cmd.CanExecute())
                 {
                     cmd.Execute();
