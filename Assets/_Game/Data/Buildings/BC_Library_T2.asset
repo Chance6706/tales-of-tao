@@ -40,12 +40,12 @@ MonoBehaviour:
   _prerequisiteBuilding: DiscipleHall
   _prerequisiteTier: 1
   _tierEffects:
-  - 'Research queue; 5 scrolls'
-  - 'Research +30%; 15 scrolls'
-  - 'Copy enemy scrolls; 30 scrolls'
+  - Research queue; 5 scrolls
+  - Research +30%; 15 scrolls
+  - Copy enemy scrolls; 30 scrolls
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 54ec5c56ceedb20498fe5f3ad5b2e6ae, type: 3}
+  - {fileID: -2432090755550338912, guid: 54ec5c56ceedb20498fe5f3ad5b2e6ae, type: 3}
+  - {fileID: -2432090755550338912, guid: 54ec5c56ceedb20498fe5f3ad5b2e6ae, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

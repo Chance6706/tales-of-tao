@@ -40,12 +40,12 @@ MonoBehaviour:
   _prerequisiteBuilding: TrainingGrounds
   _prerequisiteTier: 1
   _tierEffects:
-  - 'Basic weapons; Forge research'
-  - 'Refined weapons +8%; chainmail +8%'
-  - 'Masterwork weapons; Sect Treasure Forging'
+  - Basic weapons; Forge research
+  - Refined weapons +8%; chainmail +8%
+  - Masterwork weapons; Sect Treasure Forging
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: f249df499730af14bb159441f75692bd, type: 2}
   _requiresCollider: 1

@@ -16,8 +16,8 @@ MonoBehaviour:
   _displayName: Mountain
   _movementCost: 3
   _defenseBonus: 0.5
-  _qiModifier: 1.5
+  _qiModifier: 1.2
   _isImpassable: 0
-  _tintColor: {r: 0.55, g: 0.45, b: 0.35, a: 1}
+  _tintColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   _baseMesh: {fileID: 0}
   _featurePrefab: {fileID: 0}

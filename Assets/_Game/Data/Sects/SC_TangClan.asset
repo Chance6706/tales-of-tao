@@ -15,11 +15,11 @@ MonoBehaviour:
   _displayName: Tang Clan
   _affinity: 2
   _trait: 3
-  _startingTael: 60
-  _startingQi: 15
-  _startingPeons: 3
   _primaryColor: {r: 0.6, g: 0.1, b: 0.6, a: 1}
   _secondaryColor: {r: 0.9, g: 0.9, b: 0.2, a: 1}
   _emblemId: default
   _replacesBuilding: 
   _uniqueHallBonus: +20% assassination success; immune to poison
+  _startingTael: 120
+  _startingQi: 15
+  _startingPeons: 4

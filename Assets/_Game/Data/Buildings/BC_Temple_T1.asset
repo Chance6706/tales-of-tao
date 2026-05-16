@@ -40,12 +40,12 @@ MonoBehaviour:
   _prerequisiteBuilding: 
   _prerequisiteTier: 0
   _tierEffects:
-  - 'Qi +10/turn; 1 build slot'
-  - 'Qi +20/turn; 2 build slots; +5% income'
-  - 'Qi +35/turn; 3 build slots; Dao Sanctum option'
+  - Qi +10/turn; 1 build slot
+  - Qi +20/turn; 2 build slots; +5% income
+  - Qi +35/turn; 3 build slots; Dao Sanctum option
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 166ffecd99010ed4ba07fdaa2748ad46, type: 3}
+  - {fileID: -2432090755550338912, guid: 166ffecd99010ed4ba07fdaa2748ad46, type: 3}
+  - {fileID: -2432090755550338912, guid: 166ffecd99010ed4ba07fdaa2748ad46, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

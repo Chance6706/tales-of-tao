@@ -15,9 +15,9 @@ MonoBehaviour:
   _type: 6
   _displayName: Swamp
   _movementCost: 3
-  _defenseBonus: -0.1
+  _defenseBonus: 0.1
   _qiModifier: 0.8
   _isImpassable: 0
-  _tintColor: {r: 0.3, g: 0.45, b: 0.15, a: 1}
+  _tintColor: {r: 0.3, g: 0.4, b: 0.2, a: 1}
   _baseMesh: {fileID: 0}
   _featurePrefab: {fileID: 0}

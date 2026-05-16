@@ -18,6 +18,6 @@ MonoBehaviour:
   _defenseBonus: 0.25
   _qiModifier: 1.1
   _isImpassable: 0
-  _tintColor: {r: 0.12, g: 0.55, b: 0.12, a: 1}
+  _tintColor: {r: 0.13, g: 0.55, b: 0.13, a: 1}
   _baseMesh: {fileID: 0}
   _featurePrefab: {fileID: 0}

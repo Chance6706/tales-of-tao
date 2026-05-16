@@ -15,11 +15,12 @@ MonoBehaviour:
   _displayName: Emei
   _affinity: 4
   _trait: 5
-  _startingTael: 60
-  _startingQi: 15
-  _startingPeons: 3
   _primaryColor: {r: 0.9, g: 0.5, b: 0.7, a: 1}
   _secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   _emblemId: default
   _replacesBuilding: ExternalAffairs
-  _uniqueHallBonus: Lotus Hall: settlement trust gain x1.5; Influence Emissaries (20 Tael, +10 trust)
+  _uniqueHallBonus: 'Lotus Hall: settlement trust gain x1.5; Influence Emissaries
+    (20 Tael, +10 trust)'
+  _startingTael: 110
+  _startingQi: 20
+  _startingPeons: 5

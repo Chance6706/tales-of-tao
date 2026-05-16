@@ -15,11 +15,12 @@ MonoBehaviour:
   _displayName: Namgung
   _affinity: 7
   _trait: 8
-  _startingTael: 60
-  _startingQi: 15
-  _startingPeons: 3
   _primaryColor: {r: 0.8, g: 0.7, b: 0.2, a: 1}
   _secondaryColor: {r: 0.2, g: 0.2, b: 0.6, a: 1}
   _emblemId: default
   _replacesBuilding: ElderCouncil
-  _uniqueHallBonus: Hall of Prestige: Elders generate +3 Renown/turn; specialization bonuses +25%
+  _uniqueHallBonus: 'Hall of Prestige: Elders generate +3 Renown/turn; specialization
+    bonuses +25%'
+  _startingTael: 150
+  _startingQi: 15
+  _startingPeons: 5

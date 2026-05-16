@@ -15,11 +15,11 @@ MonoBehaviour:
   _displayName: Shaolin
   _affinity: 1
   _trait: 2
-  _startingTael: 60
-  _startingQi: 15
-  _startingPeons: 3
   _primaryColor: {r: 0.8, g: 0.6, b: 0.1, a: 1}
   _secondaryColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
   _emblemId: default
   _replacesBuilding: TrainingGrounds
-  _uniqueHallBonus: Pagoda of 108 Trials: +5% HP per cave trial, up to 3 stacks
+  _uniqueHallBonus: 'Pagoda of 108 Trials: +5% HP per cave trial, up to 3 stacks'
+  _startingTael: 100
+  _startingQi: 20
+  _startingPeons: 5

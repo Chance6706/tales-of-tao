@@ -40,12 +40,12 @@ MonoBehaviour:
   _prerequisiteBuilding: Temple
   _prerequisiteTier: 1
   _tierEffects:
-  - '8-turn training; cap 5/batch'
-  - '6-turn training; cap 8/batch; +5% combat'
-  - '5-turn training; cap 10/batch; free T1 technique'
+  - 8-turn training; cap 5/batch
+  - 6-turn training; cap 8/batch; +5% combat
+  - 5-turn training; cap 10/batch; free T1 technique
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 0cb9df64cfeb10f4cae5b65ffeb0cc2a, type: 3}
+  - {fileID: -2432090755550338912, guid: 0cb9df64cfeb10f4cae5b65ffeb0cc2a, type: 3}
+  - {fileID: -2432090755550338912, guid: 0cb9df64cfeb10f4cae5b65ffeb0cc2a, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: f249df499730af14bb159441f75692bd, type: 2}
   _requiresCollider: 1

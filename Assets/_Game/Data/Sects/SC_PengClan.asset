@@ -15,11 +15,11 @@ MonoBehaviour:
   _displayName: Peng Clan
   _affinity: 6
   _trait: 7
-  _startingTael: 60
-  _startingQi: 15
-  _startingPeons: 3
   _primaryColor: {r: 0.3, g: 0.7, b: 0.4, a: 1}
   _secondaryColor: {r: 0.9, g: 0.9, b: 0.5, a: 1}
   _emblemId: default
   _replacesBuilding: 
   _uniqueHallBonus: +2 base movement for all disciples
+  _startingTael: 100
+  _startingQi: 20
+  _startingPeons: 5
