@@ -39,7 +39,7 @@ public class AssignUnitMeshes : EditorWindow
             var config = AssetDatabase.LoadAssetAtPath<UnityEngine.ScriptableObject>(path);
             if (config == null) continue;
             
-            string name = config.Name;
+            string name = config.name;
             
             foreach (var kvp in meshMap)
             {
@@ -48,15 +48,26 @@ public class AssignUnitMeshes : EditorWindow
                     var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(kvp.Value);
                     if (mesh != null)
                     {
-                        // Use SerializedObject to set the mesh field
+                        // UnitDataSO uses _tierMeshes array, not _mesh
                         var so = new SerializedObject(config);
-                        var meshProp = so.FindProperty("_mesh");
-                        if (meshProp != null)
+                        var meshesProp = so.FindProperty("_tierMeshes");
+                        if (meshesProp != null && meshesProp.isArray)
                         {
-                            meshProp.objectReferenceValue = mesh;
-                            so.ApplyModifiedProperties();
-                            assigned++;
-                            Debug.Log("[AssignUnitMeshes] " + name + ": assigned " + mesh.name);
+                            // Find the right tier index based on the key
+                            int tierIdx = 0;
+                            if (kvp.Key.Contains("T1")) tierIdx = 0;
+                            else if (kvp.Key.Contains("T2")) tierIdx = 1;
+                            else if (kvp.Key.Contains("T3")) tierIdx = 2;
+                            else if (kvp.Key.Contains("T4")) tierIdx = 3;
+                            else if (kvp.Key.Contains("T5")) tierIdx = 4;
+                            
+                            if (tierIdx < meshesProp.arraySize)
+                            {
+                                meshesProp.GetArrayElementAtIndex(tierIdx).objectReferenceValue = mesh;
+                                so.ApplyModifiedProperties();
+                                assigned++;
+                                Debug.Log("[AssignUnitMeshes] " + name + ": assigned " + mesh.name + " to T" + (tierIdx+1));
+                            }
                         }
                     }
                     break;

@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using TalesOfTao.Sects;
 using System.Collections.Generic;
 
 public class AssignBuildingMeshes : EditorWindow
