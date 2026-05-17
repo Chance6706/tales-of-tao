@@ -5,6 +5,7 @@
         "TalesOfTao.Core",
         "TalesOfTao.Hex",
         "TalesOfTao.Sects",
+        "TalesOfTao.SaveLoad",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
