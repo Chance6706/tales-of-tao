@@ -15,37 +15,37 @@ MonoBehaviour:
   _buildingTypeId: DiscipleHall
   _displayName: Disciple Hall T2
   _tierCosts:
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
-    Jade: 0
-    MedicinalHerbs: 0
-    SpiritHerbs: 0
   - Tael: 80
-    Qi: 0
-    Lumber: 0
+    Qi: 10
+    Lumber: 30
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+  - Tael: 180
+    Qi: 25
+    Lumber: 60
+    IronOre: 15
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000300000000000000
-  _prerequisiteBuilding: DiscipleHall
+  - Tael: 350
+    Qi: 50
+    Lumber: 120
+    IronOre: 40
+    Jade: 0
+    MedicinalHerbs: 0
+    SpiritHerbs: 0
+  _tierBuildTurns: 060000000a0000000e000000
+  _prerequisiteBuilding: TrainingGrounds
   _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 'Capacity: +10 disciples'
-  - 
+  - 15-turn promotion; 1 technique slot
+  - 12-turn promotion; 2 technique slots
+  - 10-turn promotion; Dual-Path technique
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: d53f933828ada394ea74e2408649fa30, type: 3}
+  - {fileID: -2432090755550338912, guid: d53f933828ada394ea74e2408649fa30, type: 3}
+  - {fileID: -2432090755550338912, guid: d53f933828ada394ea74e2408649fa30, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

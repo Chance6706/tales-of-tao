@@ -74,8 +74,7 @@ namespace TalesOfTao.Core.TurnSystem
         public void Enter()
         {
             Debug.Log("[TurnBuild] Build phase entered.");
-            // M5: Process build queues and training queues via SectManager
-            // SectManager subscribes to GamePhase.Build and calls ProcessBuildPhase()
+            // TODO (M5): Process build queues
         }
 
         public void Tick() { }

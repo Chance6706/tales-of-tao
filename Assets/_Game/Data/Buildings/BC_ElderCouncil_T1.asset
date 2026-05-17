@@ -16,36 +16,36 @@ MonoBehaviour:
   _displayName: Elder Council T1
   _tierCosts:
   - Tael: 150
-    Qi: 0
-    Lumber: 0
+    Qi: 30
+    Lumber: 50
     IronOre: 0
-    Jade: 0
+    Jade: 2
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 300
+    Qi: 60
+    Lumber: 100
     IronOre: 0
-    Jade: 0
+    Jade: 5
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 600
+    Qi: 120
+    Lumber: 200
     IronOre: 0
-    Jade: 0
+    Jade: 10
     MedicinalHerbs: 0
-    SpiritHerbs: 0
-  _tierBuildTurns: 060000000000000000000000
-  _prerequisiteBuilding: 
-  _prerequisiteTier: 0
+    SpiritHerbs: 5
+  _tierBuildTurns: 0a0000001000000018000000
+  _prerequisiteBuilding: Library
+  _prerequisiteTier: 2
   _tierEffects:
-  - 'Dissent: -2'
-  - 
-  - 
+  - Elder promotion; 1 seat
+  - +1 seat; +2 Renown/turn
+  - High Elder promotion; Branch Sect governance
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 4b755f611ed8a874986582b6f2d07f3c, type: 3}
+  - {fileID: -2432090755550338912, guid: 4b755f611ed8a874986582b6f2d07f3c, type: 3}
+  - {fileID: -2432090755550338912, guid: 4b755f611ed8a874986582b6f2d07f3c, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: f249df499730af14bb159441f75692bd, type: 2}
   _requiresCollider: 1

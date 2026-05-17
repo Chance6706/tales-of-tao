@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c3f8bfd1817b314eb846a43213901db, type: 3}
+  m_Name: SC_Kunlun
+  m_EditorClassIdentifier: TalesOfTao.Sects::TalesOfTao.Sects.SectConfigSO
+  _displayName: Kunlun
+  _affinity: 5
+  _trait: 6
+  _primaryColor: {r: 0.7, g: 0.8, b: 0.95, a: 1}
+  _secondaryColor: {r: 0.2, g: 0.4, b: 0.6, a: 1}
+  _emblemId: default
+  _replacesBuilding: 
+  _uniqueHallBonus: 'Frozen Meridian Chamber: all caves become Qi Refinement; +20%
+    defense on Mountain/Sacred Peak'
+  _startingTael: 100
+  _startingQi: 25
+  _startingPeons: 4

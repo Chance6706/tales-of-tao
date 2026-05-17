@@ -15,37 +15,37 @@ MonoBehaviour:
   _buildingTypeId: MedicineHall
   _displayName: Medicine Hall T3
   _tierCosts:
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 70
+    Qi: 5
+    Lumber: 20
     IronOre: 0
     Jade: 0
-    MedicinalHerbs: 0
+    MedicinalHerbs: 10
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 160
+    Qi: 15
+    Lumber: 45
     IronOre: 0
     Jade: 0
-    MedicinalHerbs: 0
+    MedicinalHerbs: 25
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 350
+    Qi: 35
+    Lumber: 90
     IronOre: 0
     Jade: 0
-    MedicinalHerbs: 120
-    SpiritHerbs: 0
-  _tierBuildTurns: 000000000000000007000000
-  _prerequisiteBuilding: MedicineHall
-  _prerequisiteTier: 2
+    MedicinalHerbs: 50
+    SpiritHerbs: 5
+  _tierBuildTurns: 05000000090000000e000000
+  _prerequisiteBuilding: TrainingGrounds
+  _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 
-  - 'Healing: +15%'
+  - Herbal medicine; basic Alchemy
+  - Spirit Herb refining; advanced pills
+  - Breakthrough pills; Alchemy T4
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 7c33d31dbfaa13140acd7a29d02011aa, type: 3}
+  - {fileID: -2432090755550338912, guid: 7c33d31dbfaa13140acd7a29d02011aa, type: 3}
+  - {fileID: -2432090755550338912, guid: 7c33d31dbfaa13140acd7a29d02011aa, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

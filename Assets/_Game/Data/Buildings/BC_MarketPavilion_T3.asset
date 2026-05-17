@@ -15,37 +15,37 @@ MonoBehaviour:
   _buildingTypeId: MarketPavilion
   _displayName: Market Pavilion T3
   _tierCosts:
-  - Tael: 0
+  - Tael: 80
     Qi: 0
-    Lumber: 0
+    Lumber: 30
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
+  - Tael: 180
+    Qi: 5
+    Lumber: 65
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 150
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+  - Tael: 380
+    Qi: 15
+    Lumber: 130
+    IronOre: 15
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000000000005000000
-  _prerequisiteBuilding: MarketPavilion
-  _prerequisiteTier: 2
+  _tierBuildTurns: 060000000a0000000f000000
+  _prerequisiteBuilding: ExternalAffairs
+  _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 
-  - 'Tael income: +15'
+  - Base market; T1 markups
+  - +2 trade routes; T2 markups
+  - Trade monopoly option; no markups
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: a071389081c80c94d8b8c39a228beb53, type: 3}
+  - {fileID: -2432090755550338912, guid: a071389081c80c94d8b8c39a228beb53, type: 3}
+  - {fileID: -2432090755550338912, guid: a071389081c80c94d8b8c39a228beb53, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

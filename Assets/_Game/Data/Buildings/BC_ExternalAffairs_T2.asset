@@ -15,37 +15,37 @@ MonoBehaviour:
   _buildingTypeId: ExternalAffairs
   _displayName: External Affairs Hall T2
   _tierCosts:
-  - Tael: 0
+  - Tael: 60
     Qi: 0
-    Lumber: 0
+    Lumber: 25
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
   - Tael: 140
-    Qi: 0
-    Lumber: 0
+    Qi: 10
+    Lumber: 55
     IronOre: 0
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
+  - Tael: 300
+    Qi: 25
+    Lumber: 110
+    IronOre: 20
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000500000000000000
-  _prerequisiteBuilding: ExternalAffairs
+  _tierBuildTurns: 05000000080000000c000000
+  _prerequisiteBuilding: Temple
   _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 'Reputation: +6'
-  - 
+  - Basic diplomacy; 1 spy
+  - +2 trade routes; spy resist +15%
+  - Alliance diplomacy; joint declarations
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 58ba6436015f4d44a92f9b91250335af, type: 3}
+  - {fileID: -2432090755550338912, guid: 58ba6436015f4d44a92f9b91250335af, type: 3}
+  - {fileID: -2432090755550338912, guid: 58ba6436015f4d44a92f9b91250335af, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: c2ee01ecf7acb55448e2336d16fc6b5b, type: 2}
   _requiresCollider: 1

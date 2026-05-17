@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: BC_DaoSanctum_T1
   m_EditorClassIdentifier: TalesOfTao.Sects::TalesOfTao.Sects.BuildingConfigSO
   _buildingTypeId: DaoSanctum
-  _displayName: Dao Sanctum T1
+  _displayName: Dao Sanctum
   _tierCosts:
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 0
-    Jade: 100
+  - Tael: 500
+    Qi: 200
+    Lumber: 100
+    IronOre: 50
+    Jade: 20
     MedicinalHerbs: 0
-    SpiritHerbs: 0
+    SpiritHerbs: 10
   - Tael: 0
     Qi: 0
     Lumber: 0
@@ -37,15 +37,15 @@ MonoBehaviour:
     MedicinalHerbs: 0
     SpiritHerbs: 0
   _tierBuildTurns: 140000000000000000000000
-  _prerequisiteBuilding: 
-  _prerequisiteTier: 0
+  _prerequisiteBuilding: Temple
+  _prerequisiteTier: 3
   _tierEffects:
-  - 'Wonder: +10 Qi, +5 Renown'
+  - 'Wonder: Enlightenment victory path; +50% all Qi income'
   - 
   - 
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 15177c53eb1119e4aa673edd3775c70c, type: 3}
+  - {fileID: -2432090755550338912, guid: 15177c53eb1119e4aa673edd3775c70c, type: 3}
+  - {fileID: -2432090755550338912, guid: 15177c53eb1119e4aa673edd3775c70c, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: 8189ce0be2ae4414aa18a5428bfb13f6, type: 2}
   _requiresCollider: 1

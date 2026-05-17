@@ -24,6 +24,10 @@ namespace TalesOfTao.Hex
         [SerializeField] private int _seed = 0;
         [SerializeField] private bool _randomizeSeed = true;
 
+        [Header("Preset Map (optional)")]
+        [Tooltip("If assigned, generates from this preset instead of procedural generation.")]
+        [SerializeField] private PresetMapData _presetMap;
+
         [Header("References")]
         [SerializeField] private TerrainTypeSO[] _terrainTypes; // 8 types in enum order
 
@@ -76,13 +80,21 @@ namespace TalesOfTao.Hex
 
         /// <summary>
         /// Generates the full map. Call this at game start or from an editor tool.
+        /// If a preset map is assigned, loads from that. Otherwise uses procedural generation.
         /// </summary>
         public void GenerateMap(int? forcedSeed = null)
         {
+            AutoLoadTerrainTypes();
+
+            if (_presetMap != null)
+            {
+                GenerateFromPreset();
+                return;
+            }
+
+            // Procedural generation
             if (forcedSeed.HasValue) _seed = forcedSeed.Value;
             else if (_randomizeSeed) _seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-
-            AutoLoadTerrainTypes();
 
             var rng = new System.Random(_seed);
 
@@ -93,7 +105,6 @@ namespace TalesOfTao.Hex
 
             _tiles = new HexTileData[totalTiles];
 
-            // Initialize all tiles with default coords
             for (int i = 0; i < totalTiles; i++)
             {
                 var coords = IndexToAxial(i);
@@ -117,6 +128,78 @@ namespace TalesOfTao.Hex
             OnMapGenerated?.Invoke();
 
             Debug.Log($"[HexGrid] Generation complete. {_tiles.Length} tiles.");
+        }
+
+        /// <summary>
+        /// Generates map data from a preset map asset.
+        /// </summary>
+        private void GenerateFromPreset()
+        {
+            if (!_presetMap.Validate())
+            {
+                Debug.LogError("[HexGrid] Preset map validation failed. Falling back to procedural.");
+                _presetMap = null;
+                GenerateMap();
+                return;
+            }
+
+            var preset = _presetMap;
+            (_width, _height) = GetDimensions(preset.MapSize);
+            int totalTiles = _width * _height;
+
+            Debug.Log($"[HexGrid] Loading preset map: {preset.MapName} ({_width}x{_height}, {totalTiles} tiles)");
+
+            _tiles = new HexTileData[totalTiles];
+
+            // Initialize tiles from preset data
+            for (int i = 0; i < totalTiles; i++)
+            {
+                var coords = IndexToAxial(i);
+                var tile = new HexTileData { Coords = coords };
+
+                if (preset.TerrainTypes != null && i < preset.TerrainTypes.Length)
+                    tile.Terrain = GetTerrainTypeSO(preset.TerrainTypes[i]);
+                if (preset.Elevations != null && i < preset.Elevations.Length)
+                    tile.Elevation = preset.Elevations[i];
+                if (preset.QiDensities != null && i < preset.QiDensities.Length)
+                    tile.QiDensity = preset.QiDensities[i];
+
+                _tiles[i] = tile;
+            }
+
+            // Apply resource deposits from preset
+            if (preset.ResourceDeposits != null)
+            {
+                foreach (var deposit in preset.ResourceDeposits)
+                {
+                    int index = AxialToIndex(deposit.Q, deposit.R);
+                    if (index >= 0 && index < _tiles.Length)
+                    {
+                        var tile = _tiles[index];
+                        var deposits = tile.Deposits;
+                        System.Array.Resize(ref deposits, deposits.Length + 1);
+                        deposits[deposits.Length - 1] = deposit.Type;
+                        tile.Deposits = deposits;
+                        _tiles[index] = tile;
+                    }
+                }
+            }
+
+            // Apply cave counts based on terrain
+            for (int i = 0; i < totalTiles; i++)
+            {
+                var tile = _tiles[i];
+                if (tile.Terrain?.Type == TerrainType.Mountain || tile.Terrain?.Type == TerrainType.SacredPeak)
+                {
+                    tile.CaveCount = UnityEngine.Random.Range(1, 5);
+                }
+                _tiles[i] = tile;
+            }
+
+            _isGenerated = true;
+            OnMapGenerated?.Invoke();
+
+            Debug.Log($"[HexGrid] Preset map loaded: {preset.MapName}. {_tiles.Length} tiles, {preset.SacredPeaks?.Length ?? 0} sacred peaks, {preset.Settlements?.Length ?? 0} settlements.");
         }
 
         /// <summary>

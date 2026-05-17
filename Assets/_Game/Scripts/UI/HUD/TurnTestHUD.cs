@@ -1,17 +1,18 @@
 using UnityEngine;
 using TalesOfTao.Core;
 using TalesOfTao.Core.TurnSystem;
+using TalesOfTao.Sects;
 
 namespace TalesOfTao.UI.HUD
 {
     /// <summary>
     /// Minimal test HUD for the turn system. Uses IMGUI (OnGUI).
-    /// Shows phase, turn number, zodiac year, and End Turn button.
-    /// Auto-creates turn system if not present in scene.
+    /// Shows phase, turn number, zodiac year, End Turn button, and build/training queue.
     /// </summary>
     public class TurnTestHUD : MonoBehaviour
     {
         private TurnDriver _turnDriver;
+        private SectManager _sectManager;
         private string _phaseText = "...";
         private string _turnText = "...";
         private string _zodiacText = "...";
@@ -23,9 +24,6 @@ namespace TalesOfTao.UI.HUD
         private float _turnEndTimer;
         private bool _waitingForNextTurn;
 
-        /// <summary>
-        /// True while mouse is over the End Turn button. TileSelector checks this.
-        /// </summary>
         public static bool IsMouseOverButton { get; private set; }
 
         private void Start()
@@ -51,10 +49,12 @@ namespace TalesOfTao.UI.HUD
             _turnDriver.OnPhaseChanged += OnPhaseChanged;
             _turnDriver.OnTurnStarted += OnTurnStarted;
 
+            // Find SectManager for build queue display
+            _sectManager = FindAnyObjectByType<SectManager>();
+
             if (!_turnDriver.IsActive)
                 _turnDriver.StartTurn();
 
-            // Force initial UI update
             OnPhaseChanged(_turnDriver.CurrentPhase);
             OnTurnStarted(_turnDriver.TurnNumber);
         }
@@ -88,7 +88,7 @@ namespace TalesOfTao.UI.HUD
 
             _labelStyle = new GUIStyle
             {
-                fontSize = 24,
+                fontSize = 14,
                 normal = { textColor = Color.white },
                 alignment = TextAnchor.UpperLeft
             };
@@ -105,11 +105,12 @@ namespace TalesOfTao.UI.HUD
 
             float x = 20;
             float y = 20;
-            float lineHeight = 32;
+            float lineHeight = 22;
 
-            // Dark background for readability
+            // --- Top-left: Turn info ---
+            float topPanelH = lineHeight * 3 + 20;
             GUI.color = new Color(0, 0, 0, 0.7f);
-            GUI.DrawTexture(new Rect(10, 10, 420, lineHeight * 3 + 20), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(10, 10, 420, topPanelH), Texture2D.whiteTexture);
             GUI.color = Color.white;
 
             GUI.Label(new Rect(x, y, 400, lineHeight), _phaseText, _labelStyle);
@@ -118,7 +119,7 @@ namespace TalesOfTao.UI.HUD
             y += lineHeight;
             GUI.Label(new Rect(x, y, 400, lineHeight), _zodiacText, _labelStyle);
 
-            // End Turn button
+            // --- End Turn button ---
             float btnW = 160;
             float btnH = 50;
             _buttonRect = new Rect(Screen.width - btnW - 20, Screen.height - btnH - 20, btnW, btnH);
@@ -138,13 +139,73 @@ namespace TalesOfTao.UI.HUD
 
             GUI.color = Color.white;
 
-            // Keyboard shortcut
             if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.Space))
             {
                 if (_canEndTurn)
                 {
                     OnEndTurnClicked();
                     e.Use();
+                }
+            }
+
+            // --- Build Queue display (below turn info) ---
+            if (_sectManager != null && _sectManager.HasFoundedSect)
+            {
+                float queueY = topPanelH + 20;
+                float queuePanelH = lineHeight * 6 + 20;
+
+                GUI.color = new Color(0, 0, 0, 0.7f);
+                GUI.DrawTexture(new Rect(10, queueY, 420, queuePanelH), Texture2D.whiteTexture);
+                GUI.color = Color.white;
+
+                float qx = 20;
+                float qy = queueY + 5;
+
+                GUI.Label(new Rect(qx, qy, 400, lineHeight), "Build Queue:", _labelStyle);
+                qy += lineHeight;
+
+                var buildQueue = _sectManager.BuildQueue;
+                if (buildQueue != null && buildQueue.QueueLength > 0)
+                {
+                    var entries = buildQueue.GetQueue();
+                    for (int i = 0; i < entries.Length && i < 3; i++)
+                    {
+                        var entry = entries[i];
+                        if (!entry.IsComplete && !entry.IsCancelled)
+                        {
+                            GUI.Label(new Rect(qx, qy, 400, lineHeight),
+                                "  " + entry.BuildingTypeId + " T" + entry.Tier + " (" + entry.TurnsRemaining + " turns)", _labelStyle);
+                            qy += lineHeight;
+                        }
+                    }
+                }
+                else
+                {
+                    GUI.Label(new Rect(qx, qy, 400, lineHeight), "  (empty)", _labelStyle);
+                    qy += lineHeight;
+                }
+
+                GUI.Label(new Rect(qx, qy, 400, lineHeight), "Training Queue:", _labelStyle);
+                qy += lineHeight;
+
+                var trainingQueue = _sectManager.TrainingQueue;
+                if (trainingQueue != null && trainingQueue.QueueLength > 0)
+                {
+                    var entries = trainingQueue.GetQueue();
+                    for (int i = 0; i < entries.Length && i < 3; i++)
+                    {
+                        var entry = entries[i];
+                        if (!entry.IsComplete && !entry.IsCancelled)
+                        {
+                            GUI.Label(new Rect(qx, qy, 400, lineHeight),
+                                "  " + entry.DiscipleName + " (" + entry.TurnsRemaining + " turns)", _labelStyle);
+                            qy += lineHeight;
+                        }
+                    }
+                }
+                else
+                {
+                    GUI.Label(new Rect(qx, qy, 400, lineHeight), "  (empty)", _labelStyle);
                 }
             }
         }
@@ -166,11 +227,9 @@ namespace TalesOfTao.UI.HUD
 
         private void OnTurnStarted(int turn)
         {
-            _turnText = $"Turn {turn}";
+            _turnText = "Turn " + turn;
             if (_turnDriver != null)
-            {
-                _zodiacText = $"Year of the {_turnDriver.CurrentAnimal}";
-            }
+                _zodiacText = "Year of the " + _turnDriver.CurrentAnimal;
         }
 
         private void OnEndTurnClicked()

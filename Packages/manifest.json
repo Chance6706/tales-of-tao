@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+    "com.ivanmurzak.unity.mcp": "0.72.1",
     "com.unity.inputsystem": "1.19.0",
+    "com.unity.probuilder": "6.0.9",
     "com.unity.render-pipelines.universal": "17.4.0",
     "com.unity.test-framework": "1.6.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
@@ -15,6 +18,23 @@
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.unityanalytics": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.vectorgraphics": "1.0.0"
-  }
+    "com.unity.modules.vectorgraphics": "1.0.0",
+    "com.ivanmurzak.unity.mcp.animation": "1.1.39",
+    "com.ivanmurzak.unity.mcp.particlesystem": "1.0.65",
+    "com.ivanmurzak.unity.mcp.probuilder": "1.0.77"
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.ivanmurzak",
+        "extensions.unity",
+        "org.nuget.com.ivanmurzak",
+        "org.nuget.microsoft",
+        "org.nuget.system",
+        "org.nuget.r3"
+      ]
+    }
+  ]
 }

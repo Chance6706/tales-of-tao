@@ -102,7 +102,7 @@ namespace TalesOfTao.Sects
         private void FoundSect(int q, int r)
         {
             if (_sectConfig == null) return;
-
+            
             var command = new FoundSectCommand(_sectConfig, q, r, _gridManager);
             if (command.CanExecute())
             {
@@ -115,6 +115,14 @@ namespace TalesOfTao.Sects
             {
                 _statusMessage = "Cannot found sect on this tile";
             }
+        }
+
+        /// <summary>
+        /// Sets the sect config to use for founding.
+        /// </summary>
+        public void SetConfig(SectConfigSO config)
+        {
+            _sectConfig = config;
         }
 
         private void OnGUI()

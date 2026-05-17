@@ -61,6 +61,7 @@ namespace TalesOfTao.Runtime
             SetupCamera();
             SetupGrid();
             SetupInteraction();
+            SetupSectFounding();
             LoadPrefabs();
 
             _status = "Ready. Press T for auto test, 1-5 for units, B for buildings, S for status.";
@@ -131,6 +132,30 @@ namespace TalesOfTao.Runtime
             {
                 var hudGO = new GameObject("TurnTestHUD");
                 hudGO.AddComponent<TurnTestHUD>();
+            }
+        }
+
+        /// <summary>
+        /// Sets up sect founding. Press T on a tile to found a sect.
+        /// </summary>
+        private void SetupSectFounding()
+        {
+            var existing = FindAnyObjectByType<SectFoundingTest>();
+            if (existing != null) return;
+
+            var go = new GameObject("SectFoundingTest");
+            var test = go.AddComponent<SectFoundingTest>();
+
+            // Load a sect config from Resources
+            var config = Resources.Load<SectConfigSO>("Sects/SC_WuDang");
+            if (config != null)
+            {
+                test.SetConfig(config);
+                Debug.Log("[M5VisualTest] SectFoundingTest created with Wu Dang config. Press T on a tile to found sect.");
+            }
+            else
+            {
+                Debug.LogWarning("[M5VisualTest] No SectConfig found in Resources. Sect founding will not work.");
             }
         }
 
@@ -226,16 +251,17 @@ namespace TalesOfTao.Runtime
 
         private GameObject LoadPrefabByName(string name)
         {
-            // Search all prefabs in the project by name
-            var allPrefabs = Resources.FindObjectsOfTypeAll<GameObject>();
-            foreach (var prefab in allPrefabs)
-            {
-                if (prefab.name == name && prefab.scene.rootCount == 0)
-                {
-                    // This is a prefab asset (not a scene instance)
-                    return prefab;
-                }
-            }
+            // Load from Resources folder
+            var prefab = Resources.Load<GameObject>(name);
+            if (prefab != null) return prefab;
+            
+            // Try with subfolder path
+            prefab = Resources.Load<GameObject>("Buildings/" + name);
+            if (prefab != null) return prefab;
+            
+            prefab = Resources.Load<GameObject>("Units/" + name);
+            if (prefab != null) return prefab;
+            
             return null;
         }
 
@@ -280,8 +306,8 @@ namespace TalesOfTao.Runtime
                 _buildingIndex = (_buildingIndex + 1) % _buildingPrefabs.Length;
             }
 
-            // R: Regenerate
-            if (kb.rKey.wasPressedThisFrame) RegenerateMap();
+            // G: Regenerate map
+            if (kb.gKey.wasPressedThisFrame) RegenerateMap();
 
             // F5: Run auto test
             if (kb.f5Key.wasPressedThisFrame && !_autoTestRunning)
@@ -329,6 +355,7 @@ namespace TalesOfTao.Runtime
                     break;
 
                 case 5:
+                    EnsureTurnSystem();
                     TestTurnSystem();
                     _autoTestStep = 6;
                     break;
@@ -457,7 +484,7 @@ namespace TalesOfTao.Runtime
             int recruited = 0;
             for (int i = 0; i < 3; i++)
             {
-                var cmd = new RecruitPeonCommand(data, config);
+                var cmd = new RecruitPeonCommand(data, config, _grid, null);
                 if (cmd.CanExecute())
                 {
                     cmd.Execute();

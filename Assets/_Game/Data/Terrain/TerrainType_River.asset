@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: TalesOfTao.Hex::TalesOfTao.Hex.TerrainTypeSO
   _type: 3
   _displayName: River
-  _movementCost: 1.5
+  _movementCost: 2
   _defenseBonus: 0
-  _qiModifier: 1.2
+  _qiModifier: 1
   _isImpassable: 0
-  _tintColor: {r: 0.25, g: 0.6, b: 0.9, a: 1}
+  _tintColor: {r: 0.2, g: 0.4, b: 0.8, a: 1}
   _baseMesh: {fileID: 0}
   _featurePrefab: {fileID: 0}

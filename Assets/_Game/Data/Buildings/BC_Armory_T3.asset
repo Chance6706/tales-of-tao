@@ -15,37 +15,37 @@ MonoBehaviour:
   _buildingTypeId: Armory
   _displayName: Armory T3
   _tierCosts:
-  - Tael: 0
+  - Tael: 60
     Qi: 0
-    Lumber: 0
-    IronOre: 0
+    Lumber: 15
+    IronOre: 15
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
+  - Tael: 140
     Qi: 0
-    Lumber: 0
-    IronOre: 0
+    Lumber: 35
+    IronOre: 40
     Jade: 0
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  - Tael: 0
-    Qi: 0
-    Lumber: 0
-    IronOre: 150
-    Jade: 0
+  - Tael: 300
+    Qi: 10
+    Lumber: 70
+    IronOre: 80
+    Jade: 3
     MedicinalHerbs: 0
     SpiritHerbs: 0
-  _tierBuildTurns: 000000000000000008000000
-  _prerequisiteBuilding: Armory
-  _prerequisiteTier: 2
+  _tierBuildTurns: 05000000090000000e000000
+  _prerequisiteBuilding: TrainingGrounds
+  _prerequisiteTier: 1
   _tierEffects:
-  - 
-  - 
-  - 'Combat: +9'
+  - Basic weapons; Forge research
+  - Refined weapons +8%; chainmail +8%
+  - Masterwork weapons; Sect Treasure Forging
   _tierMeshes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _buildingMaterial: {fileID: 0}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  - {fileID: -2432090755550338912, guid: 06002df395c85db4994b887fca59aab2, type: 3}
+  _buildingMaterial: {fileID: 2100000, guid: f249df499730af14bb159441f75692bd, type: 2}
   _requiresCollider: 1
