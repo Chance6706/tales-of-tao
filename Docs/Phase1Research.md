@@ -403,11 +403,443 @@ A wuxia-themed army formation system inspired by Civ VI's Corps/Army and AoE4's 
 | 6 | Research nodes per branch? | **3-4 per branch (10 total)** — Martial gets 4th node: Qi Awareness (sensing) |
 | 7 | Map size target? | **~4,000 tiles** (60×60 hex grid) |
 | 8 | Qi Sensing ability? | **Yes** — T1 Qi Awareness (passive, 2-hex fog reveal, 40 Qi) + T2 Qi Pulse (active, 4-hex, 80 Qi + 10 Qi/use). Balance note: higher cost than standard T1 to prevent auto-first-pick. T3-T4 deferred to Phase 2. |
-| 9 | Qi Gathering Formation? | **Defer to Phase 2** — disciples in formation on Qi-rich tiles generate bonus Qi/turn. Thematic (聚灵阵), creates map-level strategy, but needs combat + AI to be functional first. |
 
 ---
 
-## Phase 2 Recommendations (Tracked Here for Reference)
+## Deep Dive Research
+
+The following topics were researched in depth to prevent costly refactoring during implementation:
+
+### Save Data Structure
+
+```csharp
+[System.Serializable]
+public class SaveData
+{
+    public int version = 1;                    // Save format version for migration
+    public string timestamp;                   // ISO 8601 timestamp
+    public int turnNumber;                     // Current turn
+    public int activePlayerIndex;              // Whose turn it is
+    public List<SectSaveData> sects;           // All sect data
+    public List<TileSaveData> tiles;           // All tile data (terrain, features, visibility)
+    public List<UnitSaveData> units;           // All unit data
+    public List<FormationSaveData> formations; // All formation data
+    public GameStateSaveData gameState;        // Global game state (zodiac, events, etc.)
+}
+
+[System.Serializable]
+public class SectSaveData
+{
+    public string sectId;
+    public string sectName;
+    public int factionId;
+    public float tael;
+    public float qi;
+    public float renown;
+    public float face;
+    public int dissentLevel;
+    public int templeTier;
+    public int hallTier;
+    public List<string> completedResearch;
+    public List<string> activeResearch;        // techId + progress%
+    public int foundingTileX, foundingTileZ;
+    public Dictionary<string, int> resources; // commodity stockpile
+    public List<BuildingSaveData> buildings;
+    public List<DiplomacySaveData> relations; // bilateral relation scores
+}
+
+[System.Serializable]
+public class TileSaveData
+{
+    public int x, z;                          // Hex coordinates
+    public int terrainTypeIndex;
+    public int elevation;
+    public int qiDensity;                     // None/Sparse/Moderate/Dense/LeyLine
+    public int caveType;                      // None/Meditation/BodyTempering/QiRefinement/SpiritTrial
+    public bool hasRoad;
+    public int ownerSectId;                   // -1 = unclaimed
+    public bool[] visibilityPerSect;          // fog of war per sect
+}
+
+[System.Serializable]
+public class UnitSaveData
+{
+    public string unitId;
+    public string unitType;                   // Prefab name for instantiation
+    public int ownerSectId;
+    public int tileX, tileZ;
+    public float currentHP;
+    public float maxHP;
+    public int movementPointsRemaining;
+    public int formationType;                 // -1 = no formation
+    public List<string> assignedDisciples;    // disciple IDs in this unit
+    public string activeAction;               // "Meditate", "QiPulse", etc.
+}
+
+[System.Serializable]
+public class FormationSaveData
+{
+    public string formationId;
+    public int formationType;                 // Sword/Commander/Scout
+    public int tileX, tileZ;
+    public List<string> unitIds;              // Units in this formation
+}
+```
+
+### Serialization Strategy
+
+**Use JsonUtility (Unity built-in) for v1.** It's fast, requires no external packages, and handles the data structures above. Limitations to be aware of:
+- No dictionary support → use `SerializableDictionary` wrapper or parallel arrays
+- No polymorphism → use type discriminator fields (`unitType` string)
+- No null for value types → use nullable wrappers or sentinel values
+- Float precision → JsonUtility serializes with excessive decimal places; round to 4 decimals for file size
+
+**If JsonUtility becomes limiting, migrate to Newtonsoft JSON** (via `com.unity.nuget.newtonsoft-json` package). Plan the data structures to be compatible with both.
+
+### File Operations (Atomic Writes)
+
+```csharp
+public static class SaveManager
+{
+    private static string SaveDir =>
+        Path.Combine(Application.persistentDataPath, "saves");
+
+    public static bool Save(int slot, SaveData data)
+    {
+        Directory.CreateDirectory(SaveDir);
+        data.timestamp = System.DateTime.UtcNow.ToString("o");
+
+        string json = JsonUtility.ToJson(data, prettyPrint: true);
+        string path = SlotPath(slot);
+        string tmpPath = path + ".tmp";
+        string bakPath = path + ".bak";
+
+        try
+        {
+            // Write to temp file first (atomic write pattern)
+            File.WriteAllText(tmpPath, json);
+
+            // Backup existing save
+            if (File.Exists(path))
+                File.Copy(path, bakPath, overwrite: true);
+
+            // Atomic move (rename is atomic on all platforms)
+            File.Move(tmpPath, path, overwrite: true);
+            return true;
+        }
+        catch (IOException e)
+        {
+            Debug.LogError($"Save failed: {e.Message}");
+            return false;
+        }
+    }
+
+    public static SaveData Load(int slot)
+    {
+        string path = SlotPath(slot);
+
+        // Try primary save, then backup
+        if (!File.Exists(path))
+        {
+            string bakPath = path + ".bak";
+            if (File.Exists(bakPath))
+                path = bakPath;
+            else
+                return null;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+            return MigrateSave(data);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Load failed: {e.Message}");
+            return null;
+        }
+    }
+
+    private static string SlotPath(int slot) =>
+        Path.Combine(SaveDir, $"save_slot_{slot}.json");
+}
+```
+
+### Save Versioning & Migration
+
+**Always include a version field.** When save format changes between updates, migrate old saves forward:
+
+```csharp
+private static SaveData MigrateSave(SaveData data)
+{
+    if (data.version < 2)
+    {
+        // v1 → v2: formations added
+        if (data.formations == null)
+            data.formations = new List<FormationSaveData>();
+    }
+
+    if (data.version < 3)
+    {
+        // v2 → v3: Qi sensing added
+        foreach (var unit in data.units)
+        {
+            if (unit.activeAction == null)
+                unit.activeAction = "None";
+        }
+    }
+
+    data.version = CurrentSaveVersion; // Always update to latest
+    return data;
+}
+```
+
+**Key rule:** Never remove fields from SaveData. Only add new ones with sensible defaults. Old saves will have missing fields → JsonUtility fills with defaults.
+
+### Save File Size Estimation
+
+For a 4,000-tile map with 6 sects and ~50 units:
+- Tile data: 4,000 × ~50 bytes = ~200 KB
+- Unit data: 50 × ~200 bytes = ~10 KB
+- Sect data: 6 × ~500 bytes = ~3 KB
+- Game state: ~5 KB
+- **Total: ~220 KB per save file** (well within reasonable limits)
+
+### Autosave Strategy
+
+Per GDD §17.5: autosave every 5 turns. Implementation:
+- Use a separate autosave slot (slot 0) that overwrites each time
+- Keep 3 manual save slots (1-3) for player
+- Autosave on the Income Phase (after all state changes are complete)
+- Show a brief "Saving..." indicator in the UI
+
+### Platform Considerations
+
+| Platform | Save Location | Notes |
+|----------|--------------|-------|
+| Windows | `%AppData%/LocalLow/<company>/<product>/saves/` | Standard |
+| macOS | `~/Library/Application Support/<company>/<product>/saves/` | Standard |
+| Linux | `~/.config/unity3d/<company>/<product>/saves/` | Standard |
+| Android | `/data/data/<package>/files/saves/` | No permissions needed |
+| iOS | `<App>/Documents/saves/` | Included in iCloud backup |
+| WebGL | IndexedDB via PlayerPrefs | Use for small saves only |
+
+### Testing Checklist
+
+- [ ] Save after every phase (Action, Build, Research, Income)
+- [ ] Load and verify all state matches (units, tiles, resources, research)
+- [ ] Test save/load mid-combat
+- [ ] Test autosave every 5 turns
+- [ ] Test backup recovery (delete primary save, verify backup loads)
+- [ ] Test version migration (load v1 save in v2 build)
+- [ ] Test on all target platforms
+- [ ] Test with maximum map size (4,000 tiles)
+- [ ] Test save file size stays under 1 MB
+
+---
+
+## Deep Dive: Procedural Map Generation
+
+### Architecture
+
+**Two-layer approach:**
+1. **Terrain generation** — Perlin noise for height/moisture → terrain types
+2. **Feature placement** — Rules-based placement of special features (Ley Lines, caves, Sacred Peaks, settlements)
+
+This is the approach used by Catlike Coding's hex map tutorial and Felix Turner's WFC generator. WFC is overkill for v1 — Perlin noise + rules is simpler and faster.
+
+### Terrain Generation Algorithm
+
+```csharp
+public class HexMapGenerator
+{
+    // Noise parameters
+    public float terrainScale = 0.03f;      // Perlin noise frequency
+    public float moistureScale = 0.02f;     // Second noise layer for moisture
+    public int seed = 0;                    // Deterministic seed
+
+    // Terrain thresholds
+    public float waterLevel = 0.3f;
+    public float sandLevel = 0.4f;
+    public float grassLevel = 0.6f;
+    public float forestLevel = 0.75f;
+    public float mountainLevel = 0.85f;
+
+    public void GenerateMap(int width, int height)
+    {
+        // Initialize noise with seed
+        Unity.Mathematics.Random rng = new(seed);
+
+        for (int z = 0; z < height; z++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Sample noise (offset to avoid symmetry at origin)
+                float terrain = Mathf.PerlinNoise(
+                    (x + seed * 1000) * terrainScale,
+                    (z + seed * 1000) * terrainScale
+                );
+                float moisture = Mathf.PerlinNoise(
+                    (x + seed * 2000) * moistureScale + 500,
+                    (z + seed * 2000) * moistureScale + 500
+                );
+
+                // Assign terrain based on height + moisture
+                HexTileData tile = grid.GetCell(x, z);
+                tile.terrainType = ClassifyTerrain(terrain, moisture);
+                tile.elevation = Mathf.FloorToInt(terrain * 5); // 0-4 elevation levels
+                tile.qiDensity = ClassifyQiDensity(terrain, moisture, rng);
+            }
+        }
+
+        // Post-processing: place special features
+        PlaceLeyLines(rng);
+        PlaceCaves(rng);
+        PlaceSacredPeaks(rng);
+        PlaceSettlements(rng);
+
+        // Ensure fair starting positions
+        PlaceStartingPositions(rng);
+    }
+
+    TerrainType ClassifyTerrain(float height, float moisture)
+    {
+        if (height < waterLevel) return TerrainType.Water;
+        if (height < sandLevel) return TerrainType.Sand;
+        if (height < grassLevel) return TerrainType.Plains;
+        if (height < forestLevel) return TerrainType.Forest;
+        if (height < mountainLevel) return TerrainType.Hills;
+        return TerrainType.Mountain;
+    }
+
+    QiDensity ClassifyQiDensity(float height, float moisture, Random rng)
+    {
+        // Qi density correlates with terrain quality but has randomness
+        float qiBase = height * 0.6f + moisture * 0.4f;
+        float qiNoise = (Mathf.PerlinNoise(height * 10, moisture * 10) - 0.5f) * 0.3f;
+        float qiValue = Mathf.Clamp01(qiBase + qiNoise);
+
+        if (qiValue > 0.9f) return QiDensity.LeyLine;      // ~2% of tiles
+        if (qiValue > 0.7f) return QiDensity.Dense;         // ~10% of tiles
+        if (qiValue > 0.5f) return QiDensity.Moderate;      // ~20% of tiles
+        if (qiValue > 0.3f) return QiDensity.Sparse;        // ~30% of tiles
+        return QiDensity.None;                              // ~38% of tiles
+    }
+}
+```
+
+### Feature Placement Rules
+
+**Ley Lines (rare, high-value):**
+- Place on tiles with `QiDensity.LeyLine`
+- Ensure minimum 10-hex spacing between Ley Lines
+- ~8-12 Ley Lines per 4,000-tile map
+- Ley Lines should form natural "paths" (use noise to create curves)
+
+**Caves (uncommon, medium-value):**
+- Place on Mountain or Hills tiles with `QiDensity >= Moderate`
+- Minimum 5-hex spacing between caves
+- ~30-50 caves per map
+- Cave type (Meditation/BodyTempering/QiRefinement/SpiritTrial) assigned by Qi density
+
+**Sacred Peaks (very rare, highest-value):**
+- Place on Mountain tiles with `QiDensity >= Dense`
+- Minimum 15-hex spacing
+- ~3-5 Sacred Peaks per map
+- These are the most contested tiles in the game
+
+**Settlements (common, strategic):**
+- Place on Plains/Forest tiles near water
+- Minimum 8-hex spacing between settlements
+- ~20-30 settlements per map
+- Settlement type (Village/Town/Trade Post) by terrain quality
+
+### Starting Position Fairness
+
+**Critical for multiplayer.** Each sect needs:
+- At least 15 tiles of usable land (not water/mountain)
+- Access to at least 2 different terrain types
+- At least 1 Moderate+ Qi density tile within 5 hexes
+- Minimum 12-hex distance from other sects
+- No direct line-of-sight to another sect (fog of war at start)
+
+```csharp
+void PlaceStartingPositions(Random rng)
+{
+    List<HexTileData> candidates = FindValidStartTiles();
+
+    // Score each candidate by resource diversity
+    foreach (var tile in candidates)
+    {
+        tile.startScore = ScoreStartPosition(tile);
+    }
+
+    // Pick top N positions with maximum spacing
+    List<HexTileData> starts = SelectSpacedPositions(
+        candidates,
+        count: 6,           // 1 player + 5 AI
+        minSpacing: 12       // hexes
+    );
+
+    foreach (var start in starts)
+    {
+        start.ownerSectId = AssignSect(start);
+        start.terrainType = TerrainType.Plains; // Ensure buildable
+    }
+}
+
+float ScoreStartPosition(HexTileData center)
+{
+    float score = 0;
+    var neighbors = grid.GetNeighbors(center, radius: 5);
+
+    foreach (var n in neighbors)
+    {
+        if (n.terrainType != TerrainType.Water && n.terrainType != TerrainType.Mountain)
+            score += 1;
+        if (n.qiDensity >= QiDensity.Moderate)
+            score += 3;
+        if (n.qiDensity >= QiDensity.Dense)
+            score += 5;
+        if (n.caveType != CaveType.None)
+            score += 2;
+    }
+
+    return score;
+}
+```
+
+### Map Size & Performance
+
+| Map Size | Tiles | Generation Time | Save File Size | Recommended Players |
+|----------|-------|-----------------|----------------|-------------------|
+| Small | 1,600 (40×40) | <1s | ~80 KB | 2-4 |
+| Medium | 4,000 (60×60) | ~2s | ~220 KB | 4-6 |
+| Large | 9,600 (80×80) | ~5s | ~500 KB | 6-8 |
+
+**v1 target: Medium (4,000 tiles, 60×60)**
+
+### Determinism Requirement
+
+**Map generation must be deterministic** for multiplayer. Same seed = same map on all clients.
+- Use `System.Random` with seed (not `UnityEngine.Random`)
+- All noise sampling must be in a fixed order (iterate x then z)
+- No `Time.deltaTime` or frame-dependent logic
+- Seed is set by the host and transmitted to all clients
+
+### Testing Checklist
+
+- [ ] Same seed produces identical maps on all clients
+- [ ] All starting positions meet fairness criteria
+- [ ] Ley Lines are properly spaced (min 10 hexes)
+- [ ] Caves are properly spaced (min 5 hexes)
+- [ ] Sacred Peaks are properly spaced (min 15 hexes)
+- [ ] Settlements are properly spaced (min 8 hexes)
+- [ ] No unreachable land areas (flood fill check)
+- [ ] Qi density distribution matches targets (2% LeyLine, 10% Dense, etc.)
+- [ ] Generation completes under 3 seconds for 4,000 tiles
+- [ ] Save/load preserves map state exactly
 
 These concepts were discussed during Phase 1 research and deferred to Phase 2 (Engagement):
 
