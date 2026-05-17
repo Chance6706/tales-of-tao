@@ -2,9 +2,10 @@
 
 ## Methodology
 - Audited 85 C# scripts across 7 system categories
+- Audited 120 art assets (meshes, materials, prefabs) across 5 categories
 - Compared implemented systems against GDD §1-§18 vision
-- Benchmarked against: Civ VI, Stellaris, Total War: Three Kingdoms, Age of Wonders 4, Northgard, Old World
-- Identified gaps from both player experience and code architecture perspectives
+- Benchmarked against: Civ VI, Stellaris, Total War: Three Kingdoms, Age of Wonders 4, Northgard, Old World, Jade Dynasty
+- Identified gaps from player experience, code architecture, and visual/art perspectives
 
 ---
 
@@ -311,3 +312,77 @@ Based on genre benchmarks and the GDD's vertical slice methodology:
 16. Tutorial system
 17. UI/UX polish
 18. Balance pass
+
+---
+
+## CATEGORY 8: VISUAL & ART PIPELINE
+
+### GDD Vision (§16)
+- Wuxia aesthetic: flowing robes, martial arts animations, ink-wash UI elements
+- Hex tiles rendered with 3D terrain; buildings appear as sect compounds grow
+- Zodiac visual theming: golden glow (Dragon), swirling mist (Snake), red lanterns (Rat)
+- Qi effects as visible energy flows on high-density tiles and during combat
+- Traditional Chinese instruments (guzheng, erhu, dizi) with dynamic music layering
+- Martial arts SFX: sword clashes, Qi discharge, ambient nature
+- Narrator for key events; disciple contextual barks
+
+### What's Implemented
+- 11 building OBJ meshes (T1 variants) ✅
+- 5 unit OBJ meshes (T1-T5 disciples) ✅
+- 9 terrain LOD meshes (8 biomes × 3 LODs, minus Desert LOD2) ✅
+- 7 prop meshes (trees, rocks, crystal, water plane) ✅
+- 18 materials (5 disciple tiers, 13 terrain/building types) ✅
+- 47 prefabs (buildings, terrain LODs, props, units) ✅
+- Hex grid rendering with chunk system ✅
+- Basic camera controller ✅
+
+### GAPS (Visual/Art Perspective)
+
+| Gap | Severity | Description | Benchmark Comparison |
+|-----|----------|-------------|---------------------|
+| **No textures on meshes** | CRITICAL | All OBJ meshes are untextured. Materials use flat colors. | TW3K: Hand-painted textures on all character models. Jade Dynasty: Detailed texture maps. Civ VI: Stylized textures on all assets. |
+| **No shaders** | CRITICAL | No custom shaders exist. GDD specifies ink-wash aesthetic. | TW3K: Custom toon shaders for painterly look. Jade Dynasty: Custom water/ink shaders. Both define the visual identity. |
+| **No animations** | HIGH | GDD §16: flowing robes, martial arts animations. Current: static meshes only. | TW3K: Full character animations for combat. Jade Dynasty: Animation-driven combat. Both bring characters to life. |
+| **No VFX/particles** | HIGH | GDD §16: Qi energy flows, zodiac ambient effects, combat VFX. Current: nothing. | Jade Dynasty: Extensive Qi/energy VFX. TW3K: Battle VFX for abilities. Both create visual spectacle. |
+| **No UI art assets** | HIGH | GDD §15: Ink-wash UI elements, sect banners, icons. Current: IMGUI debug UI only. | TW3K: Beautiful UI with Chinese painting motifs. Jade Dynasty: Themed UI elements. Both reinforce the aesthetic. |
+| **No audio** | HIGH | GDD §16: Traditional instruments, SFX, voice. Current: nothing. | TW3K: Excellent Chinese instrument score. Jade Dynasty: Atmospheric audio. Both create immersion. |
+| **No LOD system** | MEDIUM | LOD meshes exist but no LODGroup components or switching logic. | Civ VI: LOD system for all models. Essential for performance on large maps. |
+| **No USD pipeline** | MEDIUM | GDD §17.8: Blender → USD → Unity USD Plugin. Current: OBJ import. | Pixar's USD is the industry standard for complex asset pipelines. Enables non-destructive editing. |
+| **Building meshes are T1 only** | MEDIUM | GDD §6.3: 3 tiers per building with visual upgrades. Current: only T1 meshes. | Civ VI: District visuals upgrade with era. TW3K: Building upgrades are visually distinct. |
+| **No terrain blending** | MEDIUM | GDD §4: 8 terrain types should blend at edges. Current: flat color per tile. | Civ VI: Terrain blending with texture transitions. Creates natural-looking maps. |
+| **No water shader** | MEDIUM | GDD §4: River/Lake terrain with water effects. Current: flat blue material. | TW3K: Animated water with reflections. Jade Dynasty: Stylized water. Both are visually striking. |
+| **No character customization** | LOW | GDD §17: Banner color picker, emblem selection. Current: fixed materials. | TW3K: Character customization. AOW4: Army customization. Both increase player attachment. |
+
+### GAPS (Art Pipeline Perspective)
+
+| Gap | Severity | Description |
+|-----|----------|-------------|
+| **No texture atlasing** | HIGH | GDD §17.4 specifies texture atlasing for draw call batching. |
+| **No GPU instancing setup** | HIGH | GDD §17.4 specifies Graphics.DrawMeshInstanced for units. |
+| **No material property blocks** | MEDIUM | Needed for per-instance color variation (sect colors). |
+| **No asset bundle system** | MEDIUM | For downloadable content and mod support. |
+| **No Blender automation** | MEDIUM | GDD §17.8 specifies Blender → USD pipeline. No automation scripts exist. |
+
+### Art Style Recommendations (based on genre research)
+
+The GDD specifies "Chinese ink-wash stylized realism" — this is a strong direction, but needs refinement based on what works in shipped games:
+
+1. **Reference: Total War: Three Kingdoms** — Stylized realism with painterly textures. Characters are recognizable but idealized. This is the closest benchmark for ToT's disciple models.
+
+2. **Reference: Jade Dynasty / Storm Age** — Wuxia aesthetic with flowing robes, glowing Qi effects, dramatic poses. More stylized than TW3K. Good reference for combat VFX and character silhouettes.
+
+3. **Reference: Civ VI's approach to stylized strategy** — Clear readability over photorealism. Players need to distinguish unit types at a glance. This matters more than visual fidelity for a 4X game.
+
+4. **Recommendation: Hybrid approach** — Use TW3K's character style (stylized realism) for disciples, Jade Dynasty's VFX style for Qi effects, and Civ VI's clarity for UI/readability. The ink-wash aesthetic should be expressed through shaders and UI, not necessarily through mesh topology.
+
+5. **Critical insight from shipped games**: The visual style needs to work at both zoom levels — close-up for tactical battles and zoomed-out for strategic map. TW3K handles this with LODs and a consistent art direction. ToT should plan for this dual-view requirement from the start.
+
+### Recommended Art Production Order
+
+1. **Shader foundation** (week 1-2): Ink-wash terrain shader, water shader, Qi glow shader
+2. **Character art** (week 3-6): 5 disciple rank models with textures, LODs, basic animations
+3. **Building art** (week 5-8): 11 building types × 3 tiers with visual upgrades
+4. **VFX** (week 7-10): Qi effects, combat VFX, zodiac ambient effects
+5. **UI art** (week 9-12): Ink-wash UI elements, icons, banners
+6. **Audio** (week 11-14): Music, SFX, voice
+7. **Polish** (week 13-16): LOD optimization, texture atlasing, GPU instancing
