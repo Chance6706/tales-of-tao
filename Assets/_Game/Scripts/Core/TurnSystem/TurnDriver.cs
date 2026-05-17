@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TalesOfTao.Core.Commands;
 using TalesOfTao.Core.EventChannels;
 
 namespace TalesOfTao.Core.TurnSystem
 {
     /// <summary>
-    /// Drives the turn cycle. Auto-advances through non-Action phases,
-    /// waits for player input during Action phase.
+    /// Drives the turn cycle for a local player.
+    /// In multiplayer, receives phase events from TurnCoordinator.
+    /// In single-player (no coordinator), falls back to local state management.
     /// </summary>
     public class TurnDriver : MonoBehaviour
     {
@@ -20,6 +22,10 @@ namespace TalesOfTao.Core.TurnSystem
         [SerializeField] private float _nonActionPhaseDelay = 0.5f;
         [SerializeField] private bool _logPhases = false;
 
+        [Header("Multiplayer")]
+        [SerializeField] private int _localPlayerId = 1;
+
+        // Single-player state (used when no coordinator)
         private ZodiacCalendar _calendar;
         private int _currentPhase;
         private int _turnNumber;
@@ -27,14 +33,23 @@ namespace TalesOfTao.Core.TurnSystem
         private bool _active;
         private bool _initialized;
 
-        public int TurnNumber => _turnNumber;
-        public GamePhase CurrentPhase => (GamePhase)_currentPhase;
+        // Multiplayer reference
+        private TurnCoordinator _coordinator;
+
+        // Public access
+        public int TurnNumber => _coordinator != null ? _coordinator.TurnNumber : _turnNumber;
+        public GamePhase CurrentPhase => _coordinator != null ? _coordinator.CurrentPhase : (GamePhase)_currentPhase;
         public string CurrentAnimal => _calendar != null ? _calendar.CurrentAnimal : "None";
-        public bool IsActive => _active;
+        public bool IsActive => _coordinator != null ? _coordinator.IsGameActive : _active;
+        public bool IsMultiplayer => _coordinator != null;
+        public int LocalPlayerId => _localPlayerId;
 
         public event System.Action<GamePhase> OnPhaseChanged;
         public event System.Action<int> OnTurnStarted;
 
+        /// <summary>
+        /// Initialize for single-player mode.
+        /// </summary>
         public void Initialize(ZodiacCalendar calendar, GamePhaseEventChannelSO phaseCh, VoidEventChannelSO turnEndCh, ZodiacBonusesEventChannelSO zodiacCh, float autoDelay)
         {
             _calendar = calendar;
@@ -45,7 +60,58 @@ namespace TalesOfTao.Core.TurnSystem
             _initialized = true;
         }
 
+        /// <summary>
+        /// Initialize for multiplayer mode. Finds and binds to the TurnCoordinator.
+        /// </summary>
+        public void InitializeMultiplayer(int playerId)
+        {
+            _localPlayerId = playerId;
+            _coordinator = FindAnyObjectByType<TurnCoordinator>();
+
+            if (_coordinator == null)
+            {
+                Debug.LogWarning("[TurnDriver] No TurnCoordinator found. Falling back to single-player mode.");
+                return;
+            }
+
+            // Subscribe to coordinator events
+            _coordinator.OnPhaseStarted += HandlePhaseStarted;
+            _coordinator.OnPhaseEnded += HandlePhaseEnded;
+            _coordinator.OnTurnStarted += HandleTurnStarted;
+
+            _initialized = true;
+
+            if (_logPhases)
+                Debug.Log($"[TurnDriver] Initialized for multiplayer as player {playerId}");
+        }
+
+        private void OnDestroy()
+        {
+            if (_coordinator != null)
+            {
+                _coordinator.OnPhaseStarted -= HandlePhaseStarted;
+                _coordinator.OnPhaseEnded -= HandlePhaseEnded;
+                _coordinator.OnTurnStarted -= HandleTurnStarted;
+            }
+        }
+
         private void Update()
+        {
+            if (!_initialized) return;
+
+            if (IsMultiplayer)
+            {
+                UpdateMultiplayer();
+            }
+            else
+            {
+                UpdateSinglePlayer();
+            }
+        }
+
+        #region Single-Player (original behavior)
+
+        private void UpdateSinglePlayer()
         {
             if (!_active) return;
 
@@ -87,6 +153,12 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void StartTurn()
         {
+            if (IsMultiplayer)
+            {
+                Debug.LogWarning("[TurnDriver] StartTurn() should be called on TurnCoordinator in multiplayer mode.");
+                return;
+            }
+
             if (!_initialized) return;
 
             _turnNumber++;
@@ -108,6 +180,12 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void AdvancePhase()
         {
+            if (IsMultiplayer)
+            {
+                Debug.LogWarning("[TurnDriver] AdvancePhase() should be called on TurnCoordinator in multiplayer mode.");
+                return;
+            }
+
             if (!_active) return;
 
             ExitPhase();
@@ -124,6 +202,13 @@ namespace TalesOfTao.Core.TurnSystem
 
         public void EndTurn()
         {
+            if (IsMultiplayer)
+            {
+                // In multiplayer, signal ready to coordinator
+                _coordinator?.OnPlayerReady(_localPlayerId);
+                return;
+            }
+
             if (!_active) return;
             if ((GamePhase)_currentPhase != GamePhase.Action)
             {
@@ -136,6 +221,23 @@ namespace TalesOfTao.Core.TurnSystem
             EnterPhase();
             ExitPhase();
             CompleteTurn();
+        }
+
+        /// <summary>
+        /// Submits a command. In single-player, executes immediately.
+        /// In multiplayer, sends to coordinator.
+        /// </summary>
+        public void SubmitCommand(Command command)
+        {
+            if (IsMultiplayer)
+            {
+                _coordinator?.SubmitCommand(_localPlayerId, command);
+            }
+            else
+            {
+                if (command.CanExecute())
+                    command.Execute();
+            }
         }
 
         private void EnterPhase()
@@ -162,5 +264,65 @@ namespace TalesOfTao.Core.TurnSystem
             _active = false;
             _turnEndedChannel?.Raise();
         }
+
+        #endregion
+
+        #region Multiplayer
+
+        private void UpdateMultiplayer()
+        {
+            // In multiplayer, the coordinator drives phase transitions.
+            // TurnDriver only handles local input (e.g., pressing Ready).
+            
+            if (!IsActive) return;
+
+            var phase = CurrentPhase;
+
+            // During player-driven phases, check for ready input
+            if (phase == GamePhase.Build || phase == GamePhase.Action)
+            {
+                var keyboard = Keyboard.current;
+                if (keyboard != null)
+                {
+                    if (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
+                    {
+                        SignalReady();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Signals to the coordinator that the local player is ready to advance.
+        /// </summary>
+        public void SignalReady()
+        {
+            if (!IsMultiplayer) return;
+            _coordinator?.OnPlayerReady(_localPlayerId);
+        }
+
+        private void HandlePhaseStarted(GamePhase phase)
+        {
+            OnPhaseChanged?.Invoke(phase);
+
+            if (_logPhases)
+                Debug.Log($"[TurnDriver] Phase started: {phase}");
+        }
+
+        private void HandlePhaseEnded(GamePhase phase)
+        {
+            if (_logPhases)
+                Debug.Log($"[TurnDriver] Phase ended: {phase}");
+        }
+
+        private void HandleTurnStarted(int turn)
+        {
+            OnTurnStarted?.Invoke(turn);
+
+            if (_logPhases)
+                Debug.Log($"[TurnDriver] Turn {turn} started");
+        }
+
+        #endregion
     }
 }
