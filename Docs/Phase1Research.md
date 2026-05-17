@@ -168,21 +168,41 @@ This document presents research findings and draft decisions for the 5 key desig
 - `TechNodeSO` ScriptableObjects exist but are empty
 - No `ResearchManager`, no research speed calculation, no Enlightenment system
 
-### Decision: 9 NODES (3 PER BRANCH) + ENLIGHTENMENT TRIGGERS
+### Decision: 10 NODES (3-4 PER BRANCH) + ENLIGHTENMENT TRIGGERS + QI SENSING
 
-**For v1, implement 3 nodes per branch (9 total, all T1-T2), with Enlightenment Triggers. Defer T3-T4 nodes to Phase 2.**
+**For v1, implement 3-4 nodes per branch (10 total, all T1-T2), with Enlightenment Triggers and a new Qi Sensing sub-branch. Defer T3-T4 nodes to Phase 2.**
 
-**Math rationale:** At baseline research speed (~15 Qi/turn), T1 (30 Qi) ≈ 5 turns, T2 (80 Qi) ≈ 12-15 turns. 9 nodes × ~10 turns average = ~90 turns to complete all T1-T2. That's a meaningful chunk of a 200-300 turn game without delaying T3-T4 content.
+**Math rationale:** At baseline research speed (~15 Qi/turn), T1 (30 Qi) ≈ 5 turns, T2 (80 Qi) ≈ 12-15 turns. 10 nodes × ~10 turns average = ~100 turns to complete all T1-T2. That's a meaningful chunk of a 200-300 turn game without delaying T3-T4 content.
 
 **Enlightenment Triggers are IN for v1.** They're the single highest-value research feature — they make research feel active instead of passive. Implementation is straightforward (event subscription + 50% progress boost).
 
-**Recommended v1 nodes (3 per branch):**
+**Qi Sensing is IN for v1.** A new reconnaissance sub-branch under Martial Techniques. Thematically perfect for wuxia (cultivators sensing qi signatures). Mechanically: extends fog of war vision range. Implementation is simple (modify visibility radius per unit/player).
 
-| Branch | Node 1 (T1) | Node 2 (T1) | Node 3 (T2) |
-|--------|-------------|-------------|-------------|
-| Alchemy | Herbal Medicine | Antidote Craft | Qi Restoration Pills |
-| Forge | Iron Smelting | Basic Weapons | Steel Refinement |
-| Martial | Basic Sword Arts | Basic Fist Arts | Basic Qi Circulation |
+**⚠️ BALANCE NOTE:** Qi Sensing needs careful cost/benefit tuning for long games. If it's too cheap, players will always take it first and the fog of war becomes meaningless. If it's too expensive, nobody will research it. Key levers:
+- Qi cost (T1=30 is baseline, consider 40-50 for sensing)
+- Vision radius (2 hexes for T1 feels right; don't go above 3)
+- Active vs. passive (passive is always-on but weaker; active is stronger but costs Qi per use)
+- Late-game scaling (T3-T4 sensing in Phase 2 could be game-breaking if not carefully tuned — consider hard caps on radius)
+
+**Recommended v1 nodes:**
+
+| Branch | Node 1 (T1) | Node 2 (T1) | Node 3 (T2) | Node 4 (T2) |
+|--------|-------------|-------------|-------------|-------------|
+| Alchemy | Herbal Medicine | Antidote Craft | Qi Restoration Pills | — |
+| Forge | Iron Smelting | Basic Weapons | Steel Refinement | — |
+| Martial | Basic Sword Arts | Basic Fist Arts | Basic Qi Circulation | Qi Awareness (sensing) |
+
+**Qi Sensing sub-branch (Martial Techniques):**
+
+| Tier | Node | Type | Effect | Qi Cost | Balance Notes |
+|------|------|------|--------|---------|---------------|
+| T1 | **Qi Awareness** | Passive | Reveal enemy units within 2 hexes of any friendly unit (even through fog) | 40 Qi | Higher than standard T1 (30) to prevent auto-first-pick. 2-hex radius is enough to be useful without breaking fog of war. |
+| T2 | **Qi Pulse** | Active | Reveal all units/tiles within 4 hexes of a target unit for 1 turn. Cooldown: 5 turns. | 80 Qi + 10 Qi/use | Active cost prevents spam. Cooldown ensures tactical timing matters. |
+
+**T3-T4 Qi Sensing (Phase 2, for reference):**
+- T3: **Spirit Sense** — Passive: reveal resource deposits and cave types within 3 hexes of any friendly unit
+- T4: **Heavenly Vision** — Active: reveal entire map for 1 turn. Cooldown: 20 turns. Cost: 50 Qi
+- ⚠️ T4 is extremely powerful — consider making it a rare item/scroll instead of a research node
 
 **Implementation approach:**
 - Create `ResearchManager` with `ActiveResearch` array (3 slots, one per branch)
@@ -356,7 +376,7 @@ A wuxia-themed army formation system inspired by Civ VI's Corps/Army and AoE4's 
 |-------|---------------|------------|------|
 | Combat | Auto-resolve + decisive victory + formation bonus | Medium | Low |
 | Movement | Base 3 MP + terrain + ZOC + rivers + roads | Medium | Low |
-| Research | 9 nodes (3 per branch) + Enlightenment Triggers | Medium | Medium |
+| Research | 10 nodes (3-4 per branch) + Enlightenment Triggers + Qi Sensing | Medium | Medium |
 | Founder Unit | Movable unit + "Call for Aid" action | Low | Low |
 | Networking | Deterministic action propagation + Unity NGO | High | Medium |
 | Formations | 3 formation types (Sword, Commander, Scout) | Medium | Low |
@@ -371,7 +391,7 @@ A wuxia-themed army formation system inspired by Civ VI's Corps/Army and AoE4's 
 6. **Save/Load** (Week 5-6) — depends on all above systems being serializable
 7. **Networking** (Phase 3) — requires save/load and all core systems
 
-## Resolved Open Questions
+## Resolved Open Questions (8 total)
 
 | # | Question | Decision |
 |---|----------|----------|
@@ -380,5 +400,6 @@ A wuxia-themed army formation system inspired by Civ VI's Corps/Army and AoE4's 
 | 3 | Enlightenment Triggers in v1? | **Yes**, include in v1 |
 | 4 | Founder combat ability? | **No combat**, but "Call for Aid" action |
 | 5 | NGO vs custom transport? | **Unity NGO** for v1 |
-| 6 | Research nodes per branch? | **3 per branch (9 total)** |
+| 6 | Research nodes per branch? | **3-4 per branch (10 total)** — Martial gets 4th node: Qi Awareness (sensing) |
 | 7 | Map size target? | **~4,000 tiles** (60×60 hex grid) |
+| 8 | Qi Sensing ability? | **Yes** — T1 Qi Awareness (passive, 2-hex fog reveal, 40 Qi) + T2 Qi Pulse (active, 4-hex, 80 Qi + 10 Qi/use). Balance note: higher cost than standard T1 to prevent auto-first-pick. T3-T4 deferred to Phase 2. |
