@@ -403,3 +403,41 @@ A wuxia-themed army formation system inspired by Civ VI's Corps/Army and AoE4's 
 | 6 | Research nodes per branch? | **3-4 per branch (10 total)** — Martial gets 4th node: Qi Awareness (sensing) |
 | 7 | Map size target? | **~4,000 tiles** (60×60 hex grid) |
 | 8 | Qi Sensing ability? | **Yes** — T1 Qi Awareness (passive, 2-hex fog reveal, 40 Qi) + T2 Qi Pulse (active, 4-hex, 80 Qi + 10 Qi/use). Balance note: higher cost than standard T1 to prevent auto-first-pick. T3-T4 deferred to Phase 2. |
+| 9 | Qi Gathering Formation? | **Defer to Phase 2** — disciples in formation on Qi-rich tiles generate bonus Qi/turn. Thematic (聚灵阵), creates map-level strategy, but needs combat + AI to be functional first. |
+
+---
+
+## Phase 2 Recommendations (Tracked Here for Reference)
+
+These concepts were discussed during Phase 1 research and deferred to Phase 2 (Engagement):
+
+### Qi Gathering Formation (聚灵阵)
+
+**Concept:** Place a formation of disciples on Qi-rich tiles (Ley Lines, Sacred Peaks, caves) to passively collect Qi for the sect's stockpile. Disciples in the gathering formation can't fight or move.
+
+**Qi gathering rate example:**
+- 1 Outer Disciple on Moderate Qi tile: +2 Qi/turn
+- 1 Inner Disciple on Ley Line: +8 Qi/turn
+- 3 Inner Disciples on Sacred Peak: +30 Qi/turn
+
+**Why it's good:**
+- Makes Qi feel like a *physical resource* on the map, not just a number
+- Creates strategic decisions: gather Qi or keep disciples in the army?
+- Very wuxia — "qi gathering formations" (聚灵阵) are a genre staple
+- Interacts with hex map meaningfully — tile quality matters
+
+**Implementation:** ~3-4 days. Needs: `QiGatheringArray` component, tile Qi density integration, UI for placement, AI for assignment decisions.
+
+**Prerequisites:** Combat system (vulnerability), AI system (assignment logic), formation system (reuse from Phase 1).
+
+### Research Array (deferred)
+
+**Concept:** Assign disciples to a research formation that directly boosts research speed. Similar to Qi Gathering but targets research instead of Qi income.
+
+**Status:** Lower priority than Qi Gathering. Qi Gathering is more thematic and simpler to implement. Research Array could be added later as a variant.
+
+### Meditate Action (v1 lite alternative)
+
+**Concept:** Any unit can be given a "Meditate" order. While meditating: +5 Qi/turn, can't move or fight. Simple toggle, no new UI.
+
+**Estimated cost:** ~1 day. Could be added to v1 if desired.
