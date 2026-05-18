@@ -7,7 +7,9 @@
         "TalesOfTao.Combat",
         "TalesOfTao.Economy",
         "TalesOfTao.Research",
-        "TalesOfTao.Diplomacy"
+        "TalesOfTao.Diplomacy",
+        "TalesOfTao.Hex",
+        "TalesOfTao.Units"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
