@@ -1,4 +1,4 @@
-# Unity Model Instructions — Qwen3:14B
+# Coder Model Instructions — tower-coder:latest
 
 ## Your Role
 
@@ -290,6 +290,21 @@ These object types MUST use object pools:
 | Tactical Combat | NOT STARTED | Deferred to Phase 2 |
 | UI Screens | IN PROGRESS | HUD done, sector overview in progress |
 | Polish/Save-Load | NOT STARTED | Performance pass, audio, VFX |
+
+### Phase 1 Implementation Priority
+
+When working on Phase 1 Foundation, implement systems in this order (each builds on the previous):
+
+1. **Units & Movement** (finish in-progress) — `UnitController`, move commands, pathfinding integration
+2. **Combat** — `CombatPowerCalculator`, `CombatResolver`, `CasualtyDistributor`, formation bonus
+3. **Economy** — Income/upkeep calculation, `ResourceStockpile`, market, trade routes, bankruptcy handler
+4. **Research** — Tech tree data, research progress, enlightenment triggers
+5. **Diplomacy** — `Founder` relations, trust system, espionage actions
+6. **AI** — Utility-based evaluation, `AIBudgetScheduler`, genomes
+7. **UI Screens** (finish in-progress) — Sect Overview, Market, Research, Diplomacy, Combat Result, Victory
+8. **Integration Test** — Mass integration test, user play-test, F-key test keybinds, bottom-left HUD
+
+**Reference:** `Docs/Phase1Research.md` for detailed design decisions on each system.
 
 ### Git Conventions
 

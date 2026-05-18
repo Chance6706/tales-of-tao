@@ -1,4 +1,4 @@
-# Coder Model Instructions — Qwen3:14B
+# Vision Model Instructions — tower-vision:latest
 
 ## Your Role
 
